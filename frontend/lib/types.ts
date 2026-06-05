@@ -82,3 +82,17 @@ export interface Dashboard {
   latest_observation?: Observation | null;
   top_intervention?: Intervention | null;
 }
+
+export interface KnowledgeBaseItem {
+  modality: string;
+  label: string;
+  value: string;
+  trend?: string | null;
+  as_of?: string | null;
+  evidence_card?: string | null;
+}
+
+export interface KnowledgeBaseResponse {
+  user_id: string;
+  groups: Record<string, KnowledgeBaseItem[]>;
+}

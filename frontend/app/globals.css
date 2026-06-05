@@ -2,58 +2,181 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  LongevityOS — warm, editorial, science-journal palette.
+  Matched to the showcase site (longevity-os.xyz): ivory paper, near-black ink,
+  warm greige hairlines, a vivid orange primary, indigo for agentic/AI elements,
+  and muted sage / terracotta for status. Display in serif, body in Inter,
+  metrics in mono.
+*/
+
 :root {
-  --bg: #0b0f17;
-  --surface: #121826;
-  --surface-2: #1a2233;
-  --border: #232c3d;
-  --text: #e6eaf2;
-  --text-muted: #9aa7bd;
-  --vital: #14b8a6;
-  --vital-soft: #0e7e72;
-  --ai: #7c6cf6;
-  --good: #34d399;
-  --watch: #fbbf24;
-  --risk: #f87171;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "Geist Mono", "JetBrains Mono", monospace;
+  /* surfaces */
+  --bg: #fcfbf8; /* warm ivory paper */
+  --surface: #ffffff; /* cards */
+  --surface-2: #f4f1ea; /* elevated / hover */
+  --border: #e7e2d7; /* warm hairline */
+  --border-strong: #d9d3c5;
+
+  /* ink */
+  --text: #1b1b1b;
+  --text-muted: #6e695e;
+  --text-faint: #9a9486;
+
+  /* brand + accents */
+  --vital: #ff5a1f; /* primary action — vivid orange */
+  --vital-soft: #e84e12;
+  --ai: #575ecf; /* agentic / AI — indigo */
+  --ai-soft: #4248b8;
+
+  /* status */
+  --good: #4e8c6a; /* sage green */
+  --watch: #c57e1a; /* amber */
+  --risk: #dc4a2b; /* terracotta / coral */
+
+  /* data-viz pops */
+  --coral: #fe3f21;
+  --magenta: #f858bc;
+  --amber: #fe7b02;
+  --indigo: #575ecf;
+  --sage: #5e8c77;
+
+  --ring: var(--vital);
+
+  /* typography (next/font injects the *-Variable vars) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-mono-jb), ui-monospace, "JetBrains Mono", "SF Mono", monospace;
+  --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
 }
 
-.light {
-  --bg: #f6f8fb;
-  --surface: #ffffff;
-  --surface-2: #f1f4f9;
-  --border: #e2e8f0;
-  --text: #0b0f17;
-  --text-muted: #5a6678;
+/* Optional dark theme — kept functional so a future toggle works. */
+.dark {
+  --bg: #0e0d0b;
+  --surface: #17150f;
+  --surface-2: #211e17;
+  --border: #2c281f;
+  --border-strong: #3a352a;
+  --text: #f3efe6;
+  --text-muted: #a9a293;
+  --text-faint: #756f62;
+}
+
+* {
+  border-color: var(--border);
 }
 
 html {
   background: var(--bg);
   color: var(--text);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Soft teal→violet glow used behind hero metrics. */
+::selection {
+  background: color-mix(in srgb, var(--vital) 22%, transparent);
+  color: var(--text);
+}
+
+/* Subtle, premium focus ring */
+:where(a, button, [role="button"], input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ring) 70%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Quiet scrollbar that fits the paper aesthetic */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 3px solid var(--bg);
+}
+
+/* ── Reusable bits ─────────────────────────────────────────────── */
+
+/* Editorial serif display */
+.font-serif {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+/* Warm orange→indigo text gradient for accenting a word in a headline */
+.text-gradient {
+  background-image: linear-gradient(100deg, var(--vital) 0%, var(--magenta) 45%, var(--ai) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Soft aura behind hero metrics — restrained, warm. */
 .glow-vital {
   position: relative;
 }
 .glow-vital::before {
   content: "";
   position: absolute;
-  inset: -20% -10% auto -10%;
-  height: 70%;
-  background: radial-gradient(60% 60% at 30% 20%, rgba(20, 184, 166, 0.18), transparent 70%),
-    radial-gradient(50% 50% at 80% 0%, rgba(124, 108, 246, 0.16), transparent 70%);
-  filter: blur(20px);
+  inset: -30% -10% auto -10%;
+  height: 80%;
+  background:
+    radial-gradient(48% 60% at 22% 18%, color-mix(in srgb, var(--vital) 16%, transparent), transparent 70%),
+    radial-gradient(46% 56% at 82% 0%, color-mix(in srgb, var(--ai) 14%, transparent), transparent 70%);
+  filter: blur(26px);
   z-index: 0;
   pointer-events: none;
+}
+
+/* Faint dotted paper grid for big sections */
+.paper-grid {
+  background-image: radial-gradient(color-mix(in srgb, var(--text) 7%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(120% 80% at 50% 0%, #000 35%, transparent 80%);
+  mask-image: radial-gradient(120% 80% at 50% 0%, #000 35%, transparent 80%);
+}
+
+/* Hairline grid card hover lift */
+.lift {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+}
+.lift:hover {
+  transform: translateY(-2px);
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--text) 6%, transparent),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -61,6 +184,7 @@ body {
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
 }
