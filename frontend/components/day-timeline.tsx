@@ -36,10 +36,10 @@ const CATS: Record<string, Cat> = {
 const LANES = ["Sleep & recovery", "Fuel", "Movement", "Light & context"];
 
 const H = 132; // signal height (px)
-const LANE_H = 46;
 const AXIS_H = 18;
-const PILL_H = 30;
-const CONTENT_H = H + LANES.length * LANE_H;
+const ROW_H = 30; // height of one packed row inside a lane
+const MARKER = 22; // icon-marker size
+const MERGE = 38; // minutes — same-lane markers closer than this stack into another row
 
 const cat = (t: string): Cat => CATS[t] ?? { color: "#8b8577", Icon: Brain, lane: 3, label: t };
 const toMin = (s: string) => {
@@ -87,6 +87,30 @@ export function DayTimeline({ day }: { day: DayResponse }) {
     const hl = day.signals.map((p, i) => `${i ? "L" : "M"} ${p.t} ${hy(p.hr).toFixed(1)}`).join(" ");
     return { gArea: `${gl} L 1440 ${H} L 0 ${H} Z`, gLine: gl, hLine: hl };
   }, [day]);
+
+  // ── pack markers into non-overlapping rows per lane ──────────────
+  const lanes = useMemo(
+    () =>
+      LANES.map((_, li) => {
+        const evs = events.filter((e) => cat(e.type).lane === li).sort((a, b) => a.startMin - b.startMin);
+        const rowLast: number[] = [];
+        const placed = evs.map((e) => {
+          let r = rowLast.findIndex((last) => e.startMin - last >= MERGE);
+          if (r === -1) {
+            r = rowLast.length;
+            rowLast.push(e.startMin);
+          } else {
+            rowLast[r] = e.startMin;
+          }
+          return { e, row: r };
+        });
+        return { placed, rows: Math.max(1, rowLast.length) };
+      }),
+    [events],
+  );
+  const laneHeights = lanes.map((l) => l.rows * ROW_H + 6);
+  const laneTops = laneHeights.map((_, i) => laneHeights.slice(0, i).reduce((a, b) => a + b, 0));
+  const CONTENT_H = H + laneHeights.reduce((a, b) => a + b, 0);
 
   const sampleAt = (min: number) => day.signals[clamp(Math.round(min / 10), 0, day.signals.length - 1)];
   const cur = sampleAt(scrub);
@@ -189,11 +213,16 @@ export function DayTimeline({ day }: { day: DayResponse }) {
         </div>
       </div>
 
-      {/* legend */}
+      {/* legend (icon markers are decoded here) */}
       <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1.5">
         {Object.entries(CATS).map(([k, c]) => (
           <span key={k} className="inline-flex items-center gap-1 text-[11px] text-muted">
-            <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
+            <span
+              className="grid h-4 w-4 place-items-center rounded-full"
+              style={{ background: hexA(c.color, 0.15), color: c.color }}
+            >
+              <c.Icon size={9} />
+            </span>
             {c.label}
           </span>
         ))}
@@ -211,10 +240,10 @@ export function DayTimeline({ day }: { day: DayResponse }) {
               Heart rate <span className="h-2 w-2 rounded-full bg-ai" />
             </span>
           </div>
-          {LANES.map((l) => (
+          {LANES.map((l, li) => (
             <div
               key={l}
-              style={{ height: LANE_H }}
+              style={{ height: laneHeights[li] }}
               className="flex items-center justify-end text-[10px] font-medium uppercase leading-tight tracking-wide text-faint"
             >
               {l}
@@ -246,7 +275,7 @@ export function DayTimeline({ day }: { day: DayResponse }) {
               <div
                 key={li}
                 className="absolute inset-x-0 border-t border-border/40"
-                style={{ top: H + li * LANE_H }}
+                style={{ top: H + laneTops[li] }}
               />
             ))}
           </div>
@@ -269,50 +298,40 @@ export function DayTimeline({ day }: { day: DayResponse }) {
             </svg>
           </div>
 
-          {/* lanes + pills */}
+          {/* lanes + icon markers */}
           <div className="relative z-10">
             {LANES.map((_, li) => (
-              <div key={li} className="relative" style={{ height: LANE_H }}>
-                {events
-                  .filter((e) => cat(e.type).lane === li)
-                  .map((e) => {
-                    const c = cat(e.type);
-                    const active = sel?.id === e.id;
-                    const future = playing && e.startMin > scrub;
-                    return (
-                      <button
-                        key={e.id}
-                        onPointerDown={(ev) => dragPill(ev, e)}
-                        title={`${e.title} · ${toHHMM(e.startMin)} — click to expand, drag to move`}
-                        className={cn(
-                          "group absolute flex items-center overflow-hidden rounded-lg border text-left transition-all",
-                          active ? "z-20" : "z-10 cursor-grab active:cursor-grabbing hover:-translate-y-px",
-                        )}
-                        style={{
-                          left: `${pct(e.startMin)}%`,
-                          width: `${pct(e.durMin)}%`,
-                          top: (LANE_H - PILL_H) / 2,
-                          height: PILL_H,
-                          minWidth: "1.9rem",
-                          background: hexA(c.color, active ? 0.18 : 0.1),
-                          borderColor: hexA(c.color, active ? 0.85 : 0.4),
-                          opacity: future ? 0.3 : 1,
-                          boxShadow: active ? `0 0 0 2px var(--surface), 0 0 0 3px ${c.color}` : undefined,
-                        }}
-                      >
-                        <span className="h-full w-1 shrink-0" style={{ background: c.color }} />
-                        <span
-                          className="grid h-full w-[18px] shrink-0 place-items-center"
-                          style={{ color: c.color }}
-                        >
-                          <c.Icon size={12} />
-                        </span>
-                        <span className="truncate pr-1.5 text-[11px] font-medium text-fg/90">
-                          {e.title}
-                        </span>
-                      </button>
-                    );
-                  })}
+              <div key={li} className="relative" style={{ height: laneHeights[li] }}>
+                {lanes[li].placed.map(({ e, row }) => {
+                  const c = cat(e.type);
+                  const active = sel?.id === e.id;
+                  const future = playing && e.startMin > scrub;
+                  return (
+                    <button
+                      key={e.id}
+                      onPointerDown={(ev) => dragPill(ev, e)}
+                      aria-label={e.title}
+                      title={`${e.title} · ${toHHMM(e.startMin)}–${toHHMM(e.startMin + e.durMin)}`}
+                      className={cn(
+                        "absolute grid place-items-center rounded-full border transition-all",
+                        active ? "z-20" : "z-10 cursor-grab active:cursor-grabbing hover:scale-110",
+                      )}
+                      style={{
+                        left: `${pct(e.startMin)}%`,
+                        top: row * ROW_H + (ROW_H - MARKER) / 2,
+                        width: MARKER,
+                        height: MARKER,
+                        background: hexA(c.color, active ? 0.22 : 0.13),
+                        borderColor: hexA(c.color, active ? 0.9 : 0.45),
+                        color: c.color,
+                        opacity: future ? 0.3 : 1,
+                        boxShadow: active ? `0 0 0 2px var(--surface), 0 0 0 3px ${c.color}` : undefined,
+                      }}
+                    >
+                      <c.Icon size={12} />
+                    </button>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -408,14 +427,14 @@ export function DayTimeline({ day }: { day: DayResponse }) {
             animate={{ opacity: 1 }}
             className="mt-5 rounded-xl border border-dashed border-border-strong bg-surface p-4 text-center text-sm text-muted"
           >
-            Click any activity to expand its explanation and your body&rsquo;s response.
+            Click any activity icon to expand its explanation and your body&rsquo;s response.
           </motion.div>
         )}
       </AnimatePresence>
 
       <p className="mt-3 text-[11px] text-faint">
-        Drag an activity to reschedule it · drag the scrubber or hit Replay to scan your day · click
-        an activity to expand it.
+        Drag an activity icon to reschedule it · drag the scrubber or hit Replay to scan your day ·
+        click an icon to expand it.
       </p>
     </div>
   );
