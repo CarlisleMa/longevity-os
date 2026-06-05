@@ -1,16 +1,10 @@
-# LongevityOS backend — FastAPI app layer.
-# Pinned loosely for a class-project prototype; tighten before any real deployment.
-
+# LongevityOS backend — runtime deps (representative mode + live coach).
+# This is all the running app needs; keep it lean for fast cloud builds.
 fastapi>=0.110
 uvicorn[standard]>=0.29
 pydantic>=2.6
 python-multipart>=0.0.9      # file uploads
-numpy>=1.26
-pandas>=2.1
-scikit-learn>=1.4            # frozen aging-clock scoring (Ridge/ElasticNet)
-pyarrow>=15.0               # parquet feature tables
-python-dateutil>=2.9
+anthropic>=0.40              # live multi-agent coach (set ANTHROPIC_API_KEY; COACH_MODEL optional)
 
-# Live multi-agent coach (set ANTHROPIC_API_KEY to enable; app runs grounded without it).
-anthropic>=0.40
-# Optional model override: COACH_MODEL (defaults to claude-opus-4-8).
+# Scoring-live extras (frozen aging-clock scoring on uploaded data) are in
+# requirements-scoring.txt — not needed to run the app or the coach.

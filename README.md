@@ -73,6 +73,7 @@ to render before you wire in your own uploads.
 - **[docs/BRAINSTORM.md](docs/BRAINSTORM.md)** — vision, the research→individual reframe, design rationale
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — components, data flow, per-user knowledge base
 - **[docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md)** — phased plan to take this from slice to product
+- **[docs/DEPLOY.md](docs/DEPLOY.md)** — deploy frontend (Vercel) + backend (Render/Railway/Fly): env vars, CORS, live coach
 - **[docs/FRONTEND_SPEC.md](docs/FRONTEND_SPEC.md)** — detailed spec for the polished UI (for v0 / Cursor / Claude Code)
 - **[docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)** — what to show the class + talking points for FM / agentic / hypothesis
 - **[docs/PROVENANCE.md](docs/PROVENANCE.md)** — exactly what was copied from AI-READI and at which commit

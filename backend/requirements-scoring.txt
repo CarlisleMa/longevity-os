@@ -1,0 +1,8 @@
+# Optional — only for Scoring-live mode (frozen aging-clock scoring from
+# normalized parquet + model_artifacts/). The app and the coach run without these.
+# Install with:  pip install -r requirements.txt -r requirements-scoring.txt
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+pyarrow>=15.0
+python-dateutil>=2.9

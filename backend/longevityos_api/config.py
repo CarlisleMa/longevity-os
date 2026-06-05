@@ -30,11 +30,18 @@ WEIGHTS_DIR = MODEL_ARTIFACTS / "weights"
 
 DEMO_USER_ID = "demo_alex"
 
-# CORS origins for the local frontend.
-CORS_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+# CORS — local frontend by default; override in production via env.
+#   CORS_ORIGINS="https://your-frontend.vercel.app,https://www.yourdomain.com"
+#   CORS_ORIGIN_REGEX="https://.*\\.vercel\\.app"   (e.g. to allow Vercel previews)
+def _cors_origins() -> list[str]:
+    raw = os.getenv("CORS_ORIGINS")
+    if raw:
+        return [o.strip() for o in raw.split(",") if o.strip()]
+    return ["http://localhost:3000", "http://127.0.0.1:3000"]
+
+
+CORS_ORIGINS = _cors_origins()
+CORS_ORIGIN_REGEX = os.getenv("CORS_ORIGIN_REGEX")
 
 
 def agent_live() -> bool:

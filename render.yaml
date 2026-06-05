@@ -1,0 +1,17 @@
+# Render Blueprint for the LongevityOS backend (Docker).
+# The frontend deploys separately on Vercel (see docs/DEPLOY.md).
+# In Render: New → Blueprint → point at this repo. Verify against Render's current
+# schema if it complains.
+services:
+  - type: web
+    name: longevityos-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: COACH_MODEL
+        value: claude-sonnet-4-6
+      - key: ANTHROPIC_API_KEY
+        sync: false # set in the Render dashboard (secret) to enable the live coach
+      - key: CORS_ORIGINS
+        sync: false # e.g. https://your-frontend.vercel.app

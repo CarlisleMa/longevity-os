@@ -1,0 +1,16 @@
+frontend
+node_modules
+.next
+.git
+**/__pycache__
+**/*.pyc
+.venv
+venv
+docs
+model_artifacts
+data/users
+data/uploads
+# engine is large research code; the backend only needs the knowledge cards,
+# which the Dockerfile copies explicitly.
+engine
+!engine/knowledge_cards
