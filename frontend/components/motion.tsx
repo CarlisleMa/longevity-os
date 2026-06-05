@@ -1,38 +1,35 @@
 "use client";
 
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
-/** Fade + rise into view on scroll. Honors prefers-reduced-motion. */
+/**
+ * Fade + rise in on mount via a pure CSS keyframe (animate-fade-rise) — no
+ * JS-driven motion, so it always paints its final state reliably (server
+ * components, hydration, headless rendering all fine). The global
+ * prefers-reduced-motion rule collapses the animation to instant.
+ */
 export function Reveal({
   children,
   delay = 0,
   className,
-  y = 12,
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
-  y?: number;
 }) {
-  const reduce = useReducedMotion();
   return (
-    <motion.div
-      className={className}
-      initial={reduce ? false : { opacity: 0, y }}
-      whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay }}
+    <div
+      className={cn("animate-fade-rise", className)}
+      style={delay ? { animationDelay: `${delay}s` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
-/**
- * Count a number up when it scrolls into view — the "numbers count up" motion
- * from the spec. Falls back to the final value under reduced motion.
- */
+/** Count a number up on mount. Falls back to the final value under reduced motion. */
 export function CountUp({
   value,
   decimals = 0,
@@ -49,31 +46,30 @@ export function CountUp({
   className?: string;
 }) {
   const reduce = useReducedMotion();
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
-  const [display, setDisplay] = useState(reduce ? value : 0);
+  const [display, setDisplay] = useState(value);
+  const started = useRef(false);
 
   useEffect(() => {
-    if (reduce || !inView) {
-      if (reduce) setDisplay(value);
+    if (reduce) {
+      setDisplay(value);
       return;
     }
+    started.current = true;
+    setDisplay(0);
     let raf = 0;
     const start = performance.now();
-    const from = 0;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
-      // easeOutCubic
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(from + (value - from) * eased);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      setDisplay(value * eased);
       if (t < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, value, duration, reduce]);
+  }, [value, duration, reduce]);
 
   return (
-    <span ref={ref} className={className}>
+    <span className={className}>
       {prefix}
       {display.toFixed(decimals)}
       {suffix}

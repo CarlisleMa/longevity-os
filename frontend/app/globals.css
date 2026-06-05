@@ -140,12 +140,22 @@ body {
   pointer-events: none;
 }
 
-/* Faint dotted paper grid for big sections */
+/* Faint dotted paper grid — texture sits on a pseudo-element BEHIND the content
+   (never masks the card's own text). */
 .paper-grid {
-  background-image: radial-gradient(color-mix(in srgb, var(--text) 7%, transparent) 1px, transparent 1px);
+  position: relative;
+  isolation: isolate;
+}
+.paper-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--text) 6%, transparent) 1px, transparent 1px);
   background-size: 22px 22px;
-  -webkit-mask-image: radial-gradient(120% 80% at 50% 0%, #000 35%, transparent 80%);
-  mask-image: radial-gradient(120% 80% at 50% 0%, #000 35%, transparent 80%);
+  opacity: 0.6;
 }
 
 /* Hairline grid card hover lift */
