@@ -38,8 +38,8 @@ const LANES = ["Sleep & recovery", "Fuel", "Movement", "Light & context"];
 const H = 132; // signal height (px)
 const AXIS_H = 18;
 const ROW_H = 30; // height of one packed row inside a lane
-const MARKER = 22; // icon-marker size
-const MERGE = 38; // minutes — same-lane markers closer than this stack into another row
+const PILL_H = 24; // pill height
+const MIN_SLOT = 55; // minutes a pill "occupies" for overlap packing (so short pills don't collide)
 
 const cat = (t: string): Cat => CATS[t] ?? { color: "#8b8577", Icon: Brain, lane: 3, label: t };
 const toMin = (s: string) => {
@@ -93,18 +93,19 @@ export function DayTimeline({ day }: { day: DayResponse }) {
     () =>
       LANES.map((_, li) => {
         const evs = events.filter((e) => cat(e.type).lane === li).sort((a, b) => a.startMin - b.startMin);
-        const rowLast: number[] = [];
+        const rowEnd: number[] = []; // first free minute per row
         const placed = evs.map((e) => {
-          let r = rowLast.findIndex((last) => e.startMin - last >= MERGE);
+          const occ = Math.max(e.durMin, MIN_SLOT);
+          let r = rowEnd.findIndex((end) => e.startMin >= end);
           if (r === -1) {
-            r = rowLast.length;
-            rowLast.push(e.startMin);
+            r = rowEnd.length;
+            rowEnd.push(e.startMin + occ);
           } else {
-            rowLast[r] = e.startMin;
+            rowEnd[r] = e.startMin + occ;
           }
           return { e, row: r };
         });
-        return { placed, rows: Math.max(1, rowLast.length) };
+        return { placed, rows: Math.max(1, rowEnd.length) };
       }),
     [events],
   );
@@ -313,22 +314,28 @@ export function DayTimeline({ day }: { day: DayResponse }) {
                       aria-label={e.title}
                       title={`${e.title} · ${toHHMM(e.startMin)}–${toHHMM(e.startMin + e.durMin)}`}
                       className={cn(
-                        "absolute grid place-items-center rounded-full border transition-all",
-                        active ? "z-20" : "z-10 cursor-grab active:cursor-grabbing hover:scale-110",
+                        "absolute flex items-center overflow-hidden rounded-md border text-left transition-all",
+                        active ? "z-20" : "z-10 cursor-grab active:cursor-grabbing hover:-translate-y-px",
                       )}
                       style={{
                         left: `${pct(e.startMin)}%`,
-                        top: row * ROW_H + (ROW_H - MARKER) / 2,
-                        width: MARKER,
-                        height: MARKER,
-                        background: hexA(c.color, active ? 0.22 : 0.13),
-                        borderColor: hexA(c.color, active ? 0.9 : 0.45),
-                        color: c.color,
+                        width: `${pct(e.durMin)}%`,
+                        top: row * ROW_H + (ROW_H - PILL_H) / 2,
+                        height: PILL_H,
+                        minWidth: "1.6rem",
+                        background: hexA(c.color, active ? 0.2 : 0.12),
+                        borderColor: hexA(c.color, active ? 0.85 : 0.4),
                         opacity: future ? 0.3 : 1,
                         boxShadow: active ? `0 0 0 2px var(--surface), 0 0 0 3px ${c.color}` : undefined,
                       }}
                     >
-                      <c.Icon size={12} />
+                      <span
+                        className="grid h-full aspect-square shrink-0 place-items-center"
+                        style={{ background: c.color, color: "#fff" }}
+                      >
+                        <c.Icon size={11} />
+                      </span>
+                      <span className="truncate px-1.5 text-[11px] font-medium text-fg/90">{e.title}</span>
                     </button>
                   );
                 })}
