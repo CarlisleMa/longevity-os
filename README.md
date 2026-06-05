@@ -76,6 +76,7 @@ to render before you wire in your own uploads.
 - **[docs/DEPLOY.md](docs/DEPLOY.md)** — deploy frontend (Vercel) + backend (Render/Railway/Fly): env vars, CORS, live coach
 - **[docs/FRONTEND_SPEC.md](docs/FRONTEND_SPEC.md)** — detailed spec for the polished UI (for v0 / Cursor / Claude Code)
 - **[docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)** — what to show the class + talking points for FM / agentic / hypothesis
+- **[video/README.md](video/README.md)** — the Remotion demo video (code-defined, ~5.5 min, cloned-voice narration; maps each scene to the project rubric)
 - **[docs/PROVENANCE.md](docs/PROVENANCE.md)** — exactly what was copied from AI-READI and at which commit
 - **[docs/research_engine/](docs/research_engine/)** — the original research design docs (FM, agentic, hypothesis)
 

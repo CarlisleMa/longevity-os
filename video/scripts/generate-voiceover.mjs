@@ -1,0 +1,155 @@
+#!/usr/bin/env node
+// Generate narration for each scene in your cloned ElevenLabs voice, then lock
+// the video's per-scene durations to the measured audio.
+//
+// Usage:
+//   ELEVENLABS_API_KEY=sk_... [ELEVENLABS_VOICE_ID=...] node scripts/generate-voiceover.mjs
+//
+// Env / flags:
+//   ELEVENLABS_API_KEY   (required) your ElevenLabs key
+//   ELEVENLABS_VOICE_ID  (optional) your cloned voice id; auto-detected if omitted
+//   ELEVENLABS_MODEL     (optional) default "eleven_multilingual_v2"
+//   --only <id,id>       generate just these scene ids
+//   --skip-existing      skip scenes whose mp3 already exists
+//
+// It reads the script straight from src/script.ts so there's one source of truth.
+
+import { writeFile, mkdir, readFile, access } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, "..");
+const AUDIO_DIR = resolve(ROOT, "public/audio");
+
+const API_KEY = process.env.ELEVENLABS_API_KEY;
+const MODEL = process.env.ELEVENLABS_MODEL || "eleven_multilingual_v2";
+const TAIL_PAD_S = 0.85; // breathing room after the voice before the cut
+
+if (!API_KEY) {
+  console.error("✗ ELEVENLABS_API_KEY is not set. Export your key and re-run.");
+  process.exit(1);
+}
+
+const argv = process.argv.slice(2);
+const onlyArg = (() => {
+  const i = argv.indexOf("--only");
+  return i >= 0 ? argv[i + 1].split(",").map((s) => s.trim()) : null;
+})();
+const skipExisting = argv.includes("--skip-existing");
+
+// ── Parse SCENES out of src/script.ts (id + vo) without importing TS ──
+async function loadScenes() {
+  const src = await readFile(resolve(ROOT, "src/script.ts"), "utf8");
+  const scenes = [];
+  const re = /id:\s*"([^"]+)"[\s\S]*?vo:\s*"((?:[^"\\]|\\.)*)"/g;
+  let m;
+  while ((m = re.exec(src))) {
+    scenes.push({ id: m[1], vo: m[2].replace(/\\"/g, '"').replace(/\\n/g, " ") });
+  }
+  return scenes;
+}
+
+async function resolveVoiceId() {
+  if (process.env.ELEVENLABS_VOICE_ID) return process.env.ELEVENLABS_VOICE_ID;
+  const res = await fetch("https://api.elevenlabs.io/v1/voices", {
+    headers: { "xi-api-key": API_KEY },
+  });
+  if (!res.ok) throw new Error(`voices list failed: ${res.status} ${await res.text()}`);
+  const { voices } = await res.json();
+  const cloned = voices.find((v) => v.category === "cloned") || voices.find((v) => v.category === "generated");
+  const pick = cloned || voices[0];
+  if (!pick) throw new Error("No voices found on this ElevenLabs account.");
+  console.log(`• Using voice "${pick.name}" (${pick.category}) → ${pick.voice_id}`);
+  console.log("  (set ELEVENLABS_VOICE_ID to override)");
+  return pick.voice_id;
+}
+
+async function tts(voiceId, text) {
+  const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps?output_format=mp3_44100_128`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "xi-api-key": API_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text,
+      model_id: MODEL,
+      voice_settings: { stability: 0.5, similarity_boost: 0.85, style: 0.1, use_speaker_boost: true },
+    }),
+  });
+  if (!res.ok) throw new Error(`TTS failed: ${res.status} ${await res.text()}`);
+  const data = await res.json();
+  const buf = Buffer.from(data.audio_base64, "base64");
+  const ends = (data.alignment?.character_end_times_seconds || data.normalized_alignment?.character_end_times_seconds || [0]);
+  const duration = ends.length ? ends[ends.length - 1] : 0;
+  return { buf, duration };
+}
+
+async function main() {
+  await mkdir(AUDIO_DIR, { recursive: true });
+  const scenes = (await loadScenes()).filter((s) => (onlyArg ? onlyArg.includes(s.id) : true));
+  const voiceId = await resolveVoiceId();
+  console.log(`• Model: ${MODEL}\n• Scenes: ${scenes.map((s) => s.id).join(", ")}\n`);
+
+  const durations = {};
+  const ids = [];
+  for (const s of scenes) {
+    const out = resolve(AUDIO_DIR, `${s.id}.mp3`);
+    if (skipExisting && existsSync(out)) {
+      console.log(`↷ ${s.id} (exists, skipped)`);
+      ids.push(s.id);
+      continue;
+    }
+    process.stdout.write(`▶ ${s.id} … `);
+    const { buf, duration } = await tts(voiceId, s.vo);
+    await writeFile(out, buf);
+    durations[s.id] = +(duration + TAIL_PAD_S).toFixed(2);
+    ids.push(s.id);
+    console.log(`${(buf.length / 1024).toFixed(0)} KB · ${duration.toFixed(1)}s voice → ${durations[s.id]}s scene`);
+  }
+
+  // Merge with any existing durations/manifest so partial runs don't wipe others.
+  const prevDur = await readJsonish(resolve(ROOT, "src/durations.ts"), "DURATIONS");
+  const prevIds = await readArrayish(resolve(ROOT, "src/audioManifest.ts"), "AUDIO_IDS");
+  const mergedDur = { ...prevDur, ...durations };
+  const mergedIds = Array.from(new Set([...prevIds, ...ids]));
+
+  await writeFile(
+    resolve(ROOT, "src/durations.ts"),
+    `// Measured per-scene audio durations (seconds). Generated by scripts/generate-voiceover.mjs.\n` +
+      `export const DURATIONS: Record<string, number> = ${JSON.stringify(mergedDur, null, 2)};\n`
+  );
+  await writeFile(
+    resolve(ROOT, "src/audioManifest.ts"),
+    `// Scene ids with generated narration at public/audio/<id>.mp3. Generated by scripts/generate-voiceover.mjs.\n` +
+      `export const AUDIO_IDS: string[] = ${JSON.stringify(mergedIds)};\n` +
+      `export const HAS_MUSIC = ${existsSync(resolve(AUDIO_DIR, "music.mp3"))};\n`
+  );
+
+  console.log(`\n✓ Wrote ${ids.length} clip(s). Durations + manifest updated.`);
+  console.log("Next: npm run render");
+}
+
+async function readJsonish(file, name) {
+  try {
+    const txt = await readFile(file, "utf8");
+    const m = txt.match(new RegExp(`${name}[^=]*=\\s*(\\{[\\s\\S]*?\\});`));
+    return m ? JSON.parse(m[1]) : {};
+  } catch {
+    return {};
+  }
+}
+async function readArrayish(file, name) {
+  try {
+    const txt = await readFile(file, "utf8");
+    const m = txt.match(new RegExp(`${name}[^=]*=\\s*(\\[[\\s\\S]*?\\]);`));
+    return m ? JSON.parse(m[1]) : [];
+  } catch {
+    return [];
+  }
+}
+
+main().catch((e) => {
+  console.error("\n✗", e.message);
+  process.exit(1);
+});

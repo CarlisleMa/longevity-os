@@ -1,0 +1,30 @@
+{
+  "name": "longevityos-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remotion demo video for LongevityOS — programmatic motion-graphics walkthrough mapped to the project rubric.",
+  "scripts": {
+    "dev": "remotion studio",
+    "render": "remotion render LongevityOS out/longevityos-demo.mp4 --concurrency=2",
+    "still": "remotion still LongevityOS out/poster.png --frame=120",
+    "voiceover": "node scripts/generate-voiceover.mjs",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "^4.0.0",
+    "@remotion/media-utils": "^4.0.0",
+    "@remotion/shapes": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.3"
+  }
+}

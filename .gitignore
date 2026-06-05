@@ -56,5 +56,13 @@ engine/**/logs/
 Thumbs.db
 .vscode/
 .idea/
-.claude/
+# Local Claude Code config — ignore everything except committed, reusable skills
+.claude/*
+!.claude/skills/
 .codex
+
+# ── Remotion video build (large / re-renderable / generated) ──
+video/node_modules/
+video/out/
+video/.remotion/
+video/public/audio/*.mp3
