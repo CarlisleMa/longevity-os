@@ -8,9 +8,10 @@ import { buttonClass } from "@/components/ui/button";
 
 const links = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/timeline", label: "Timeline" },
+  { href: "/coach", label: "Coach" },
   { href: "/knowledge-base", label: "Knowledge Base" },
   { href: "/interventions", label: "Interventions" },
-  { href: "/timeline", label: "Timeline" },
   { href: "/about", label: "About" },
 ];
 

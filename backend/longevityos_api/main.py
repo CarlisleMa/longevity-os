@@ -11,7 +11,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import __version__
 from .config import CORS_ORIGINS, USERS, run_modes
-from .routers import agent, ingest, interventions, knowledge_base, scoring, users
+from .routers import (
+    agent,
+    coach,
+    day,
+    ingest,
+    interventions,
+    knowledge_base,
+    scoring,
+    users,
+)
 from .schemas import MetaResponse
 from .services import knowledge_service
 
@@ -30,7 +39,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for r in (users, ingest, scoring, knowledge_base, agent, interventions):
+for r in (users, ingest, scoring, knowledge_base, agent, interventions, day, coach):
     app.include_router(r.router)
 
 

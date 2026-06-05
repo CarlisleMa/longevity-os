@@ -96,3 +96,45 @@ export interface KnowledgeBaseResponse {
   user_id: string;
   groups: Record<string, KnowledgeBaseItem[]>;
 }
+
+export interface DayEvent {
+  id: string;
+  type: string;
+  title: string;
+  start: string;
+  end: string;
+  detail: string;
+  response: string;
+}
+
+export interface DaySignal {
+  t: number; // minutes from midnight
+  glucose: number;
+  hr: number;
+}
+
+export interface DayResponse {
+  date: string;
+  events: DayEvent[];
+  signals: DaySignal[];
+  summary: {
+    glucose_min: number;
+    glucose_max: number;
+    hr_min: number;
+    hr_max: number;
+    meals: number;
+    workouts: number;
+  };
+}
+
+export interface CoachResponse {
+  reply: string;
+  citations: string[];
+  suggestions: string[];
+  checked: string[];
+}
+
+export interface CoachTurn {
+  role: "user" | "assistant";
+  text: string;
+}

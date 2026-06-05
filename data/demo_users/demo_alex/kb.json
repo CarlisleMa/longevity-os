@@ -120,5 +120,25 @@
       "status": "new",
       "reasoning_trace": "Positive-reinforcement intervention; metabolic flexibility (KC-GLUCOSE-COMPLEXITY) is stable, so the recommendation is to sustain morning-light habits supporting KC-CIRCADIAN-COUPLING."
     }
-  ]
+  ],
+  "day": {
+    "date": "2026-06-01",
+    "events": [
+      { "id": "EV-01", "type": "sleep", "title": "Asleep", "start": "00:00", "end": "06:45", "detail": "Continuing last night's sleep — 7h 10m total, 88% efficiency, one brief wake at 03:10.", "response": "Overnight glucose held flat (~86 mg/dL) and resting HR bottomed at 50 bpm — but glucose–HR coupling ran below your baseline (0.41 vs 0.59).", "hrRest": 50 },
+      { "id": "EV-02", "type": "light", "title": "Morning light", "start": "06:55", "end": "07:15", "detail": "10 minutes of outdoor light shortly after waking — your strongest circadian anchor.", "response": "Morning light supports the day–night swing in your coupling. This is the habit INT-0003 asks you to keep." },
+      { "id": "EV-03", "type": "caffeine", "title": "Coffee", "start": "07:10", "end": "07:25", "detail": "First coffee of the day, black.", "response": "HR nudged up ~6 bpm for 30 minutes; no measurable glucose effect.", "hrBump": 7 },
+      { "id": "EV-04", "type": "meal", "title": "Breakfast — oatmeal & berries", "start": "07:35", "end": "08:05", "detail": "Steel-cut oats, blueberries, walnuts, a little Greek yogurt.", "response": "Glucose rose ~36 mg/dL, peaked at 45 min, and settled by 90 min — a controlled curve for a carb-forward meal.", "gPeak": 36 },
+      { "id": "EV-05", "type": "activity", "title": "Walk to work", "start": "08:30", "end": "08:55", "detail": "1.6 km brisk walk, ~2,100 steps.", "response": "Gentle post-breakfast movement blunted the tail of the glucose rise.", "gDip": 8 },
+      { "id": "EV-06", "type": "supplement", "title": "Vitamin D + Omega-3", "start": "10:00", "end": "10:05", "detail": "2,000 IU vitamin D3 and 1 g EPA/DHA with water.", "response": "No acute signal — tracked for adherence and long-term inflammatory markers." },
+      { "id": "EV-07", "type": "meal", "title": "Lunch — chicken & quinoa salad", "start": "12:45", "end": "13:15", "detail": "Grilled chicken, quinoa, greens, olive oil, lemon.", "response": "Glucose rose ~26 mg/dL — protein and fiber flattened the curve nicely.", "gPeak": 26 },
+      { "id": "EV-08", "type": "activity", "title": "Post-lunch walk", "start": "13:20", "end": "13:40", "detail": "Short 15-minute walk after eating.", "response": "Clipped the post-lunch peak — exactly the lever behind INT-0002.", "gDip": 7 },
+      { "id": "EV-09", "type": "caffeine", "title": "Afternoon espresso", "start": "15:30", "end": "15:45", "detail": "Single espresso.", "response": "Small HR bump. Late-day caffeine can carry into your evening wind-down — worth watching.", "hrBump": 6 },
+      { "id": "EV-10", "type": "exercise", "title": "Strength training", "start": "17:30", "end": "18:15", "detail": "45-minute full-body strength session, 6 compound lifts.", "response": "HR peaked at 128 bpm; glucose dipped ~12 mg/dL and HRV rebounded strongly for 2h after — your cardiac system's strong suit.", "hrPeak": 128, "gDip": 12 },
+      { "id": "EV-11", "type": "meal", "title": "Dinner — salmon, rice & greens", "start": "19:15", "end": "19:55", "detail": "Baked salmon, white rice, sautéed greens.", "response": "Glucose rose ~32 mg/dL. Eaten ~3.5h before bed — earlier dinners help your overnight coupling.", "gPeak": 32 },
+      { "id": "EV-12", "type": "light", "title": "Evening screens (bright)", "start": "20:30", "end": "22:00", "detail": "Laptop + TV at high brightness after sunset.", "response": "Elevated evening light — linked to your flattened circadian coupling (KC-CIRCADIAN-COUPLING). The strongest lever in INT-0001.", "hrBump": 4 },
+      { "id": "EV-13", "type": "supplement", "title": "Magnesium glycinate", "start": "21:30", "end": "21:35", "detail": "300 mg magnesium glycinate.", "response": "Tracked as a sleep-support habit; no acute glucose/HR signal." },
+      { "id": "EV-14", "type": "behavior", "title": "Wind-down routine", "start": "22:15", "end": "22:45", "detail": "Lights down, reading, no screens.", "response": "Lowers pre-sleep arousal; HR began drifting toward its nocturnal floor." },
+      { "id": "EV-15", "type": "sleep", "title": "Asleep", "start": "23:15", "end": "24:00", "detail": "Sleep onset ~23:20. Bedtime is the target of INT-0001 — 30 min earlier strengthens overnight coupling.", "response": "Sleep onset latency ~12 min. Advancing this window is your highest-yield change right now.", "hrRest": 51 }
+    ]
+  }
 }

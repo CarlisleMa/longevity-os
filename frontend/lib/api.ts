@@ -1,5 +1,8 @@
 import type {
+  CoachResponse,
+  CoachTurn,
   Dashboard,
+  DayResponse,
   Intervention,
   KnowledgeBaseResponse,
   KnowledgeCard,
@@ -17,6 +20,16 @@ async function get<T>(path: string): Promise<T> {
 
 async function post<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { method: "POST" });
+  if (!res.ok) throw new Error(`${res.status} ${path}`);
+  return res.json() as Promise<T>;
+}
+
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
   if (!res.ok) throw new Error(`${res.status} ${path}`);
   return res.json() as Promise<T>;
 }
@@ -40,6 +53,9 @@ export const api = {
     post<Intervention>(`/api/users/${userId}/interventions/${id}/accept`),
   dismissIntervention: (userId: string, id: string) =>
     post<Intervention>(`/api/users/${userId}/interventions/${id}/dismiss`),
+  day: (userId: string) => get<DayResponse>(`/api/users/${userId}/day`),
+  coach: (userId: string, message: string, history: CoachTurn[] = []) =>
+    postJson<CoachResponse>(`/api/users/${userId}/coach`, { message, history }),
 };
 
 export const DEMO_USER = "demo_alex";
