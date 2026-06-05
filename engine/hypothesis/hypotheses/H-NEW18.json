@@ -1,0 +1,143 @@
+{
+  "id": "H-NEW18",
+  "title": "HR complexity loss (multiscale entropy) amplifies the glucose-HR coupling signal in diabetes",
+  "category": "complexity_loss",
+  "statement": "Participants with lower HR multiscale entropy (less complex HR dynamics, indicating more severe autonomic neuropathy) show stronger glucose-HR coupling than those with higher HR complexity, within each diabetes severity group. This interaction means that HR complexity moderates the coupling signal: the coupling increase in diabetes is partly driven by the loss of HR degrees of freedom (simplified HR dynamics become more 'capturable' by glucose variations). Formally, there is a negative interaction between HR MSE and diabetes severity in predicting glucose-HR coupling.",
+  "mechanism": "In a complex HR time series (healthy autonomic regulation), many independent controllers modulate HR: baroreflexes, respiratory sinus arrhythmia, thermoregulatory vasomotion, and activity-driven changes. Glucose is only one of many inputs, so glucose-HR coupling is diluted by these other influences. When autonomic neuropathy reduces HR complexity (fewer active controllers), glucose becomes a proportionally larger driver of HR variation, increasing the apparent coupling. This is analogous to signal-to-noise improvement: when the 'noise' of complex autonomous HR dynamics is reduced, the 'signal' of glucose-driven HR changes becomes more visible. This mechanism predicts that within a diabetes severity group, those with lower HR complexity show stronger coupling.",
+  "predictions": [
+    "HR MSE (at scales 3-12) is negatively correlated with glucose-HR coupling (r < -0.15) after adjusting for study group, age, and HbA1c",
+    "There is a significant HR_MSE x study_group_ordinal interaction on coupling: the coupling increase with severity is amplified in participants with lower HR MSE",
+    "Glucose MSE does not show the same moderating effect (the mechanism is specific to HR complexity, not glucose complexity)",
+    "Controlling for HR MSE attenuates (but does not eliminate) the coupling-severity gradient, indicating partial mediation",
+    "Negative control: HR MSE does not moderate glucose-activity coupling as strongly (activity coupling is behaviorally driven)"
+  ],
+  "literature": [
+    {
+      "title": "Heart rate variability and complexity in people with diabetes associated cardiac autonomic neuropathy",
+      "authors": "Khandoker et al.",
+      "journal": "Physiological Measurement",
+      "year": 2009,
+      "key_finding": "Both HRV and HR complexity are reduced in diabetic cardiac autonomic neuropathy, with multiscale entropy showing greater diagnostic sensitivity than traditional HRV metrics.",
+      "relevance": "Establishes that HR MSE is reduced in diabetic autonomic neuropathy, providing the basis for our interaction hypothesis.",
+      "doi": "10.1088/0967-3334/30/4/005",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19163764/"
+    },
+    {
+      "title": "Loss of 'complexity' and aging: potential applications of fractals and chaos theory to senescence",
+      "authors": "Lipsitz & Goldberger",
+      "journal": "JAMA",
+      "year": 1992,
+      "key_finding": "Disease and aging reduce physiological complexity; this loss of complexity reduces the system's ability to adapt to perturbations.",
+      "relevance": "Theoretical framework for why complexity loss in HR dynamics would amplify the apparent coupling with glucose.",
+      "doi": "10.1001/jama.1992.03480130122036",
+      "url": ""
+    },
+    {
+      "title": "Permutation entropy analysis of heart rate variability for the assessment of cardiovascular autonomic neuropathy in type 1 diabetes mellitus",
+      "authors": "Bettermann et al.",
+      "journal": "Biomedical Signal Processing and Control",
+      "year": 2017,
+      "key_finding": "Permutation entropy of HR detects CAN earlier than traditional HRV metrics, supporting entropy-based measures of autonomic function.",
+      "relevance": "Validates entropy measures of HR as clinically relevant autonomic neuropathy markers.",
+      "doi": "10.1016/j.bspc.2017.04.009",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28527351/"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "per-person summary (MSE from 10-day HR, coupling from 10-day glucose-HR)",
+    "computational_cost": "medium",
+    "statistical_power": "N~1900; sufficient for interaction terms with medium effect sizes",
+    "key_challenges": [
+      "HR MSE from 5-min averaged Garmin data may not capture the fine-grained complexity that beat-to-beat HR would",
+      "Collinearity between HR MSE, mean HR, and coupling features",
+      "Formal SampEn computation for HR at multiple scales (not the existing Shannon proxy)"
+    ],
+    "dataset_limitations": [
+      "Garmin HR is smoothed/averaged; true HR complexity (beat-to-beat) is not available",
+      "The 11-second ECG provides one RMSSD value but not MSE",
+      "Medications affecting HR dynamics are redacted"
+    ]
+  },
+  "priority": 0.62,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Moderation analysis: coupling ~ study_group * HR_MSE + covariates, testing whether HR complexity moderates the coupling-severity relationship",
+    "implementation_steps": [
+      "Step 1: Compute formal HR SampEn at scales 1,3,6,12,24 from 10-day 5-min HR time series per participant",
+      "Step 2: Compute HR complexity index (CI_HR) as area under MSE curve for scales 3-12",
+      "Step 3: Compute per-person glucose-HR coupling features (from existing coupling_features.parquet)",
+      "Step 4: Fit moderation model: glucose_hr_awake_r ~ study_group_ordinal * CI_HR + age + site + HbA1c + BMI",
+      "Step 5: Test significance of the interaction term",
+      "Step 6: Test mediation: does adjusting for CI_HR attenuate the coupling-severity gradient?",
+      "Step 7: Negative control: repeat with glucose MSE as moderator (should be weaker)",
+      "Step 8: Compare existing Shannon entropy proxy vs formal SampEn for HR"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "hr_mean"
+    ],
+    "time_window": "Full 10-day window",
+    "frequency_bands": [],
+    "expected_effect_size": "Interaction beta such that a 1-SD decrease in HR MSE corresponds to a 0.02-0.04 increase in coupling, beyond severity main effect",
+    "success_criterion": "Significant negative HR_MSE x severity interaction on coupling (p < 0.01), with partial mediation of the coupling-severity gradient by HR MSE",
+    "refutation_criterion": "No interaction between HR MSE and severity on coupling. HR MSE is fully redundant with HR mean or HR SD. Glucose MSE shows the same moderating effect (non-specific).",
+    "sensitivity_checks": [
+      "Compare Shannon entropy proxy vs formal SampEn",
+      "Stratify by awake/sleep to test if moderation differs by state",
+      "Control for mean HR level (HR MSE may correlate with mean HR)",
+      "Test with the 11-second ECG RMSSD as an alternative autonomic measure",
+      "Bootstrap the interaction term 1000x"
+    ],
+    "secondary_methods": [
+      "Structural equation model: severity -> HR_MSE -> coupling (path analysis)",
+      "Conditional random forest: importance of HR_MSE for coupling prediction"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.7,
+    "biological_plausibility": 0.8,
+    "novelty": 0.65,
+    "importance": 0.7,
+    "reproducibility": 0.65,
+    "issues": [
+      "The fundamental measurement problem: HR MSE from 5-min averaged Garmin HR is NOT equivalent to HR MSE from beat-to-beat R-R intervals. The Garmin averaging mechanically reduces MSE at all scales by smoothing out high-frequency variability. The measured HR MSE reflects BOTH genuine autonomic complexity AND the degree of Garmin smoothing, which may vary with activity level, skin contact quality, and device firmware.",
+      "The mechanism (HR complexity loss -> increased apparent coupling) is plausible but circular: if both HR MSE and coupling are affected by autonomic neuropathy, they will correlate, but the 'HR complexity moderates coupling' interpretation implies a specific causal direction that cross-sectional data cannot test.",
+      "The expected interaction effect (1 SD decrease in HR MSE -> 0.02-0.04 increase in coupling) is very small and requires precise measurement of both HR MSE and coupling to detect. With Garmin HR smoothing artifacts, this precision may not be achievable.",
+      "The comparison with glucose MSE as a negative control is reasonable but may fail: glucose complexity loss ALSO reflects regulatory failure, and might also moderate coupling for the same reason (fewer glucose controllers -> glucose becomes a simpler 'input' to the coupling)."
+    ],
+    "confounders_missed": [
+      "Garmin HR sampling rate and smoothing algorithm: varies with activity state and device model, directly affects MSE",
+      "Physical fitness: fit individuals have higher HRV (and likely higher MSE) AND may have different coupling patterns, confounding the MSE-coupling relationship",
+      "Resting HR: strongly correlated with HR MSE; the MSE-coupling interaction may be a proxy for resting HR-coupling interaction"
+    ],
+    "suggestions": [
+      "Test the hypothesis first using the 11-second ECG RMSSD as a validated autonomic marker instead of Garmin-based HR MSE. If RMSSD moderates coupling, the hypothesis has merit. Then test whether Garmin HR MSE adds information beyond RMSSD.",
+      "Control for mean HR and HR SD when testing HR MSE effects. If the MSE effect disappears after controlling for mean and SD, the 'complexity' interpretation is not supported.",
+      "Compute HR MSE only during rest periods (no activity) to minimize Garmin smoothing artifacts from movement."
+    ],
+    "overall_score": 0.7
+  },
+  "depends_on": [
+    "H-MIG01",
+    "H-NEW05"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "This addresses WHY coupling increases in diabetes: partly because HR dynamics become simpler, making glucose a relatively larger HR driver. Important mechanistic refinement. Garmin HR quality is the main concern."
+}

@@ -1,0 +1,148 @@
+{
+  "id": "H-MIG07",
+  "title": "Cross-modal predictability decreases with diabetes severity",
+  "category": "temporal_coupling",
+  "statement": "The ability to predict glucose from HR and activity (and vice versa) decreases with diabetes severity, reflecting loss of inter-system predictability as metabolic disease disrupts coordinated physiological regulation.",
+  "mechanism": "In healthy physiology, glucose, heart rate, and activity are tightly coordinated through autonomic and metabolic feedback loops, making each partially predictable from the others. As diabetes disrupts these regulatory loops through insulin resistance, autonomic neuropathy, and metabolic inflexibility, the cross-modal predictability should decrease because the systems become more autonomous and less coordinated.",
+  "predictions": [
+    "R-squared for predicting glucose from HR and activity decreases with diabetes severity",
+    "R-squared for predicting HR from glucose and activity also decreases",
+    "The minimum cross-modal R-squared (worst direction) shows a severity gradient"
+  ],
+  "literature": [
+    {
+      "title": "Network physiology reveals relations between network topology and physiological function",
+      "authors": "Bashan et al.",
+      "journal": "Nature Communications",
+      "year": 2012,
+      "key_finding": "Inter-organ coupling and predictability structures change with physiological state.",
+      "relevance": "Motivates cross-modal predictability as a measure of inter-system coordination.",
+      "doi": "",
+      "url": ""
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_activity"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "multi-day (2-10d)",
+    "computational_cost": "medium",
+    "statistical_power": "N=1939 provides adequate power for moderate effects",
+    "key_challenges": [
+      "Cross-modal prediction R-squared may be near zero, limiting sensitivity",
+      "Need to account for circadian patterns that inflate apparent predictability",
+      "Activity predicting HR is trivially high and may mask glucose-specific effects"
+    ],
+    "dataset_limitations": [
+      "No meal timing data to enrich glucose prediction",
+      "Simple linear models may miss nonlinear coupling"
+    ]
+  },
+  "priority": 0.48,
+  "status": "inconclusive",
+  "test_plan": {
+    "primary_method": "Per-person linear regression of each modality from the other two, computing R-squared, then testing for severity group differences with Kruskal-Wallis and FDR correction",
+    "implementation_steps": [
+      "For each participant, fit glucose ~ HR + activity (and permutations) using linear regression on 5-min aligned data",
+      "Compute R-squared for each direction",
+      "Compute minimum R-squared across directions as a summary metric",
+      "Test for severity group differences"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "site"
+    ],
+    "time_window": "Full 10-day overlap",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d ~ 0.15-0.25",
+    "success_criterion": "FDR-significant decrease in cross-modal predictability with severity for at least one direction",
+    "refutation_criterion": "No significant differences or predictability increases with severity",
+    "sensitivity_checks": [
+      "Stratification by circadian phase",
+      "Nonlinear prediction models (random forest)"
+    ],
+    "secondary_methods": [
+      "Granger causality analysis",
+      "Transfer entropy between modalities"
+    ]
+  },
+  "results": {
+    "method_used": "Per-person linear regression with Kruskal-Wallis group comparison and FDR correction",
+    "sample_size": 1939,
+    "primary_metric": "glucose_from_hr_activity_r2 (median)",
+    "primary_value": -0.008,
+    "effect_size": -0.191,
+    "effect_size_type": "cohen_d",
+    "p_value": 0.047,
+    "fdr_p_value": 0.047,
+    "confidence_interval": null,
+    "confounders_adjusted": [
+      "age",
+      "site"
+    ],
+    "sensitivity_checks": [
+      {
+        "name": "predictability_min_r2 severity gradient",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "FDR=0.047, d=-0.191 \u2014 borderline significant"
+      },
+      {
+        "name": "hr_from_glucose_activity_r2",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "Median=0.360 \u2014 HR is moderately predictable from glucose+activity, but severity gradient is weak"
+      }
+    ],
+    "group_values": {},
+    "group_ns": {
+      "healthy": 668,
+      "pre_diabetes": 477,
+      "oral_medication": 576,
+      "insulin_dependent": 218
+    },
+    "interpretation": "Cross-modal predictability shows a directionally interesting but weak signal. Glucose is essentially unpredictable from HR and activity alone (median R2=-0.008), while HR is moderately predictable from the other two (R2=0.360). The minimum predictability metric shows a borderline severity gradient (FDR=0.047, d=-0.191) but this is not a lead result. The approach needs enrichment with meal timing, richer lag structures, and circadian stratification.",
+    "surprises": "Glucose is nearly unpredictable from HR and activity at the 5-min timescale using simple linear models. This highlights the importance of meal timing (unmeasured) as the primary driver of glucose dynamics.",
+    "output_files": [
+      "results/cross_modal_predictability.parquet"
+    ],
+    "figure_paths": []
+  },
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.55,
+    "biological_plausibility": 0.7,
+    "novelty": 0.6,
+    "importance": 0.45,
+    "reproducibility": 0.5,
+    "issues": [
+      "Near-zero glucose predictability suggests the approach is insensitive, not that coupling is absent",
+      "Borderline significance (FDR=0.047) for primary metric",
+      "Linear models may be inappropriate for nonlinear physiological coupling"
+    ],
+    "confounders_missed": [
+      "Meal timing (dominant driver of glucose not captured)",
+      "Circadian phase confounding"
+    ],
+    "suggestions": [
+      "Incorporate meal timing or meal detection from CGM",
+      "Use nonlinear prediction models (random forest, LSTM)",
+      "Stratify by circadian phase (morning vs afternoon vs night)",
+      "Use richer lag features (multiple time delays)"
+    ],
+    "overall_score": 0.52
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [],
+  "supports": [],
+  "source": "migrated",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Directionally interesting but not a lead result. Needs meal/activity timing, richer lags, and circadian stratification to be conclusive."
+}

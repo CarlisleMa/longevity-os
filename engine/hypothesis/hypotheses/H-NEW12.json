@@ -1,0 +1,147 @@
+{
+  "id": "H-NEW12",
+  "title": "PM2.5 acutely amplifies glucose-HR coupling through inflammation-mediated autonomic activation",
+  "category": "environmental_modulation",
+  "statement": "Within-person day-to-day fluctuations in PM2.5 exposure modulate same-day glucose-HR coupling strength: higher PM2.5 days are followed by stronger (more positive) glucose-HR coupling with a 12-24 hour lag, especially in diabetes. This occurs because PM2.5 triggers systemic inflammation (IL-6, TNF-alpha) and oxidative stress that impairs autonomic balance (reducing vagal tone, increasing sympathetic drive), amplifying the pathological glucose-HR locking. The effect is stronger in diabetes because the autonomic system is already compromised and has less reserve to buffer the PM2.5 perturbation.",
+  "mechanism": "Inhaled PM2.5 triggers alveolar macrophage activation within hours, releasing pro-inflammatory cytokines (IL-6, TNF-alpha, IL-1beta) into the circulation. These cytokines act on the CNS (via vagal afferents and circumventricular organs) to increase sympathetic outflow and reduce vagal tone. Additionally, PM2.5 particles that enter the bloodstream directly activate endothelial oxidative stress and impair endothelial NO production, further impairing autonomic vasomotor regulation. In healthy individuals, intact autonomic reserve can buffer these perturbations, maintaining relatively decoupled glucose-HR dynamics. In diabetes, where vagal tone is already reduced and sympathetic tone is elevated, the additional PM2.5-induced autonomic shift pushes the system further into pathological glucose-HR locking. The 12-24h lag reflects the time course of systemic inflammation from PM2.5 inhalation to peak cytokine levels and autonomic effects.",
+  "predictions": [
+    "Within-person: days with higher PM2.5 (top tertile) are followed by days with stronger glucose-HR coupling (r increase of 0.02-0.05 at 12-24h lag)",
+    "This PM2.5->coupling relationship is stronger in insulin-dependent participants (interaction d > 0.15)",
+    "The lag structure shows peak effect at 12-24h (consistent with inflammatory cascade timing), weaker at 0-6h and >36h",
+    "Negative control: temperature and humidity fluctuations do not predict coupling changes at the same lag",
+    "The effect is attenuated when both PM2.5 and coupling are detrended for time-of-day and day-of-week"
+  ],
+  "literature": [
+    {
+      "title": "A review of air pollution as a driver of cardiovascular disease risk across the diabetes spectrum",
+      "authors": "Rajagopalan et al.",
+      "journal": "Frontiers in Endocrinology",
+      "year": 2024,
+      "key_finding": "PM2.5 exposure is associated with autonomic imbalance, systemic inflammation, and insulin resistance, with diabetic individuals showing greater susceptibility.",
+      "relevance": "Provides the mechanistic framework for PM2.5-mediated autonomic-metabolic coupling amplification in diabetes.",
+      "doi": "10.3389/fendo.2024.1321323",
+      "url": "https://www.frontiersin.org/journals/endocrinology/articles/10.3389/fendo.2024.1321323/full"
+    },
+    {
+      "title": "Long-term exposure to ambient PM2.5 and its components associated with diabetes",
+      "authors": "Liu et al.",
+      "journal": "Diabetes Care",
+      "year": 2023,
+      "key_finding": "PM2.5 components (especially organic carbon and sulfate) are associated with incident diabetes, with effects partially mediated by inflammation and insulin resistance.",
+      "relevance": "Epidemiological support for PM2.5-diabetes interaction through metabolic and inflammatory pathways.",
+      "doi": "10.2337/dc22-1309",
+      "url": "https://diabetesjournals.org/care/article/46/1/111/147938/"
+    },
+    {
+      "title": "Epidemiological and mechanistic links between PM2.5 exposure and type 2 diabetes: focus on the TRPV1 receptor",
+      "authors": "Wang et al.",
+      "journal": "Frontiers in Endocrinology",
+      "year": 2025,
+      "key_finding": "PM2.5 activates TRPV1 receptors leading to oxidative stress, inflammation, and autonomic imbalance that promote insulin resistance.",
+      "relevance": "Identifies TRPV1 as a specific molecular mechanism linking PM2.5 to autonomic-metabolic dysfunction.",
+      "doi": "10.3389/fendo.2025.1653375",
+      "url": "https://www.frontiersin.org/journals/endocrinology/articles/10.3389/fendo.2025.1653375/full"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "environment_pm25"
+    ],
+    "participant_coverage": 0.75,
+    "time_resolution_needed": "hourly for PM2.5; per-day for coupling",
+    "analysis_timescale": "12-36h lag (within-person day-to-day)",
+    "computational_cost": "low",
+    "statistical_power": "N~1500 with environment data x ~10 days = ~15,000 person-days for mixed-effects models",
+    "key_challenges": [
+      "PM2.5 sensor accuracy at low concentrations (many indoor environments)",
+      "Indoor PM2.5 may not reflect personal exposure (outdoor exposure during commute not captured)",
+      "Limited day-to-day PM2.5 variability in some locations (especially controlled indoor environments)",
+      "Need within-person detrending to remove between-person confounding"
+    ],
+    "dataset_limitations": [
+      "Environment sensor measures room-level PM2.5, not personal exposure",
+      "PM2.5 composition data not available (total mass only)",
+      "10-day window limits the number of day-to-day PM2.5 fluctuations per person"
+    ]
+  },
+  "priority": 0.5,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Within-person lagged mixed-effects model: daily_coupling ~ PM2.5_lag_1d * study_group + covariates + (1|person_id), with person-mean-centered PM2.5",
+    "implementation_steps": [
+      "Step 1: Compute daily mean PM2.5 from environment sensor per participant (excluding missing days)",
+      "Step 2: Compute daily glucose-HR coupling (Pearson r, awake-only) per participant",
+      "Step 3: Person-mean-center both PM2.5 and coupling to extract within-person fluctuations",
+      "Step 4: Fit mixed-effects model with lagged PM2.5 (lag=0, 1, 2 days) predicting coupling",
+      "Step 5: Add study_group x PM2.5_lag interaction to test diabetes-specific amplification",
+      "Step 6: Test lag structure: compare model fit at lag 0, 1, 2 days",
+      "Step 7: Negative controls: replace PM2.5 with temperature and humidity; test same model",
+      "Step 8: Sensitivity: add time-of-day and day-of-week fixed effects"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "daily_activity_total",
+      "daily_temperature",
+      "season_month"
+    ],
+    "time_window": "Same-day and next-day (0-24h lag primarily)",
+    "frequency_bands": [],
+    "expected_effect_size": "Within-person standardized beta 0.03-0.08 for PM2.5_lag_1d -> coupling; interaction d 0.15-0.25",
+    "success_criterion": "Significant within-person PM2.5 -> coupling association at 12-24h lag (p < 0.01) with diabetes severity interaction",
+    "refutation_criterion": "No within-person PM2.5 -> coupling association at any lag. Temperature/humidity show equal or stronger effects (non-specific). Effect disappears after autocorrelation adjustment.",
+    "sensitivity_checks": [
+      "Use 6h-binned PM2.5 for finer lag resolution",
+      "Stratify by site (UAB/UW/UCSD have different air quality environments)",
+      "Test PM2.5 variance instead of mean as predictor (spike exposure)",
+      "Adjust for autocorrelation in coupling time series (AR(1) model)",
+      "Exclude days with very low PM2.5 variance (<2 ug/m3 within-day range)"
+    ],
+    "secondary_methods": [
+      "Distributed lag nonlinear model (DLNM) for flexible lag-response curves",
+      "Conditional Granger causality: PM2.5 -> coupling, conditioning on activity"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.65,
+    "biological_plausibility": 0.7,
+    "novelty": 0.55,
+    "importance": 0.65,
+    "reproducibility": 0.6,
+    "issues": [
+      "This is essentially a within-person retest of H-MIG06 (PM2.5-glucose coupling, which was already inconclusive). The key improvement (within-person detrending) is methodologically sound, but the fundamental problem remains: room-level PM2.5 from an indoor environmental sensor is a poor proxy for personal PM2.5 exposure.",
+      "Indoor PM2.5 in controlled environments (which many AI-READI participants likely inhabit during their 10-day sensor period) has very limited day-to-day variability. If PM2.5 ranges from 5-15 ug/m3 across most days, the within-person variation is too small to detect a meaningful coupling change.",
+      "The expected standardized beta of 0.03-0.08 is extremely small. This is a 3-8% of a standard deviation change in coupling per 1 SD change in PM2.5. At this effect size, even a tiny unmeasured confounder can create or eliminate the signal.",
+      "The lag structure analysis (0, 1, 2 day lags) assumes the PM2.5 effect is day-level. But indoor PM2.5 spikes can occur from cooking, cleaning, or candle burning -- these are acute events, not day-level exposures. Hourly PM2.5 data should be used with distributed lag models, not daily averages."
+    ],
+    "confounders_missed": [
+      "Cooking and cleaning: acute indoor PM2.5 sources that co-occur with meal timing and physical activity, both of which independently affect coupling",
+      "Window/door opening: ventilation changes affect indoor PM2.5 and are correlated with weather and activity patterns",
+      "Sensor placement: if the sensor is in the bedroom vs kitchen, it captures very different exposure profiles"
+    ],
+    "suggestions": [
+      "First check PM2.5 within-person day-to-day variance. If the IQR is < 5 ug/m3 for most participants, there is insufficient variation to detect anything.",
+      "Use the distributed lag nonlinear model (DLNM) as the primary method with hourly PM2.5, not daily averages.",
+      "Stratify by site to see if the effect is only present at high-variability sites.",
+      "If PM2.5 variability is insufficient, honestly report this as a negative feasibility finding rather than a null result."
+    ],
+    "overall_score": 0.63
+  },
+  "depends_on": [
+    "H-MIG06"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG06"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "This is a more rigorous retest of H-MIG06 (which was inconclusive). Key improvements: within-person detrending, lag structure analysis, negative controls, and interaction with diabetes severity. Still limited by indoor PM2.5 measurement."
+}

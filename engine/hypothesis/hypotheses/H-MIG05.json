@@ -1,0 +1,150 @@
+{
+  "id": "H-MIG05",
+  "title": "Coupling features predict retinal/cardiac structural damage",
+  "category": "structural_dynamic",
+  "statement": "Dynamic coupling features are associated with retinal age acceleration and cardiac age acceleration, suggesting coupling disruption reflects end-organ structural damage.",
+  "mechanism": "If dynamic coupling disruption reflects not only functional dysregulation but also structural end-organ damage, then coupling features should correlate with organ-specific aging acceleration markers derived from retinal imaging and cardiac assessments. Retinal microvasculature and cardiac structure are known targets of diabetic damage, and their age acceleration could be predicted by the degree of inter-organ coupling disruption.",
+  "predictions": [
+    "Glucose-HR coupling features are positively associated with retinal age acceleration (retinal age - chronological age)",
+    "Glucose-HR coupling features are positively associated with cardiac age acceleration",
+    "Coupling features are associated with UACR (urine albumin-to-creatinine ratio) as a marker of renal microvascular damage"
+  ],
+  "literature": [
+    {
+      "title": "Network physiology reveals relations between network topology and physiological function",
+      "authors": "Bashan et al.",
+      "journal": "Nature Communications",
+      "year": 2012,
+      "key_finding": "Inter-organ coupling topology reflects physiological state.",
+      "relevance": "If coupling reflects organ function, it might also reflect structural damage.",
+      "doi": "",
+      "url": ""
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "retinal_imaging",
+      "cardiac_imaging",
+      "clinical_labs"
+    ],
+    "participant_coverage": 0.7,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "multi-day (2-10d)",
+    "computational_cost": "medium",
+    "statistical_power": "Dependent on imaging data availability; may be underpowered for small effects",
+    "key_challenges": [
+      "Retinal and cardiac age acceleration models may have limited precision",
+      "Structural damage may be too distal from dynamic coupling signals"
+    ],
+    "dataset_limitations": [
+      "Retinal and cardiac age models are derived, not direct measurements of damage",
+      "Cross-sectional design prevents temporal ordering"
+    ]
+  },
+  "priority": 0.35,
+  "status": "refuted",
+  "test_plan": {
+    "primary_method": "Partial correlation between coupling features and organ age acceleration, adjusted for age and site, with FDR correction",
+    "implementation_steps": [
+      "Compute retinal age acceleration and cardiac age acceleration from existing aging clock models",
+      "Compute partial correlations between coupling features and age acceleration metrics",
+      "Test association with UACR",
+      "Apply FDR correction"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "site"
+    ],
+    "time_window": "Full 10-day overlap for coupling; imaging at enrollment",
+    "frequency_bands": [],
+    "expected_effect_size": "Partial r ~ 0.10-0.15",
+    "success_criterion": "FDR-significant partial correlations between coupling features and at least one organ age acceleration metric",
+    "refutation_criterion": "No FDR-significant associations with any structural marker",
+    "sensitivity_checks": [
+      "Adjustment for diabetes severity",
+      "Testing multiple coupling features"
+    ],
+    "secondary_methods": []
+  },
+  "results": {
+    "method_used": "Partial correlation with FDR correction, adjusted for age and site",
+    "sample_size": 1939,
+    "primary_metric": "FDR-corrected p-value for coupling vs structural markers",
+    "primary_value": 0.0,
+    "effect_size": 0.0,
+    "effect_size_type": "partial_r",
+    "p_value": 1.0,
+    "fdr_p_value": 1.0,
+    "confidence_interval": null,
+    "confounders_adjusted": [
+      "age",
+      "site"
+    ],
+    "sensitivity_checks": [
+      {
+        "name": "Coupling vs retinal age acceleration",
+        "passed": false,
+        "effect_preserved": false,
+        "details": "No FDR-significant associations"
+      },
+      {
+        "name": "Coupling vs cardiac age acceleration",
+        "passed": false,
+        "effect_preserved": false,
+        "details": "No FDR-significant associations"
+      },
+      {
+        "name": "Coupling vs UACR",
+        "passed": false,
+        "effect_preserved": false,
+        "details": "No FDR-significant associations"
+      }
+    ],
+    "group_values": {},
+    "group_ns": {
+      "healthy": 668,
+      "pre_diabetes": 477,
+      "oral_medication": 576,
+      "insulin_dependent": 218
+    },
+    "interpretation": "Dynamic coupling features show no FDR-significant associations with retinal age acceleration, cardiac age acceleration, or UACR. This suggests that coupling disruption is a functional/clinical-burden marker that does not directly map onto structural end-organ damage as captured by current aging clock models. Coupling and structural damage may operate on different timescales or reflect different dimensions of disease.",
+    "surprises": "Complete null result across all structural markers. Dynamic coupling appears to capture a different dimension of disease than structural imaging markers.",
+    "output_files": [
+      "results/coupling_atlas.csv"
+    ],
+    "figure_paths": []
+  },
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.75,
+    "biological_plausibility": 0.6,
+    "novelty": 0.5,
+    "importance": 0.5,
+    "reproducibility": 0.7,
+    "issues": [
+      "Null result may reflect weak aging clock models rather than true absence of structural-dynamic link",
+      "Retinal and cardiac age acceleration are derived metrics with their own noise",
+      "May need more specific structural features (e.g., retinal vessel tortuosity, LV mass) rather than composite age acceleration"
+    ],
+    "confounders_missed": [],
+    "suggestions": [
+      "Re-test with raw structural features instead of derived age acceleration",
+      "Test against more specific damage markers (retinal vessel caliber, GCC thickness, cardiac strain)",
+      "Consider that structural damage may require longer observation windows or longitudinal data"
+    ],
+    "overall_score": 0.55
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [
+    "H-MIG04"
+  ],
+  "supports": [],
+  "source": "migrated",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Important negative result. Dynamic coupling appears to be a functional/clinical-burden marker, not a structural imaging marker (yet). May need better structural features rather than composite age acceleration scores."
+}

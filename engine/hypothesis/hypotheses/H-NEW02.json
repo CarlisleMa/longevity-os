@@ -1,0 +1,148 @@
+{
+  "id": "H-NEW02",
+  "title": "Asymmetric causal direction: glucose drives HR more than HR drives glucose in diabetes",
+  "category": "causal_architecture",
+  "statement": "In healthy individuals, the causal influence between glucose and HR is approximately symmetric (glucose->HR and HR->glucose transfer entropy are similar in magnitude). With increasing diabetes severity, the glucose->HR direction strengthens while the HR->glucose direction weakens, creating a net asymmetry. This reflects the shift from bidirectional autonomic-metabolic coordination to a unidirectional 'glucose dominates HR' regime caused by autonomic neuropathy.",
+  "mechanism": "In healthy physiology, glucose and HR are bidirectionally coupled: glucose excursions trigger autonomic HR adjustments (glucose->HR), while exercise-driven HR increases mobilize glucose and improve insulin sensitivity (HR->glucose via activity-metabolism coupling). As diabetes progresses, autonomic neuropathy selectively damages the efferent parasympathetic limb first, then sympathetic fibers. The afferent sensing of glucose (hepato-portal, central) remains partially intact, preserving glucose->HR drive via residual sympathetic activation. However, the HR->glucose pathway (exercise-mediated glucose uptake regulation, autonomic modulation of hepatic glucose output) becomes impaired. The net result is an asymmetric causal architecture where glucose is the 'driver' and HR is the 'follower'.",
+  "predictions": [
+    "Transfer entropy (TE) from glucose->HR exceeds TE from HR->glucose in the insulin-dependent group (asymmetry ratio > 1.5)",
+    "In healthy participants, the asymmetry ratio is near 1.0 (symmetric coupling)",
+    "The asymmetry ratio increases monotonically with diabetes severity (d > 0.3 for linear trend)",
+    "Convergent cross mapping (CCM) skill from glucose->HR exceeds CCM skill from HR->glucose in diabetes",
+    "The TE asymmetry survives adjustment for activity state (awake/sleep) and mean glucose level",
+    "Negative control: TE between glucose and circularly-shifted HR (shifted by >2h) should show no asymmetry"
+  ],
+  "literature": [
+    {
+      "title": "Detecting Causality in Complex Ecosystems",
+      "authors": "Sugihara et al.",
+      "journal": "Science",
+      "year": 2012,
+      "key_finding": "Convergent cross mapping can detect causal relationships in nonlinear coupled systems even with bidirectional causation, unlike Granger causality.",
+      "relevance": "CCM is the methodological backbone for testing directed coupling between glucose and HR in a nonlinear physiological system.",
+      "doi": "10.1126/science.1227079",
+      "url": "https://www.nature.com/articles/srep14750"
+    },
+    {
+      "title": "Cardiac autonomic neuropathy measured by heart rate variability and markers of subclinical atherosclerosis in early type 2 diabetes",
+      "authors": "Lykke et al.",
+      "journal": "Cardiovascular Diabetology",
+      "year": 2012,
+      "key_finding": "Reduced HRV in early T2D reflects autonomic neuropathy that precedes overt cardiovascular disease.",
+      "relevance": "Supports the mechanistic basis that autonomic efferent damage creates asymmetric coupling by impairing the HR->glucose pathway.",
+      "doi": "10.1186/1475-2840-11-153",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3521488/"
+    },
+    {
+      "title": "Disruption of multisystem responses to stress in type 2 diabetes: investigating the dynamics of allostatic load",
+      "authors": "Hackett et al.",
+      "journal": "Proceedings of the National Academy of Sciences",
+      "year": 2014,
+      "key_finding": "T2D shows attenuated post-stress recovery in HR, BP, cortisol, and cholesterol, consistent with impaired autonomic feedback loops.",
+      "relevance": "Demonstrates that diabetes disrupts bidirectional stress-response dynamics, supporting asymmetric causal architecture.",
+      "doi": "10.1073/pnas.1410401111",
+      "url": "https://www.pnas.org/doi/10.1073/pnas.1410401111"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_activity"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "acute (5-120 min lags for TE estimation)",
+    "computational_cost": "high",
+    "statistical_power": "N~1900 participants x ~2880 timepoints each; sufficient embedding dimension for TE/CCM",
+    "key_challenges": [
+      "Transfer entropy estimation requires careful embedding dimension and lag selection",
+      "CCM requires sufficient library length (>500 points per participant available)",
+      "Need surrogate data tests to establish significance of individual TE values",
+      "Garmin HR sampling may smooth genuine high-frequency causal dynamics"
+    ],
+    "dataset_limitations": [
+      "No beat-to-beat HR precludes fine-grained causal timing analysis",
+      "Activity confounds both glucose and HR; must condition on activity state",
+      "Medication effects on HR responsiveness are unobservable"
+    ]
+  },
+  "priority": 0.72,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Transfer entropy (kernel-density or KSG estimator) with embedding dimension selected by false nearest neighbors, computed bidirectionally between glucose and HR for each participant",
+    "implementation_steps": [
+      "Step 1: Load aligned 5-min glucose and HR per participant; standardize each signal to zero mean, unit variance",
+      "Step 2: Determine optimal embedding dimension (E) and lag (tau) using simplex projection on glucose and HR separately",
+      "Step 3: Compute TE(glucose->HR) and TE(HR->glucose) using KSG estimator with E and tau from step 2, over lags 1-24 steps (5-120 min)",
+      "Step 4: Compute asymmetry index: AI = (TE_G->H - TE_H->G) / (TE_G->H + TE_H->G)",
+      "Step 5: Validate with surrogate test: compute TE on 100 time-shifted surrogates per participant to establish significance",
+      "Step 6: As secondary method, compute CCM skill in both directions with increasing library length",
+      "Step 7: Test group differences in AI across diabetes severity groups",
+      "Step 8: Run sensitivity analysis conditioning on awake vs sleep, and adjusting for age/site/HbA1c/BMI"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "activity_state"
+    ],
+    "time_window": "Full 10-day window, stratified by awake/sleep",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d 0.3-0.5 for asymmetry index across severity gradient",
+    "success_criterion": "Significant monotonic increase in glucose->HR dominance (positive AI) with diabetes severity, surviving covariate adjustment",
+    "refutation_criterion": "If AI does not differ across groups (symmetric coupling at all severity levels), or if HR->glucose dominates in diabetes (opposite direction), the hypothesis fails. If surrogate tests show most individual TE values are non-significant, the method has insufficient sensitivity.",
+    "sensitivity_checks": [
+      "Vary embedding dimension E from 2 to 6",
+      "Compare KSG vs binning-based TE estimator",
+      "Stratify by awake vs sleep periods separately",
+      "Condition on activity log-steps as a third variable in conditional TE",
+      "Bootstrap 500x for CI on group-level AI differences"
+    ],
+    "secondary_methods": [
+      "Convergent cross mapping (CCM)",
+      "PCMCI with conditional independence tests",
+      "Granger causality (linear benchmark)"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.7,
+    "biological_plausibility": 0.75,
+    "novelty": 0.8,
+    "importance": 0.8,
+    "reproducibility": 0.6,
+    "issues": [
+      "Transfer entropy estimation from 5-min averaged Garmin HR is deeply problematic. TE requires capturing the fine-grained temporal structure of information flow. At 5-min resolution, a single TE 'step' is 5 minutes -- far too coarse to capture the actual timescale of glucose->HR neural signaling (seconds to minutes). The TE estimate will reflect statistical dependence structure, not genuine causal dynamics.",
+      "CCM requires sufficient library length for shadow manifold reconstruction. With ~2880 points per person at 5-min resolution, and typical embedding dimension E=3-5 with lag tau=2-5, the effective library is marginal. CCM convergence (the diagnostic for causality) requires testing at multiple library lengths, and 2880 points may not show clear convergence.",
+      "The claim that 'HR->glucose weakens in diabetes' conflates two different things: (1) exercise-mediated glucose uptake (which is a behavioral pathway, not an autonomic one) and (2) autonomic modulation of hepatic glucose output (which is a genuine HR->glucose autonomic pathway). These operate at completely different timescales and the 5-min resolution cannot separate them.",
+      "Activity is a massive confounder for transfer entropy in both directions. Activity drives both glucose and HR. Conditioning on activity state (awake/sleep binary) is too coarse -- need continuous activity conditioning."
+    ],
+    "confounders_missed": [
+      "Medications (redacted): insulin bolus timing creates artificial glucose->HR temporal structure (bolus -> glucose drop -> sympathetic counter-regulation -> HR); beta-blockers attenuate HR response, reducing apparent TE in both directions",
+      "Posture changes: cause rapid HR changes that may create spurious TE from activity proxy (steps) to HR, contaminating the glucose->HR pathway",
+      "CGM sensor lag: CGM glucose reading lags true blood glucose by 5-15 minutes, which will bias TE estimates in the glucose->HR direction"
+    ],
+    "suggestions": [
+      "Pilot on 50 participants first to verify TE estimation is feasible and stable at 5-min resolution before committing to full analysis.",
+      "Use conditional transfer entropy conditioned on continuous activity (log-steps, not binary awake/sleep) to partial out activity confounding.",
+      "Acknowledge upfront that 'causal direction' from TE at 5-min resolution really means 'dominant statistical dependency direction at multi-minute timescales,' not genuine neural causal dynamics.",
+      "Consider Granger causality as primary method (simpler, better understood, robust at coarse resolution) and use TE/CCM as secondary/confirmatory.",
+      "Report surrogate-data significance rates per group: if >30% of individual TE values are non-significant by surrogate test, the method has insufficient sensitivity and the group comparison is unreliable."
+    ],
+    "overall_score": 0.72
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "This extends H-MIG01 from correlation to directed causality. High computational cost but high novelty. Should pilot on 50 participants first to validate TE estimation feasibility at 5-min resolution."
+}

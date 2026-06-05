@@ -1,0 +1,145 @@
+{
+  "id": "H-NEW11",
+  "title": "Day-to-day coupling instability is a resilience marker that predicts clinical burden",
+  "category": "resilience",
+  "statement": "The day-to-day variability (instability) of glucose-HR coupling strength is itself a marker of physiological resilience. In healthy individuals, coupling strength varies substantially from day to day because it is context-dependent (meals, activity, sleep quality, stress). In advanced diabetes, coupling becomes rigidly positive every day (loss of context dependence), reducing day-to-day variability. The coefficient of variation (CV) of daily glucose-HR coupling across the 10-day window decreases with diabetes severity and independently predicts frailty index and allostatic load.",
+  "mechanism": "Day-to-day variability in inter-organ coupling reflects the system's capacity to modulate its internal coordination in response to varying daily demands. In healthy physiology, autonomic reflexes and metabolic flexibility allow glucose-HR coupling to be strong on some days (high carb intake, sedentary) and weak or negative on others (exercise days, fasting). This variability is a signature of adaptive capacity. In diabetes, loss of metabolic flexibility (impaired fuel switching), autonomic rigidity (fixed sympathetic dominance), and reduced behavioral variability (less exercise, more routine) collapse the coupling into a narrow, persistently positive range. This loss of day-to-day coupling variability parallels the loss-of-complexity principle from Lipsitz & Goldberger: disease reduces not just signal complexity but also the variability of inter-signal relationships.",
+  "predictions": [
+    "The CV of daily glucose-HR coupling (computed from ~10 daily estimates per person) decreases with diabetes severity (d > 0.25)",
+    "Day-to-day coupling CV independently predicts frailty index (partial r > 0.08) after adjusting for age, site, HbA1c, BMI, and mean coupling level",
+    "Day-to-day coupling CV independently predicts allostatic load (partial r > 0.08) after the same adjustment",
+    "Negative control: the CV of daily glucose MEAN does not have the same independent predictive power (variability of coupling, not of glucose level, is the marker)",
+    "Participants with the lowest day-to-day coupling CV have the highest coupling means (rigid positive coupling = low variability + high mean)"
+  ],
+  "literature": [
+    {
+      "title": "Loss of 'complexity' and aging: potential applications of fractals and chaos theory to senescence",
+      "authors": "Lipsitz & Goldberger",
+      "journal": "JAMA",
+      "year": 1992,
+      "key_finding": "Aging and disease reduce physiological complexity across multiple scales and systems.",
+      "relevance": "The foundational principle that disease reduces variability/complexity, extended from single-signal complexity to inter-signal coupling variability.",
+      "doi": "10.1001/jama.1992.03480130122036",
+      "url": ""
+    },
+    {
+      "title": "Disruption of multisystem responses to stress in type 2 diabetes",
+      "authors": "Hackett et al.",
+      "journal": "PNAS",
+      "year": 2014,
+      "key_finding": "T2D shows attenuated stress reactivity and recovery across multiple systems, consistent with reduced adaptive capacity.",
+      "relevance": "Supports the idea that diabetes reduces the variability of physiological responses, which should manifest as reduced day-to-day coupling variability.",
+      "doi": "10.1073/pnas.1410401111",
+      "url": "https://www.pnas.org/doi/10.1073/pnas.1410401111"
+    },
+    {
+      "title": "From frailty to resilience: exploring adaptive capacity and reserve in older adults",
+      "authors": "Various",
+      "journal": "Frontiers in Aging",
+      "year": 2025,
+      "key_finding": "Resilience in aging is the ability to recover from perturbations, and loss of resilience precedes overt functional decline.",
+      "relevance": "Frames day-to-day coupling variability as a resilience metric that may detect pre-clinical regulatory failure.",
+      "doi": "",
+      "url": "https://www.frontiersin.org/journals/aging/articles/10.3389/fragi.2025.1520842/full"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "per-day (daily coupling estimates from 5-min data)",
+    "analysis_timescale": "multi-day (10-day variability)",
+    "computational_cost": "low",
+    "statistical_power": "N~1900; computing per-day coupling from ~288 points/day, then CV across ~10 days per person",
+    "key_challenges": [
+      "Only ~10 days limits precision of CV estimates; some days may have missing data",
+      "Day-to-day coupling CV may partly reflect CGM sensor artifacts or HR data gaps",
+      "Need to separate genuine physiological variability from measurement noise"
+    ],
+    "dataset_limitations": [
+      "10-day window provides only ~8-10 independent daily estimates for CV computation",
+      "Daily activities are not logged; day-to-day behavioral variability is unmeasured",
+      "Cross-sectional: cannot determine whether low CV precedes or follows clinical burden"
+    ]
+  },
+  "priority": 0.64,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Compute per-day glucose-HR correlation for each participant's 10-day window, then compute CV of daily correlations. Test group trend and partial correlations with clinical outcomes.",
+    "implementation_steps": [
+      "Step 1: Segment each participant's aligned glucose-HR data into calendar days (midnight to midnight, local time)",
+      "Step 2: Compute Pearson correlation between glucose and HR for each day (require >= 100 valid 5-min points per day, i.e., >8.3 hours)",
+      "Step 3: Compute per-person statistics: mean daily coupling, SD daily coupling, CV daily coupling, number of valid days",
+      "Step 4: Filter to participants with >= 7 valid days",
+      "Step 5: Test group differences in CV of daily coupling across severity groups",
+      "Step 6: Fit partial correlation models: CV ~ frailty_index, adjusting for age, site, HbA1c, BMI, mean_coupling",
+      "Step 7: Negative control: compute CV of daily glucose mean and test same partial correlations",
+      "Step 8: Test correlation between mean coupling and coupling CV (expected negative: high mean = low variability)"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "mean_coupling_level",
+      "number_valid_days"
+    ],
+    "time_window": "Per-day within 10-day window (then aggregated to per-person CV)",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d 0.25-0.40 for CV group trend; partial r 0.08-0.12 for CV vs frailty/allostatic load",
+    "success_criterion": "Coupling CV decreases with severity (FDR p < 0.01) and independently predicts frailty/allostatic load after adjustment for HbA1c, BMI, and mean coupling level",
+    "refutation_criterion": "No group difference in coupling CV. CV does not predict frailty/allostatic load after adjusting for mean coupling level. CV of daily glucose mean is an equally good predictor (coupling-specific variability is not special).",
+    "sensitivity_checks": [
+      "Use MAD (median absolute deviation) instead of SD for robust variability estimation",
+      "Compute coupling CV for awake-only periods to avoid sleep artifact",
+      "Split first 5 days vs last 5 days to assess stability of the CV metric itself",
+      "Test rolling 3-day windows instead of calendar days",
+      "Bootstrap per-person CV estimates by resampling daily values"
+    ],
+    "secondary_methods": [
+      "Shannon entropy of daily coupling distribution (binned)",
+      "Autocorrelation of daily coupling sequence (memory in coupling dynamics)"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.65,
+    "biological_plausibility": 0.75,
+    "novelty": 0.7,
+    "importance": 0.75,
+    "reproducibility": 0.65,
+    "issues": [
+      "Computing a CV from ~8-10 daily values is statistically fragile. The sampling distribution of CV from N=10 is very wide; the estimated CV has a CV of its own that is ~30%. Group differences in coupling CV will be dominated by noise in the CV estimate, not genuine physiological differences.",
+      "The prediction that 'lower CV = higher mean coupling' creates a potential statistical artifact: if coupling has a ceiling effect (bounded above), high-mean coupling mechanically has lower variance. The correlation between mean and CV may be mathematical rather than biological.",
+      "Day-to-day variability in coupling could reflect measurement noise (CGM sensor drift, HR data gaps, varying data quality across days) rather than genuine physiological variability. Without a noise model, genuine and artifactual variability are inseparable.",
+      "The 'loss of complexity' framing is borrowed from Lipsitz & Goldberger, but their framework applies to within-signal complexity (MSE of HR, fractal dimension), not to the variability of inter-signal coupling across days. Extending the concept to day-to-day coupling variability is an extrapolation, not a direct application."
+    ],
+    "confounders_missed": [
+      "Data quality variability across days: days with more missing data have noisier coupling estimates, inflating apparent CV",
+      "Weekend/weekday cycling: behavioral differences between weekend and weekday create systematic (non-random) day-to-day coupling variability that is not 'resilience'",
+      "Weather and season: outdoor activity patterns change with weather, creating day-to-day behavioral variability that drives coupling variability"
+    ],
+    "suggestions": [
+      "Use 4h blocks within days (giving ~60 blocks per person) rather than daily estimates. This provides a more robust variability estimate with enough degrees of freedom.",
+      "Explicitly test and report the mean-CV correlation. If r(mean, CV) > 0.5, the CV is largely a mathematical consequence of the mean and not an independent metric.",
+      "Compute coupling variability from AWAKE-ONLY periods to reduce the confound of varying sleep quality across nights.",
+      "Report split-half reliability of the CV estimate (first 5 days vs last 5 days). If reliability < 0.5, the metric is too noisy to be useful."
+    ],
+    "overall_score": 0.7
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01",
+    "H-MIG04"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Conceptually elegant: not just 'is coupling altered' but 'is the variability of coupling altered.' Extends loss-of-complexity from single signals to inter-signal relationships. 10-day window is the main limitation."
+}

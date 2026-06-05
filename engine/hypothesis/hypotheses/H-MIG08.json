@@ -1,0 +1,160 @@
+{
+  "id": "H-MIG08",
+  "title": "Static per-organ aging clocks discriminate diabetes poorly",
+  "category": "structural_dynamic",
+  "statement": "Individual per-organ aging clocks (retinal, cardiac, metabolic, cardiovascular) and their unified combination poorly discriminate diabetes severity, whereas deficit accumulation indices (frailty index) discriminate well.",
+  "mechanism": "Per-organ aging clocks are trained to predict chronological age from single-modality data, capturing organ-specific structural deterioration. However, diabetes severity is a multi-system disease that may not be well captured by any single organ's age acceleration. A frailty index, which aggregates deficits across multiple systems, better captures the systemic nature of diabetes burden. The failure of aging clocks and success of frailty indices suggests that diabetes progression is better characterized by cumulative deficit accumulation than by organ-specific structural aging.",
+  "predictions": [
+    "Per-organ aging clocks (retinal, cardiac, metabolic, cardiovascular) individually show low R-squared for diabetes severity prediction",
+    "A unified multi-organ aging clock does not substantially improve discrimination",
+    "Frailty index achieves high AUROC for discriminating healthy from insulin-dependent diabetes"
+  ],
+  "literature": [
+    {
+      "title": "Biological age estimation and aging clocks",
+      "authors": "Various",
+      "journal": "Nature Reviews Genetics",
+      "year": 2022,
+      "key_finding": "Organ-specific aging clocks capture tissue-level deterioration but may not align with disease-specific trajectories.",
+      "relevance": "Provides context for why per-organ clocks may fail at diabetes discrimination.",
+      "doi": "",
+      "url": ""
+    },
+    {
+      "title": "Frailty index as a measure of deficit accumulation",
+      "authors": "Rockwood et al.",
+      "journal": "Journal of Gerontology",
+      "year": 2007,
+      "key_finding": "Frailty index based on deficit accumulation is a robust predictor of adverse health outcomes and mortality.",
+      "relevance": "Motivates frailty index as the strong comparator that outperforms aging clocks.",
+      "doi": "",
+      "url": ""
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "retinal_imaging",
+      "cardiac_imaging",
+      "clinical_labs",
+      "survey_data"
+    ],
+    "participant_coverage": 0.8,
+    "time_resolution_needed": "static (cross-sectional)",
+    "analysis_timescale": "static (cross-sectional)",
+    "computational_cost": "medium",
+    "statistical_power": "N~1939 provides excellent power for AUROC comparisons",
+    "key_challenges": [
+      "Aging clock model quality varies by organ",
+      "Age acceleration as a feature may not capture diabetes-relevant variation"
+    ],
+    "dataset_limitations": [
+      "Cross-sectional design limits aging rate estimation",
+      "Aging clocks are trained on chronological age, not disease-specific targets"
+    ]
+  },
+  "priority": 0.7,
+  "status": "supported",
+  "test_plan": {
+    "primary_method": "Train per-organ aging clocks, compute age acceleration, use as features for diabetes severity prediction via logistic regression and AUROC evaluation. Compare with frailty index.",
+    "implementation_steps": [
+      "Train retinal, cardiac, metabolic, and cardiovascular aging clocks using elastic net regression",
+      "Compute age acceleration (predicted age - chronological age) per organ",
+      "Use age acceleration features to predict diabetes severity (logistic regression)",
+      "Compute AUROC for each organ and unified model",
+      "Compare with frailty index AUROC"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "site",
+      "sex"
+    ],
+    "time_window": "Cross-sectional (enrollment data)",
+    "frequency_bands": [],
+    "expected_effect_size": "Per-organ R2 < 0.20; Frailty AUROC > 0.85",
+    "success_criterion": "Per-organ clocks show R2 < 0.20 and unified AUROC < 0.60, while frailty index AUROC > 0.80",
+    "refutation_criterion": "Unified aging clock AUROC > 0.75 for diabetes discrimination",
+    "sensitivity_checks": [
+      "Different aging clock training strategies",
+      "Feature importance in unified model"
+    ],
+    "secondary_methods": [
+      "Deficit accumulation analysis",
+      "Comparison of aging clocks vs raw clinical features"
+    ]
+  },
+  "results": {
+    "method_used": "Elastic net aging clocks per organ, logistic regression for diabetes severity prediction, AUROC evaluation",
+    "sample_size": 1939,
+    "primary_metric": "Unified aging clock AUROC (healthy vs insulin-dependent)",
+    "primary_value": 0.47,
+    "effect_size": 0.47,
+    "effect_size_type": "auroc",
+    "p_value": 1.0,
+    "fdr_p_value": 1.0,
+    "confidence_interval": null,
+    "confounders_adjusted": [
+      "age",
+      "site"
+    ],
+    "sensitivity_checks": [
+      {
+        "name": "Per-organ aging clock R-squared range",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "Per-organ R2 = 0.02-0.19 across retinal, cardiac, metabolic, cardiovascular clocks"
+      },
+      {
+        "name": "Unified aging clock AUROC",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "Unified AUROC = 0.47 (worse than random) for healthy vs insulin-dependent"
+      },
+      {
+        "name": "Frailty Index AUROC",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "Frailty Index AUROC = 0.90 for healthy vs insulin-dependent \u2014 far superior"
+      }
+    ],
+    "group_values": {},
+    "group_ns": {
+      "healthy": 668,
+      "pre_diabetes": 477,
+      "oral_medication": 576,
+      "insulin_dependent": 218
+    },
+    "interpretation": "Per-organ aging clocks are weak predictors of diabetes severity (R2=0.02-0.19) and the unified clock is worse than random (AUROC=0.47). In stark contrast, the frailty index achieves AUROC=0.90. This demonstrates that diabetes severity is better captured by systemic deficit accumulation than by organ-specific structural aging. This negative result motivated the pivot from aging clocks to network physiology (coupling analysis) as the core analytical framework.",
+    "surprises": "Unified aging clock was WORSE than random (AUROC=0.47), suggesting that combining weak organ-specific signals with noise actually degrades performance. Frailty index dramatically outperforms all aging clock approaches.",
+    "output_files": [],
+    "figure_paths": []
+  },
+  "critic_verdict": {
+    "verdict": "PASS",
+    "statistical_rigor": 0.8,
+    "biological_plausibility": 0.85,
+    "novelty": 0.65,
+    "importance": 0.75,
+    "reproducibility": 0.8,
+    "issues": [
+      "Aging clocks may simply be poorly trained rather than conceptually wrong",
+      "AUROC of 0.47 may reflect model miscalibration rather than fundamental limitation"
+    ],
+    "confounders_missed": [],
+    "suggestions": [
+      "Try disease-specific aging clocks (trained on diabetes outcomes, not chronological age)",
+      "Consider that aging clocks may be useful for other endpoints (mortality, complications) even if weak for severity classification",
+      "Use this negative result to motivate the coupling-based approach in publications"
+    ],
+    "overall_score": 0.75
+  },
+  "depends_on": [],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01",
+    "H-MIG04"
+  ],
+  "source": "migrated",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Important negative result that motivated the pivot to network physiology / coupling analysis. Aging clocks are weak for diabetes; deficit accumulation (frailty) is strong. This frames the coupling work as filling a gap that aging clocks cannot."
+}

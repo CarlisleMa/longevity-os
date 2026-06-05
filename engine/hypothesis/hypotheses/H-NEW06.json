@@ -1,0 +1,158 @@
+{
+  "id": "H-NEW06",
+  "title": "Nocturnal glucose-HR coupling predicts next-day glycemic control",
+  "category": "temporal_coupling",
+  "statement": "Within each participant, nights with stronger (more positive) glucose-HR coupling during the sleep period are followed by days with worse glycemic control (higher mean glucose, lower time in range, higher glycemic variability). This night-to-day predictive relationship is stronger in the diabetes groups than in healthy controls, because in diabetes the nocturnal autonomic-metabolic linkage reflects overnight hepatic glucose overproduction and impaired dawn phenomenon regulation that carry forward into daytime glycemia.",
+  "mechanism": "During sleep, glucose dynamics are primarily driven by endogenous processes: hepatic glucose output regulated by glucagon, growth hormone, and cortisol surges (dawn phenomenon), and residual insulin action. HR during sleep reflects basal autonomic tone. In healthy individuals, nocturnal glucose and HR are weakly coupled because hepatic glucose output and sleep-stage autonomic modulation operate independently. In diabetes, impaired suppression of hepatic glucose output (insulin resistance) creates overnight hyperglycemia that triggers persistent sympathetic activation, producing glucose-HR co-elevation. Nights where this coupling is strongest reflect the most active hepatic overproduction, which carries forward into the following daytime as elevated fasting glucose, reduced time in range, and greater excursion frequency.",
+  "predictions": [
+    "Night-level glucose-HR correlation (computed per sleep period) predicts next-day mean glucose (r > 0.15 within-person) in the diabetes groups",
+    "This within-person predictive relationship is weaker in healthy controls (r < 0.05)",
+    "The diabetes vs healthy difference in this predictive strength is significant (interaction p < 0.01)",
+    "The effect is mediated partly through morning fasting glucose (dawn phenomenon amplitude)",
+    "Negative control: daytime glucose-HR coupling does not predict next-day glycemia as strongly as nocturnal coupling"
+  ],
+  "literature": [
+    {
+      "title": "Slow-oscillation/spindle coupling predicts next-day fasting glucose in adults with type 2 diabetes",
+      "authors": "Vallat et al.",
+      "journal": "Cell Reports Medicine",
+      "year": 2023,
+      "key_finding": "Sleep microstructure coupling (SO-spindle) predicts next-morning fasting glucose, partly mediated by autonomic activity during sleep.",
+      "relevance": "Establishes the night-to-day predictive framework; we use macrostructural glucose-HR coupling instead of EEG microstructure (which AI-READI lacks).",
+      "doi": "10.1016/j.xcrm.2023.101121",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10394167/"
+    },
+    {
+      "title": "Effects of night-to-night variations in objectively measured sleep on blood glucose in healthy university students",
+      "authors": "Ng et al.",
+      "journal": "SLEEP",
+      "year": 2024,
+      "key_finding": "Longer sleep duration associated with lower same-night glucose variability, but no significant effect on next-day glucose in healthy young adults.",
+      "relevance": "Supports the prediction that the night-to-day effect is diabetes-specific, not present in healthy individuals.",
+      "doi": "10.1093/sleep/zsae224",
+      "url": "https://academic.oup.com/sleep/article/48/2/zsae224/7777178"
+    },
+    {
+      "title": "Dawn Phenomenon",
+      "authors": "Rybicka et al.",
+      "journal": "StatPearls",
+      "year": 2024,
+      "key_finding": "Dawn phenomenon affects >50% of people with diabetes, is driven by cortisol/GH surges and hepatic insulin resistance, and is detectable via CGM.",
+      "relevance": "Provides the mechanism linking nocturnal glucose dynamics to morning/daytime glycemic control.",
+      "doi": "",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK430893/"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_sleep"
+    ],
+    "participant_coverage": 0.8,
+    "time_resolution_needed": "5-min (aggregated to per-night and per-day summaries)",
+    "analysis_timescale": "night-to-day (12-36h prediction)",
+    "computational_cost": "low",
+    "statistical_power": "N~1500 participants with sleep data x ~8 night-day pairs each = ~12,000 night-day observations for mixed-effects models",
+    "key_challenges": [
+      "Garmin sleep staging quality limits precision of sleep period detection",
+      "Within-person night-to-night variability may be low over 10 days",
+      "Must use mixed-effects models to separate within-person from between-person effects"
+    ],
+    "dataset_limitations": [
+      "Consumer-grade sleep staging; sleep periods may be misclassified",
+      "10 days yields only ~8-9 night-day pairs per person; limited for individual-level models",
+      "No medication timing data to separate medication effects from endogenous dawn phenomenon"
+    ]
+  },
+  "priority": 0.76,
+  "status": "completed",
+  "test_plan": {
+    "primary_method": "Mixed-effects regression: next-day glycemic metric ~ nocturnal glucose-HR coupling + random intercept per participant, with group interaction term for diabetes severity",
+    "implementation_steps": [
+      "Step 1: Segment each participant's data into night periods (using sleep start/end from Garmin) and subsequent day periods",
+      "Step 2: For each night, compute glucose-HR Pearson correlation during sleep period",
+      "Step 3: For each subsequent day (sleep end to next sleep start), compute: mean glucose, TIR (70-180), glucose SD, glucose CV",
+      "Step 4: Fit mixed-effects model: next_day_mean_glucose ~ nocturnal_glucose_hr_r + (1|person_id)",
+      "Step 5: Add group interaction: ~ nocturnal_glucose_hr_r * study_group + covariates + (1|person_id)",
+      "Step 6: Test whether the interaction term (coupling x severity) is significant",
+      "Step 7: Negative control: same model with daytime glucose-HR coupling predicting next-day glycemia",
+      "Step 8: Mediation analysis: test whether morning fasting glucose (first 30-min post-waking) mediates the effect"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "sleep_duration",
+      "night_mean_glucose",
+      "previous_day_activity"
+    ],
+    "time_window": "Nocturnal sleep period -> next daytime waking period",
+    "frequency_bands": [],
+    "expected_effect_size": "Within-person r 0.15-0.25 in diabetes groups; r < 0.05 in healthy; interaction d 0.3-0.4",
+    "success_criterion": "Significant group x nocturnal coupling interaction in predicting next-day glycemia (p < 0.01), with diabetes groups showing positive association and healthy showing null",
+    "refutation_criterion": "No within-person association between nocturnal coupling and next-day glycemia in any group. Daytime coupling predicts equally well (nocturnal specificity fails). Effect disappears after adjusting for nocturnal mean glucose.",
+    "sensitivity_checks": [
+      "Compare Garmin sleep timing vs fixed 11pm-6am window",
+      "Exclude nights with <4 hours of sleep data",
+      "Stratify by weekday/weekend",
+      "Test lagged effects (night N coupling -> day N+1 glycemia)",
+      "Bootstrap within-person correlation estimates"
+    ],
+    "secondary_methods": [
+      "Multilevel structural equation modeling for mediation",
+      "Random forest for nonlinear night-to-day prediction"
+    ]
+  },
+  "results": {
+    "status": "not_supported",
+    "interpretation": "Nocturnal glucose-HR coupling does NOT predict next-day glycemic control. The within-person association is essentially zero (mean rho = -0.004). Furthermore, nocturnal coupling itself shows no severity gradient, unlike waking coupling. This is a clean null: the 8-night within-person analysis had adequate power (N=1825 x ~8 nights = ~14,000 night-day pairs) and the null is decisive.",
+    "primary_metric": "nocturnal_coupling_vs_nextday_glucose_rho",
+    "primary_value": -0.0036,
+    "effect_size": -0.0036,
+    "effect_size_type": "mean_within_person_rho",
+    "p_value": 0.674,
+    "fdr_p_value": 1.0,
+    "sample_size": 1825,
+    "proportion_positive_rho": 0.48,
+    "nocturnal_coupling_severity_fdr": 0.38,
+    "features_reaching_fdr_significance": "0/9",
+    "method_used": "Per-night Spearman coupling (11pm-6am) vs next-day (6am-10pm) mean glucose + one-sample t-test of within-person rho",
+    "output_files": ["results/h_new06_nocturnal_coupling.csv"]
+  },
+  "critic_verdict": {
+    "verdict": "PASS",
+    "statistical_rigor": 0.8,
+    "biological_plausibility": 0.75,
+    "novelty": 0.75,
+    "importance": 0.75,
+    "reproducibility": 0.75,
+    "issues": [
+      "Only ~8-9 night-day pairs per person severely limits within-person analysis. The within-person r=0.15 prediction requires about 30 paired observations for 80% power at alpha=0.05. With 8 pairs, individual-level significance is impossible; the analysis depends entirely on the mixed-effects model borrowing strength across participants.",
+      "The proposed mediation through 'morning fasting glucose (dawn phenomenon amplitude)' is sensible but creates a near-tautology: nocturnal glucose-HR coupling is partly driven by nocturnal glucose level, and nocturnal glucose level mechanically predicts morning glucose. The 'mediation' may be capturing glucose autocorrelation, not a genuine autonomic pathway.",
+      "Garmin sleep period detection may not accurately capture sleep onset/offset, introducing noise into the nocturnal vs daytime segmentation."
+    ],
+    "confounders_missed": [
+      "Insulin-on-board: insulin-dependent participants may inject long-acting insulin at bedtime, which mechanically lowers overnight glucose and thus reduces glucose-HR coupling -- confounding the disease-specific prediction",
+      "Sleep apnea: undiagnosed sleep apnea (common in T2D) causes repeated autonomic activations during sleep that strengthen glucose-HR coupling independent of the proposed dawn phenomenon mechanism",
+      "Evening meal timing/composition: a late heavy meal drives both overnight glucose and overnight HR independently of the hypothesized endogenous mechanism"
+    ],
+    "suggestions": [
+      "Adjust for nocturnal mean glucose as a covariate (not just as a mediator) to test whether coupling INDEPENDENT of glucose level predicts next-day glycemia.",
+      "Use fixed time windows (11pm-6am, 6am-11pm) as sensitivity check against Garmin sleep timing.",
+      "Frame the analysis as population-level (random slopes model) rather than individual-level prediction, given the 8-pair limitation."
+    ],
+    "overall_score": 0.76
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-28T00:00:00",
+  "notes": "Inspired by Vallat et al. sleep-glucose work. Key advantage of AI-READI: concurrent CGM + HR during sleep enables testing this without EEG. Limitation: only ~8 night-day pairs per person limits within-person power."
+}

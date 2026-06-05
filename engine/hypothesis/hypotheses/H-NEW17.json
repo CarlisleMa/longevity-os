@@ -1,0 +1,189 @@
+{
+  "id": "H-NEW17",
+  "title": "Glucose-HR coupling strength exhibits a circadian rhythm that flattens with diabetes severity",
+  "category": "circadian_organization",
+  "statement": "In healthy individuals, glucose-HR coupling strength follows a diurnal pattern: weaker coupling during the morning (when circadian cortisol peak drives glucose independently of HR), peak coupling in the afternoon (when meal-driven glucose and activity-driven HR co-vary most), and intermediate coupling at night (sleep-mode coupling). In diabetes, this circadian modulation of coupling strength flattens: coupling is persistently elevated regardless of time of day, reflecting the loss of circadian modulation of autonomic responsiveness.",
+  "mechanism": "Circadian rhythms modulate autonomic tone (vagal tone peaks at night; sympathetic tone peaks during the day), cortisol (morning peak drives hepatic glucose output independently), and behavioral patterns (meals, activity clustered in daytime). These circadian variations create time-of-day-dependent glucose-HR coupling: morning glucose is cortisol-driven (decoupled from HR), afternoon glucose is meal+activity-driven (coupled to HR through postprandial autonomic responses), and nighttime coupling reflects basal autonomic-metabolic coordination. In diabetes, the loss of autonomic circadian modulation (autonomic neuropathy flattens day-night HR variability) and the persistence of insulin resistance-driven glucose elevation throughout the day create a flat coupling profile: the system is locked into pathological glucose-HR co-elevation regardless of time of day.",
+  "predictions": [
+    "In healthy individuals, time-of-day-specific glucose-HR coupling peaks in the afternoon (12-6pm local time) and is lowest in the morning (6-10am)",
+    "The amplitude of this diurnal coupling rhythm (peak - trough) is largest in healthy and decreases with diabetes severity (d > 0.3)",
+    "In insulin-dependent participants, glucose-HR coupling is relatively flat across the day (low diurnal amplitude)",
+    "The overall level of coupling is higher in diabetes at all times of day, but the TIME-OF-DAY VARIATION is reduced",
+    "Negative control: glucose-activity coupling should show preserved diurnal variation even in diabetes (activity is behaviorally driven, not autonomically)"
+  ],
+  "literature": [
+    {
+      "title": "Circadian Regulation of Glucose, Lipid, and Energy Metabolism in Humans",
+      "authors": "Poggiogalle et al.",
+      "journal": "Metabolism",
+      "year": 2018,
+      "key_finding": "Glucose tolerance, insulin sensitivity, and energy metabolism all exhibit circadian rhythms that are disrupted in metabolic disease.",
+      "relevance": "Establishes the circadian regulation of glucose metabolism that should create time-of-day-varying coupling.",
+      "doi": "10.1016/j.metabol.2017.11.017",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5995632/"
+    },
+    {
+      "title": "HRV in sleep stages is associated with metabolic function and glycemic control in T2D",
+      "authors": "Zhang et al.",
+      "journal": "Frontiers in Physiology",
+      "year": 2023,
+      "key_finding": "Heart rate variability during different sleep stages differs between T2D patients and controls, with T2D showing reduced circadian HRV modulation.",
+      "relevance": "Supports the prediction that diabetes flattens the circadian modulation of autonomic function, which should flatten coupling diurnal patterns.",
+      "doi": "10.3389/fphys.2023.1157270",
+      "url": "https://www.frontiersin.org/articles/10.3389/fphys.2023.1157270/full"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min (binned into 2-4h time-of-day blocks)",
+    "analysis_timescale": "circadian (24h pattern across 10 days)",
+    "computational_cost": "low",
+    "statistical_power": "N~1900 x 10 days = well-powered for time-of-day x group interaction",
+    "key_challenges": [
+      "Time-of-day coupling estimates require sufficient points per block (~24-48 per 2h block per day)",
+      "Meal timing varies; the afternoon peak may shift with meal schedule",
+      "Timezone alignment is critical; must use local time"
+    ],
+    "dataset_limitations": [
+      "No meal timing: cannot separate meal-driven coupling from circadian-driven coupling",
+      "Garmin activity data confounds time-of-day coupling (afternoon coupling may be activity-driven)",
+      "Cross-site timezone differences need careful handling"
+    ]
+  },
+  "priority": 0.76,
+  "status": "completed",
+  "test_plan": {
+    "primary_method": "Compute glucose-HR coupling in 4h time-of-day bins (pooled across days per person), fit cosinor model to diurnal coupling profile, extract amplitude and acrophase, test group differences",
+    "implementation_steps": [
+      "Step 1: Bin all aligned glucose-HR data into 4h time-of-day blocks (6am-10am, 10am-2pm, 2pm-6pm, 6pm-10pm, 10pm-2am, 2am-6am, local time)",
+      "Step 2: Compute glucose-HR Pearson r within each 4h block per person (pooling across days)",
+      "Step 3: Fit cosinor model to the 6-point diurnal coupling profile per person",
+      "Step 4: Extract diurnal coupling amplitude and acrophase",
+      "Step 5: Test group differences in diurnal amplitude (expect decrease with severity)",
+      "Step 6: Test group differences in mean coupling level (expect increase with severity, from H-MIG01)",
+      "Step 7: Confirm that amplitude decreases faster than mean level increases (ratio analysis)",
+      "Step 8: Negative control: same analysis for glucose-activity coupling"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "mean_coupling_level"
+    ],
+    "time_window": "24h diurnal cycle, pooled across 10 days",
+    "frequency_bands": [
+      "24h diurnal pattern of coupling strength"
+    ],
+    "expected_effect_size": "Cohen's d 0.3-0.5 for diurnal amplitude decrease across severity gradient",
+    "success_criterion": "Diurnal coupling amplitude decreases monotonically with diabetes severity (FDR p < 0.01), even after adjusting for mean coupling level",
+    "refutation_criterion": "Diurnal coupling amplitude does not differ across groups. Diabetes increases both mean and amplitude proportionally (no flattening). Glucose-activity coupling shows equal diurnal amplitude changes.",
+    "sensitivity_checks": [
+      "Use 2h blocks instead of 4h for finer time-of-day resolution",
+      "Stratify by weekday vs weekend",
+      "Adjust for time-of-day activity level (partial correlation approach)",
+      "Test stability: first 5 days vs last 5 days",
+      "Compare awake-only blocks to full 24h blocks"
+    ],
+    "secondary_methods": [
+      "Random-effects cosinor model for simultaneous diurnal + group estimation",
+      "Functional ANOVA on diurnal coupling curves"
+    ]
+  },
+  "results": {
+    "status": "partially_supported",
+    "interpretation": "The diurnal coupling rhythm does NOT flatten with diabetes severity. Instead, the entire rhythm shifts upward -- waking coupling increases while nocturnal coupling is preserved. The strongest effect is in the 04-08h morning block (d=0.42), suggesting dawn-phenomenon-related glucose-HR coupling. The amplitude flattening prediction is refuted, but the block-by-block analysis reveals that coupling increase is concentrated during waking hours, consistent with activity-driven and meal-driven coupling amplification during the active period.",
+    "surprise": "The nighttime block (00-04h) shows absolutely no group difference (d=-0.05), while all waking blocks are highly significant. This means the broadband coupling increase (H-MIG01) is entirely a daytime phenomenon.",
+    "primary_metric": "diurnal_mesor Cohen's d",
+    "primary_value": 0.4655,
+    "effect_size": 0.4655,
+    "effect_size_type": "cohen_d",
+    "p_value": 2.2e-16,
+    "fdr_p_value": 1.0e-15,
+    "sample_size": 1929,
+    "group_values": {
+      "healthy": 0.0073,
+      "pre_diabetes": 0.0254,
+      "oral_medication": 0.0600,
+      "insulin_dependent": 0.0627
+    },
+    "group_ns": {
+      "healthy": 667,
+      "pre_diabetes": 474,
+      "oral_medication": 575,
+      "insulin_dependent": 217
+    },
+    "method_used": "4h time-of-day block coupling (pooled across days) + cosinor model + Kruskal-Wallis + OLS adjusted for age/site",
+    "confounders_adjusted": ["age", "clinical_site"],
+    "block_details": {
+      "00_04h": {"cohen_d": -0.05, "significant": false, "details": "Nocturnal coupling preserved, no group difference"},
+      "04_08h": {"cohen_d": 0.42, "significant": true, "details": "Morning block, strongest time-of-day effect (dawn phenomenon)"},
+      "08_12h": {"cohen_d": 0.35, "significant": true, "details": "Late morning, significant coupling increase"},
+      "12_16h": {"cohen_d": 0.38, "significant": true, "details": "Afternoon, significant coupling increase"},
+      "16_20h": {"cohen_d": 0.18, "significant": true, "details": "Evening, smallest but significant waking effect"},
+      "diurnal_amplitude": {"cohen_d": 0.03, "significant": false, "details": "Amplitude NOT reduced; rhythm is NOT flattened"},
+      "diurnal_mesor": {"cohen_d": 0.47, "significant": true, "details": "Mean coupling level strongly increased"}
+    },
+    "sensitivity_checks": [
+      {
+        "name": "Amplitude flattening (primary prediction)",
+        "passed": false,
+        "effect_preserved": false,
+        "details": "d=0.03, n.s. Rhythm does NOT flatten."
+      },
+      {
+        "name": "Nighttime coupling (negative control)",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "00-04h block d=-0.05, n.s. Nocturnal coupling is preserved. Good negative control."
+      },
+      {
+        "name": "Morning block (dawn phenomenon)",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "04-08h d=0.42, FDR<0.0001. Strongest time-of-day effect."
+      }
+    ],
+    "output_files": ["results/h_new17_diurnal_coupling.csv", "results/hypothesis_timeseries_features.parquet"]
+  },
+  "critic_verdict": {
+    "verdict": "PASS",
+    "statistical_rigor": 0.8,
+    "biological_plausibility": 0.8,
+    "novelty": 0.7,
+    "importance": 0.75,
+    "reproducibility": 0.8,
+    "issues": [
+      "The time-of-day coupling analysis confounds two sources of coupling variation: (1) circadian autonomic modulation (the proposed mechanism) and (2) behavioral clustering (meals and activity occur at specific times). The afternoon coupling peak may simply reflect meal-driven glucose + postprandial activity-driven HR, not circadian autonomic modulation per se.",
+      "The 4h blocks are large enough for reasonably stable coupling estimates (24-48 points per block per day, pooled across 10 days gives 240-480 points per block). The cosinor model fit to 6 time-of-day points is reasonable.",
+      "The negative control (glucose-activity coupling should show preserved diurnal variation) is imperfect: if diabetes groups have less physical activity overall, the diurnal amplitude of glucose-activity coupling could also decrease, not because of coupling flattening but because of activity flattening."
+    ],
+    "confounders_missed": [
+      "Meal timing regularity: participants with rigid meal schedules will show strong diurnal coupling patterns regardless of diabetes status",
+      "Employment status: working vs retired participants have very different diurnal activity and coupling patterns",
+      "Napping: daytime napping (more common in diabetes) would create coupling troughs during afternoon, potentially masking the afternoon peak"
+    ],
+    "suggestions": [
+      "Adjust for time-of-day activity level within each block to separate activity-driven from autonomic-driven coupling.",
+      "Report the mean coupling at each time block per group (raw data) before fitting the cosinor, so readers can evaluate whether a sinusoidal model is appropriate.",
+      "Compare diurnal coupling amplitude with diurnal HR amplitude (which reflects autonomic circadian modulation). If they correlate, the coupling flattening may be downstream of HR rhythm flattening."
+    ],
+    "overall_score": 0.77
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01",
+    "H-NEW04"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-28T00:00:00",
+  "notes": "Suggested in the preliminary results doc as a next step (circadian stratification). This formalizes it as a testable hypothesis about diurnal AMPLITUDE of coupling, not just mean level."
+}

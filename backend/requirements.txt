@@ -1,0 +1,17 @@
+# LongevityOS backend — FastAPI app layer.
+# Pinned loosely for a class-project prototype; tighten before any real deployment.
+
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+python-multipart>=0.0.9      # file uploads
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4            # frozen aging-clock scoring (Ridge/ElasticNet)
+pyarrow>=15.0               # parquet feature tables
+python-dateutil>=2.9
+
+# Optional — only needed when wiring the live agentic layer.
+# The app runs in mock/representative mode without these.
+# anthropic>=0.39
+# claude-agent-sdk            # used by engine/agentic/agentic_discovery

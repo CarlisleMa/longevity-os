@@ -1,0 +1,146 @@
+{
+  "id": "H-NEW14",
+  "title": "Cross-recurrence of glucose-HR trajectories reveals attractor convergence in diabetes",
+  "category": "complexity_loss",
+  "statement": "Joint glucose-HR dynamics in healthy individuals explore a high-dimensional state space (low determinism in cross-recurrence plots). In diabetes, the joint dynamics collapse onto a low-dimensional attractor (high determinism, high laminarity in cross-recurrence quantification analysis). This reflects the loss of degrees of freedom in the coupled metabolic-autonomic system as regulatory feedback loops fail.",
+  "mechanism": "In healthy physiology, glucose and HR are influenced by numerous semi-independent controllers: baroreflexes, insulin/glucagon balance, incretin hormones, cortisol, growth hormone, behavioral choices, autonomic tone, and circadian timing. These controllers create a high-dimensional joint dynamics where the glucose-HR trajectory visits many regions of state space non-repetitively. As diabetes damages these controllers (beta-cell failure, autonomic neuropathy, loss of incretin amplification, impaired baroreflexes), the system loses degrees of freedom and the glucose-HR trajectory becomes trapped near a low-dimensional attractor dominated by the surviving glucose->sympathetic->HR pathway. Cross-recurrence quantification analysis (CRQA) directly measures this dimensionality collapse through determinism (DET), laminarity (LAM), and trapping time (TT).",
+  "predictions": [
+    "CRQA determinism (DET) of glucose-HR cross-recurrence increases with diabetes severity (d > 0.3)",
+    "CRQA laminarity (LAM) of glucose-HR cross-recurrence increases with diabetes severity (d > 0.25)",
+    "CRQA trapping time (TT) increases with diabetes severity (longer sojourns in recurrent states)",
+    "CRQA entropy (ENTR, diagonal line length distribution entropy) decreases with severity (fewer distinct recurrence patterns)",
+    "Negative control: CRQA metrics from randomly paired glucose-HR (different participants, same site) show no group differences",
+    "CRQA DET independently predicts frailty index beyond the broadband glucose-HR correlation"
+  ],
+  "literature": [
+    {
+      "title": "Diabetes alters cardiorespiratory dynamics: insights from short-term recurrence quantification analysis of pulse-respiration quotient",
+      "authors": "Liu et al.",
+      "journal": "Frontiers in Physiology",
+      "year": 2025,
+      "key_finding": "RQA of cardiorespiratory dynamics shows increased determinism and reduced complexity in diabetic patients.",
+      "relevance": "Directly demonstrates that RQA detects diabetes-related dynamical changes in physiological coupling.",
+      "doi": "10.3389/fphys.2025.1584922",
+      "url": "https://www.frontiersin.org/journals/physiology/articles/10.3389/fphys.2025.1584922/full"
+    },
+    {
+      "title": "Recurrence Quantification Analysis of Heart Rate Dynamics in Young Patients with Diabetes Mellitus",
+      "authors": "Javorka et al.",
+      "journal": "World Congress on Medical Physics and Biomedical Engineering",
+      "year": 2007,
+      "key_finding": "RQA of heart rate in diabetic youth shows higher recurrence rate, determinism, and trapping time, indicating reduced complexity.",
+      "relevance": "Establishes that RQA metrics capture diabetes-related HR dynamics changes; we extend to cross-recurrence (glucose x HR).",
+      "doi": "",
+      "url": "https://link.springer.com/content/pdf/10.1007/978-3-540-73044-6_200.pdf"
+    },
+    {
+      "title": "The geometry of synchronization: quantifying the coupling direction of physiological signals of stress",
+      "authors": "Wallot et al.",
+      "journal": "Frontiers in Network Physiology",
+      "year": 2023,
+      "key_finding": "Inter-system recurrence networks can detect coupling direction and synchronization patterns in physiological signal pairs.",
+      "relevance": "Provides the methodological framework for applying cross-recurrence to physiological coupling analysis.",
+      "doi": "10.3389/fnetp.2023.1289983",
+      "url": "https://www.frontiersin.org/journals/network-physiology/articles/10.3389/fnetp.2023.1289983/full"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "full 10-day window (CRQA on long time series)",
+    "computational_cost": "high",
+    "statistical_power": "N~1900 with ~2880 timepoints each; sufficient for CRQA with embedding dimension 3-5",
+    "key_challenges": [
+      "CRQA parameter selection: embedding dimension, delay, threshold (recurrence rate)",
+      "Computational cost: cross-recurrence matrix is N x N where N~2880",
+      "Sensitivity to data gaps and non-stationarity",
+      "Need to standardize signals before computing recurrence (z-score both glucose and HR)"
+    ],
+    "dataset_limitations": [
+      "5-min resolution may not capture fast dynamical transitions",
+      "Data gaps require segmentation or interpolation",
+      "CRQA is less well-known than correlation/TE methods; reviewers may need education"
+    ]
+  },
+  "priority": 0.58,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Cross-recurrence quantification analysis (CRQA) of glucose-HR time series per participant, with standardized parameter selection protocol",
+    "implementation_steps": [
+      "Step 1: Load aligned 5-min glucose and HR; z-score each signal",
+      "Step 2: Determine embedding parameters: E via false nearest neighbors, tau via first minimum of mutual information",
+      "Step 3: Compute cross-recurrence matrix with threshold set to achieve 5% recurrence rate",
+      "Step 4: Extract CRQA metrics: recurrence rate (RR), determinism (DET), laminarity (LAM), trapping time (TT), entropy (ENTR), longest diagonal line (Lmax)",
+      "Step 5: Test group differences in each CRQA metric across severity groups",
+      "Step 6: Fit partial correlation models: CRQA_DET ~ frailty_index, adjusting for age/site/HbA1c/BMI/broadband_coupling",
+      "Step 7: Negative control: compute CRQA on randomly paired participants (same site) and verify no group signal",
+      "Step 8: Test incremental predictive value of CRQA metrics beyond broadband coupling features"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "glucose_hr_awake_r"
+    ],
+    "time_window": "Full 10-day aligned time series",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d 0.3-0.5 for DET and LAM across severity gradient",
+    "success_criterion": "CRQA DET and LAM increase with diabetes severity (FDR p < 0.01) and predict frailty beyond broadband coupling",
+    "refutation_criterion": "No group differences in any CRQA metric. CRQA metrics are fully redundant with broadband Pearson r (no incremental value). Negative control (random pairing) shows similar group differences.",
+    "sensitivity_checks": [
+      "Vary recurrence threshold to achieve 2%, 5%, 10% recurrence rate",
+      "Compare fixed E=3 vs data-driven E selection",
+      "Segment into 24h blocks and average CRQA metrics to assess stationarity",
+      "Test windowed CRQA (12h windows) for temporal variation of CRQA metrics",
+      "Compare with MdCRQA (multidimensional CRQA including activity as third variable)"
+    ],
+    "secondary_methods": [
+      "Joint recurrence plots (including activity as third dimension)",
+      "Symbolic dynamics / permutation-based cross-recurrence"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.7,
+    "biological_plausibility": 0.75,
+    "novelty": 0.65,
+    "importance": 0.65,
+    "reproducibility": 0.6,
+    "issues": [
+      "CRQA has a large number of free parameters (embedding dimension E, time delay tau, recurrence threshold epsilon, minimum line length l_min) that substantially affect the output metrics. Different reasonable parameter choices can give qualitatively different results. The plan acknowledges this but underestimates the problem -- CRQA parameter sensitivity is a major reproducibility concern.",
+      "The interpretation of CRQA metrics (DET, LAM, TT) in terms of 'attractor convergence' and 'loss of degrees of freedom' sounds compelling but is not unique. Higher DET and LAM can also result from: (1) both signals becoming smoother (Garmin HR smoothing!), (2) both signals having stronger trends, (3) both signals having lower noise. The 'attractor collapse' interpretation requires ruling out these simpler explanations.",
+      "The random-pairing negative control is necessary but may be too easy to pass. Randomly paired participants from different sites or groups will have systematically different glucose levels and HR means, which can create spurious structure in the cross-recurrence plot. The control should pair participants within the same group.",
+      "Computational cost is a practical concern: the cross-recurrence matrix for N=2880 is ~8 million elements per participant. For 1900 participants, this is substantial."
+    ],
+    "confounders_missed": [
+      "Signal smoothness: Garmin HR smoothing mechanically increases determinism and laminarity by removing high-frequency variability, independent of autonomic physiology",
+      "Non-stationarity: 10-day time series are non-stationary (circadian rhythms, weekday/weekend cycles), which inflates DET because recurrence from circadian patterns is 'deterministic' but not pathological",
+      "Data gaps: interpolated gaps create artificially smooth segments that inflate DET/LAM"
+    ],
+    "suggestions": [
+      "Compare CRQA metrics with the simpler cross-correlation or Pearson r. If CRQA DET correlates r > 0.8 with Pearson coupling r, the 'nonlinear' method adds nothing beyond the linear metric.",
+      "Compute CRQA on surrogate data (phase-randomized, preserving power spectrum) to establish a null for DET/LAM. Only the excess over surrogate-expected values is interpretable as nonlinear dynamics.",
+      "Segment the 10-day series into 24h blocks and compute CRQA per block, then average. This reduces non-stationarity artifacts.",
+      "Report CRQA metrics sensitivity to epsilon (recurrence threshold) over a range, not just the single value that gives 5% recurrence rate."
+    ],
+    "overall_score": 0.67
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01",
+    "H-NEW05"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Novel analytical angle on the coupling data. CRQA captures nonlinear dynamical properties (determinism, trapping) that correlation and entropy miss. High computational cost and less familiar to clinical audiences."
+}

@@ -1,0 +1,146 @@
+{
+  "id": "H-NEW08",
+  "title": "Coupling-defined physiotypes capture distinct metabolic phenotypes missed by HbA1c stratification",
+  "category": "physiotype_discovery",
+  "statement": "Unsupervised clustering on dynamic coupling features (glucose-HR, glucose-activity, sleep-glucose, complexity metrics) reveals 3-5 distinct physiotypes that cross-cut HbA1c-based diabetes severity categories. Specifically, there exist individuals with high HbA1c but normal coupling patterns (preserved regulatory physiology despite hyperglycemia, possibly medication-controlled) and individuals with normal HbA1c but abnormal coupling (early dysregulation not yet reflected in mean glycemia). These coupling-defined physiotypes predict frailty index and allostatic load better than HbA1c quartiles alone.",
+  "mechanism": "HbA1c reflects the average glycemic level over 2-3 months but does not capture the dynamic organization of physiological regulation. Two individuals with identical HbA1c may differ in: (1) the complexity of their glucose dynamics, (2) the autonomic responsiveness of their HR to glucose excursions, (3) the circadian coordination of their metabolic rhythms, and (4) the coupling of activity to glucose regulation. These dynamic properties reflect the state of multiple regulatory systems (pancreatic, hepatic, autonomic, circadian, behavioral) that collectively determine health trajectory. Clustering on coupling features should capture this regulatory phenotype space, identifying groups defined by physiological organization rather than average glycemic level.",
+  "predictions": [
+    "K-means or spectral clustering on coupling features yields 3-5 stable clusters with silhouette score > 0.15",
+    "Clusters are NOT aligned with HbA1c quartiles: Adjusted Rand Index between cluster labels and HbA1c quartiles < 0.15",
+    "At least one cluster contains participants from both healthy and diabetes groups (HbA1c-discordant physiotype)",
+    "Coupling-based clusters predict frailty index variance better than HbA1c quartiles (incremental R2 > 0.03)",
+    "Clusters have distinct clinical profiles (e.g., one cluster may have high glucose complexity + high coupling = pre-clinical dysregulation; another may have low complexity + normal coupling = stable but rigid)"
+  ],
+  "literature": [
+    {
+      "title": "Prediction of metabolic subphenotypes of type 2 diabetes via continuous glucose monitoring and machine learning",
+      "authors": "Li et al.",
+      "journal": "Nature Biomedical Engineering",
+      "year": 2024,
+      "key_finding": "CGM-derived features define metabolic subphenotypes that differ in clinical outcomes, demonstrating that dynamic glucose metrics capture meaningful heterogeneity beyond HbA1c.",
+      "relevance": "Establishes the precedent for CGM-based phenotyping; we extend this to cross-modal coupling features, not just single-signal CGM metrics.",
+      "doi": "10.1038/s41551-024-01311-6",
+      "url": "https://www.nature.com/articles/s41551-024-01311-6"
+    },
+    {
+      "title": "Multimodal AI correlates of glucose spikes in people with normal glucose regulation, pre-diabetes and type 2 diabetes",
+      "authors": "Carletti et al.",
+      "journal": "Nature Medicine",
+      "year": 2025,
+      "key_finding": "Multimodal phenotyping (CGM + microbiome + diet + activity) reveals glucose spike dynamics that vary substantially within diabetes categories.",
+      "relevance": "Shows that within-category heterogeneity in glucose dynamics is real and clinically meaningful.",
+      "doi": "10.1038/s41591-025-03849-7",
+      "url": "https://www.nature.com/articles/s41591-025-03849-7"
+    },
+    {
+      "title": "Network physiology reveals relations between network topology and physiological function",
+      "authors": "Bashan et al.",
+      "journal": "Nature Communications",
+      "year": 2012,
+      "key_finding": "Different physiological states have distinct network coupling topologies, suggesting that coupling-based phenotyping is biologically meaningful.",
+      "relevance": "Theoretical basis for defining health states by coupling topology rather than single-organ metrics.",
+      "doi": "10.1038/ncomms1705",
+      "url": "https://www.nature.com/articles/ncomms1705"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_activity",
+      "wearable_sleep"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min (features already pre-computed)",
+    "analysis_timescale": "per-person summary features over 10 days",
+    "computational_cost": "low",
+    "statistical_power": "N~1900 for clustering; well-powered for k=3-5 clusters",
+    "key_challenges": [
+      "Cluster stability across different algorithms and initializations",
+      "Feature selection matters: must exclude raw level features to ensure clusters reflect coupling, not glycemia",
+      "Interpretation requires external validation with clinical outcomes"
+    ],
+    "dataset_limitations": [
+      "Cross-sectional: cannot validate clusters against longitudinal outcomes",
+      "No medication data: clusters may partly reflect medication regimens rather than biology",
+      "10-day window may not capture full physiotype stability"
+    ]
+  },
+  "priority": 0.68,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Consensus clustering (K-means and spectral clustering with gap statistic for K selection) on standardized coupling-only features (no raw means/SDs)",
+    "implementation_steps": [
+      "Step 1: Select coupling features only (correlations, xcorr, lags, entropy, partial correlations) from coupling_features.parquet, excluding raw means and SDs",
+      "Step 2: Standardize features to zero mean, unit variance; impute missing with median",
+      "Step 3: Run K-means for K=2..8, compute silhouette scores and gap statistic for optimal K",
+      "Step 4: Run spectral clustering with same K range; compute consensus between methods",
+      "Step 5: For optimal K, characterize each cluster by: mean coupling profile, demographic composition, study group distribution, clinical profile",
+      "Step 6: Compute Adjusted Rand Index between cluster labels and HbA1c quartiles",
+      "Step 7: Test cluster-based prediction of frailty index vs HbA1c-quartile-based prediction (compare R2)",
+      "Step 8: Identify HbA1c-discordant physiotypes: participants in 'dysregulated coupling' cluster but normal HbA1c, and vice versa"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site"
+    ],
+    "time_window": "Per-person 10-day summary features",
+    "frequency_bands": [],
+    "expected_effect_size": "Incremental R2 > 0.03 for frailty prediction; ARI < 0.15 between clusters and HbA1c quartiles",
+    "success_criterion": "Stable clusters (silhouette > 0.15) that cross-cut HbA1c categories and predict clinical burden beyond HbA1c alone",
+    "refutation_criterion": "Clusters align perfectly with HbA1c categories (ARI > 0.5). Clusters do not predict frailty/allostatic load better than HbA1c quartiles. Cluster assignments are unstable across random initializations.",
+    "sensitivity_checks": [
+      "Bootstrap cluster stability (1000 resamples, compute Jaccard index)",
+      "Compare K-means vs spectral vs hierarchical clustering",
+      "Leave-one-site-out cross-validation for cluster generalizability",
+      "Test with and without entropy features to assess their contribution",
+      "UMAP visualization of coupling feature space colored by cluster and by study group"
+    ],
+    "secondary_methods": [
+      "Gaussian mixture models for soft clustering",
+      "SHAP values for cluster-defining features"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.7,
+    "biological_plausibility": 0.7,
+    "novelty": 0.75,
+    "importance": 0.8,
+    "reproducibility": 0.65,
+    "issues": [
+      "Unsupervised clustering is fundamentally exploratory and prone to finding structure in noise. The silhouette score threshold of 0.15 is very low -- this means substantial cluster overlap, which questions whether the 'physiotypes' are genuinely discrete or just continuous variation being arbitrarily discretized.",
+      "The claim that clusters 'cross-cut HbA1c categories' is almost guaranteed by design: if you cluster on features other than HbA1c, of course the clusters will not align perfectly with HbA1c. The ARI < 0.15 criterion is too easy to satisfy. A more meaningful test is whether the coupling-based clusters have distinct CLINICAL profiles beyond what HbA1c grouping achieves.",
+      "Medications are redacted. In diabetes care, medication regimens create systematic patterns in glucose dynamics (metformin smooths glucose, insulin creates specific oscillation patterns, SGLT2i cause nocturnal hypoglycemia). Coupling-based clusters may simply be recovering medication regimen subgroups, not fundamental physiological phenotypes.",
+      "Cross-sectional clustering cannot validate that physiotypes are stable over time. The same person might cluster differently in another 10-day window."
+    ],
+    "confounders_missed": [
+      "Medication regimen (redacted): the strongest determinant of glucose dynamics pattern within each severity group",
+      "Dietary patterns: vegan vs omnivore, regular meals vs erratic eating -- create distinct coupling patterns",
+      "Physical activity patterns: athletes vs sedentary -- create distinct glucose-activity and glucose-HR coupling profiles",
+      "CGM sensor type and placement: different devices produce systematically different signal characteristics"
+    ],
+    "suggestions": [
+      "Replace the arbitrary ARI < 0.15 threshold with a more demanding test: do coupling clusters predict frailty/allostatic load in a cross-validated model BETTER than the best single coupling feature? If not, the cluster structure adds noise, not information.",
+      "Use consensus clustering (perturbation-based stability) and report the fraction of participants with stable cluster assignment across 1000 resamples. Reject if <70% are stable.",
+      "Name the hypothesis more honestly: this is 'exploratory subtype discovery' not 'coupling-defined physiotypes capture distinct metabolic phenotypes.' The latter implies validation that cross-sectional clustering cannot provide.",
+      "Include a split-half validation: cluster on one half of participants, project the other half into cluster space, test whether the cluster profiles replicate."
+    ],
+    "overall_score": 0.72
+  },
+  "depends_on": [
+    "H-MIG01",
+    "H-MIG03",
+    "H-MIG04"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG03",
+    "H-MIG04"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "High translational potential: if coupling-defined physiotypes predict outcomes beyond HbA1c, this supports personalized monitoring. Must be careful not to over-interpret clusters from cross-sectional data."
+}

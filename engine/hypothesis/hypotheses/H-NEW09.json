@@ -1,0 +1,142 @@
+{
+  "id": "H-NEW09",
+  "title": "Glucose-HR coupling links to retinal OCTA vessel density through shared autonomic damage",
+  "category": "structural_dynamic",
+  "statement": "While broadband glucose-HR coupling does not predict retinal age acceleration (H-MIG05, refuted), a more specific test should reveal a link: coupling features that specifically index autonomic neuropathy (glucose->HR transfer entropy asymmetry, post-excursion HR recovery time) predict retinal superficial vessel density (SVD) loss measured by OCTA, after adjusting for age, HbA1c, and BMI. This is because both autonomic HR dysfunction and retinal microvascular rarefaction share a common upstream cause: small-vessel and nerve damage from chronic hyperglycemia and oxidative stress.",
+  "mechanism": "Diabetic autonomic neuropathy and diabetic retinal microvasculopathy share common pathogenic mechanisms: hyperglycemia-driven advanced glycation end-products (AGEs), polyol pathway activation, oxidative stress, and pericyte loss. The autonomic nerve fibers that regulate HR are small unmyelinated (vagal) and small myelinated (sympathetic) fibers vulnerable to the same microvascular ischemia that damages retinal capillaries. OCTA-measured superficial vessel density directly reflects capillary dropout in the retinal ganglion cell layer, which is one of the earliest structural changes in diabetic retinopathy. If glucose-HR coupling features reflect autonomic damage, and retinal vessel density reflects microvascular damage, and both share the same upstream cause, then there should be a detectable partial correlation between autonomic-specific coupling features and retinal vessel density after adjusting for glycemic level.",
+  "predictions": [
+    "Post-excursion HR recovery time (from H-NEW03) correlates negatively with OCTA superficial vessel density (partial r -0.08 to -0.15 after age/HbA1c/BMI/site adjustment)",
+    "Glucose->HR transfer entropy asymmetry (from H-NEW02) correlates negatively with SVD (shared autonomic-microvascular damage)",
+    "Broadband glucose-HR coupling (awake_r) does NOT correlate with SVD after adjustment (confirming H-MIG05 and showing that autonomic-specific features are needed)",
+    "The coupling-SVD link is present in the diabetes groups but absent in healthy (interaction effect)",
+    "Negative control: glucose-activity coupling does NOT predict SVD (activity coupling is behavioral, not autonomic)"
+  ],
+  "literature": [
+    {
+      "title": "Neuro-vascular coupling and heart rate variability in patients with type II diabetes at different stages of diabetic retinopathy",
+      "authors": "Li et al.",
+      "journal": "Frontiers in Medicine",
+      "year": 2022,
+      "key_finding": "HRV parameters correlate with retinal neurovascular coupling changes across diabetic retinopathy stages, suggesting shared autonomic-microvascular pathology.",
+      "relevance": "Directly supports the hypothesis that cardiac autonomic markers and retinal vascular measures share variance through common pathology.",
+      "doi": "10.3389/fmed.2022.1025853",
+      "url": "https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2022.1025853/full"
+    },
+    {
+      "title": "Heart rate variability, the dynamic nature of the retinal microvasculature and cardiac stress: the SABPA study",
+      "authors": "Kotliar et al.",
+      "journal": "Microvascular Research",
+      "year": 2020,
+      "key_finding": "Low HRV is associated with reduced retinal vessel dynamic range, linking cardiac autonomic dysfunction to retinal microvascular impairment.",
+      "relevance": "Establishes the HRV-retinal microvasculature connection that we extend using continuous coupling features.",
+      "doi": "",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7182573/"
+    },
+    {
+      "title": "Associations of retinal microvascular alterations with diabetes mellitus: an OCTA-based cross-sectional study",
+      "authors": "Wang et al.",
+      "journal": "BMC Ophthalmology",
+      "year": 2024,
+      "key_finding": "OCTA vessel density is significantly reduced in diabetes, even in eyes without clinical diabetic retinopathy, reflecting early subclinical microvascular damage.",
+      "relevance": "Validates OCTA SVD as a measurable structural endpoint for subclinical diabetic microvasculopathy.",
+      "doi": "10.1186/s12886-024-03492-9",
+      "url": "https://bmcophthalmol.biomedcentral.com/articles/10.1186/s12886-024-03492-9"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "retinal_octa"
+    ],
+    "participant_coverage": 0.8,
+    "time_resolution_needed": "5-min for coupling; single-timepoint for OCTA",
+    "analysis_timescale": "cross-sectional (coupling features vs OCTA metrics)",
+    "computational_cost": "medium (depends on TE computation from H-NEW02)",
+    "statistical_power": "N~1800 with both coupling and OCTA data; powered for partial r > 0.07",
+    "key_challenges": [
+      "Extracting quantitative SVD from OCTA data requires image processing pipeline",
+      "OCTA quality varies; need QC filtering",
+      "Effect is expected to be small (partial r 0.08-0.15); needs strict multiple comparison correction"
+    ],
+    "dataset_limitations": [
+      "OCTA SVD may not be directly available as a scalar; may need extraction from images",
+      "RETFound embeddings capture retinal structure but may not directly index SVD",
+      "Cross-sectional: cannot determine temporal ordering (coupling changes first vs SVD loss first)"
+    ]
+  },
+  "priority": 0.55,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Partial correlation between autonomic-specific coupling features and OCTA SVD, adjusting for age, HbA1c, BMI, clinical site",
+    "implementation_steps": [
+      "Step 1: Extract OCTA superficial vessel density (SVD) per participant from OCTA manifest/images, averaging across both eyes if available",
+      "Step 2: Alternatively, use RETFound embedding principal components as retinal structure proxies if direct SVD extraction is not available",
+      "Step 3: Compute autonomic-specific coupling features: post-excursion HR recovery time (H-NEW03), TE asymmetry (H-NEW02), and broadband awake_r (as negative comparator)",
+      "Step 4: Fit partial correlation models: SVD ~ feature + age + HbA1c + BMI + site",
+      "Step 5: Test whether autonomic-specific features predict SVD while broadband coupling does not",
+      "Step 6: Test group interaction: does the coupling-SVD link strengthen with diabetes severity?",
+      "Step 7: Negative control: glucose-activity coupling should not predict SVD"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "IOP_if_available"
+    ],
+    "time_window": "Cross-sectional: 10-day coupling features vs single-timepoint OCTA",
+    "frequency_bands": [],
+    "expected_effect_size": "Partial r 0.08-0.15 for autonomic coupling features vs SVD",
+    "success_criterion": "Autonomic-specific coupling features predict SVD after adjustment (FDR p < 0.05), while broadband coupling does not",
+    "refutation_criterion": "No coupling feature predicts SVD after adjustment. Broadband coupling predicts SVD equally well as autonomic-specific features. Effect is fully mediated by HbA1c.",
+    "sensitivity_checks": [
+      "Left vs right eye SVD separately",
+      "Stratify by presence vs absence of clinical diabetic retinopathy",
+      "Adjust for additional OCTA quality metrics (signal strength)",
+      "Test with RETFound embedding PCs instead of direct SVD"
+    ],
+    "secondary_methods": [
+      "Mediation analysis: coupling -> OCTA SVD -> visual acuity",
+      "Partial least squares for multivariate coupling-retinal structure association"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.65,
+    "biological_plausibility": 0.7,
+    "novelty": 0.65,
+    "importance": 0.7,
+    "reproducibility": 0.55,
+    "issues": [
+      "This hypothesis depends on results from H-NEW02 (TE asymmetry) and H-NEW03 (post-excursion HR recovery), neither of which has been validated yet. Building a hypothesis on top of unvalidated features creates a dependency chain where failure at any link invalidates the whole structure.",
+      "The predicted effect size (partial r 0.08-0.15) is very small. After adjustment for age, HbA1c, BMI, and site, detecting a partial r of 0.08 requires N~1200 for 80% power. This is feasible but leaves little room for error from OCTA quality issues, feature noise, or additional confounders.",
+      "OCTA superficial vessel density extraction is not trivial -- it requires image processing pipelines that may not exist in the current codebase. Using RETFound embedding PCs as a proxy introduces an additional layer of abstraction that makes interpretation harder.",
+      "H-MIG05 was already REFUTED for broadband coupling. The claim that 'autonomic-specific' coupling features will succeed where broadband failed is plausible but may also reflect researcher degrees of freedom (trying different features until one works)."
+    ],
+    "confounders_missed": [
+      "Intraocular pressure (IOP): affects OCTA measurements and is associated with diabetes status",
+      "Diabetic retinopathy treatment history (laser/anti-VEGF): directly affects vessel density but may not be recorded",
+      "OCTA signal quality: signal strength varies with media opacity (cataracts, common in diabetes) and affects SVD measurement"
+    ],
+    "suggestions": [
+      "Wait for H-NEW02 and H-NEW03 results before pursuing this. If either fails, the 'autonomic-specific features' are not available.",
+      "Start with the simplest possible test: does 11-second ECG RMSSD (which IS a validated autonomic marker available in AI-READI) correlate with OCTA SVD? If not, the shared autonomic-microvascular damage hypothesis fails at the most basic level.",
+      "If RMSSD-SVD correlation is present, THEN test whether continuous coupling features add incrementally over RMSSD.",
+      "Register this as conditional on H-NEW02/H-NEW03 results."
+    ],
+    "overall_score": 0.65
+  },
+  "depends_on": [
+    "H-MIG05",
+    "H-NEW02",
+    "H-NEW03"
+  ],
+  "contradicts": [],
+  "supports": [],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "This is a more targeted retry of H-MIG05 (which was refuted for broadband coupling). The key insight is that only autonomic-specific coupling features should link to retinal damage, not the broadband glucose-HR correlation. Requires OCTA processing or RETFound analysis."
+}

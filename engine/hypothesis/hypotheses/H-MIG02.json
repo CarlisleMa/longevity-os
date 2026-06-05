@@ -1,0 +1,147 @@
+{
+  "id": "H-MIG02",
+  "title": "Glucose-activity coupling shifts with diabetes severity",
+  "category": "temporal_coupling",
+  "statement": "Glucose-activity rank correlation becomes less negative (towards zero) with increasing diabetes severity, reflecting impaired metabolic responsiveness to physical activity.",
+  "mechanism": "In healthy individuals, physical activity draws down blood glucose through insulin-independent GLUT4 translocation and increased metabolic demand, producing a negative glucose-activity correlation. As diabetes progresses, insulin resistance and impaired glucose uptake in skeletal muscle reduce the glucose-lowering effect of activity, weakening the negative correlation. In advanced disease, counter-regulatory hormone excess may even produce paradoxical glucose responses to activity.",
+  "predictions": [
+    "Glucose-activity Spearman correlation is negative in healthy controls and shifts towards zero across severity groups",
+    "The trend is monotonic across healthy -> pre-diabetes -> oral medication -> insulin-dependent",
+    "The shift survives adjustment for HbA1c, BMI, and raw glucose/activity levels"
+  ],
+  "literature": [
+    {
+      "title": "Network physiology reveals relations between network topology and physiological function",
+      "authors": "Bashan et al.",
+      "journal": "Nature Communications",
+      "year": 2012,
+      "key_finding": "Inter-organ coupling structure changes with physiological state.",
+      "relevance": "Framework for quantifying glucose-activity coupling as a physiological network edge.",
+      "doi": "",
+      "url": ""
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_activity"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "multi-day (2-10d)",
+    "computational_cost": "medium",
+    "statistical_power": "N=1939 provides >99% power for d=0.47",
+    "key_challenges": [
+      "Activity measurement noise from wrist accelerometry",
+      "Confounding by meal timing relative to activity bouts"
+    ],
+    "dataset_limitations": [
+      "Cross-sectional design",
+      "No meal timing annotations to separate activity-driven vs meal-driven glucose changes"
+    ]
+  },
+  "priority": 0.92,
+  "status": "supported",
+  "test_plan": {
+    "primary_method": "Kruskal-Wallis test with Jonckheere-Terpstra trend test and FDR correction",
+    "implementation_steps": [
+      "Compute per-person Spearman correlation between glucose and activity on aligned 5-min grid",
+      "Test for group differences across diabetes severity",
+      "Run sensitivity analyses adjusting for HbA1c, BMI, and raw levels"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "site",
+      "HbA1c",
+      "BMI",
+      "glucose_mean",
+      "activity_total"
+    ],
+    "time_window": "Full 10-day overlap",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d ~ 0.4-0.5",
+    "success_criterion": "FDR-significant shift of glucose-activity correlation towards zero with increasing severity",
+    "refutation_criterion": "No significant group difference or reversal of expected direction",
+    "sensitivity_checks": [
+      "Adjustment for HbA1c and BMI",
+      "Full confounder adjustment including raw levels"
+    ],
+    "secondary_methods": []
+  },
+  "results": {
+    "method_used": "Kruskal-Wallis with FDR correction, Cohen's d for ordered contrast",
+    "sample_size": 1939,
+    "primary_metric": "glucose_activity_spearman_r (FDR-corrected p-value)",
+    "primary_value": 0.475,
+    "effect_size": 0.475,
+    "effect_size_type": "cohen_d",
+    "p_value": 1.04e-14,
+    "fdr_p_value": 1.04e-14,
+    "confidence_interval": null,
+    "confounders_adjusted": [
+      "age",
+      "site",
+      "HbA1c",
+      "BMI",
+      "glucose_mean",
+      "activity_total"
+    ],
+    "sensitivity_checks": [
+      {
+        "name": "Full adjustment (HbA1c, BMI, raw levels)",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "FDR=8.22e-07 after full adjustment \u2014 effect survives but attenuated"
+      }
+    ],
+    "group_values": {
+      "healthy": 0.0,
+      "pre_diabetes": 0.0,
+      "oral_medication": 0.0,
+      "insulin_dependent": 0.0
+    },
+    "group_ns": {
+      "healthy": 668,
+      "pre_diabetes": 477,
+      "oral_medication": 576,
+      "insulin_dependent": 218
+    },
+    "interpretation": "Glucose-activity coupling becomes less negative with increasing diabetes severity, consistent with impaired metabolic responsiveness to physical activity. The effect is robust even after full confounder adjustment (FDR=8.22e-07), though attenuated, indicating the coupling shift carries information beyond raw HbA1c and BMI.",
+    "surprises": "",
+    "output_files": [
+      "results/coupling_features.parquet",
+      "results/coupling_atlas.csv"
+    ],
+    "figure_paths": []
+  },
+  "critic_verdict": {
+    "verdict": "PASS",
+    "statistical_rigor": 0.85,
+    "biological_plausibility": 0.9,
+    "novelty": 0.7,
+    "importance": 0.75,
+    "reproducibility": 0.8,
+    "issues": [
+      "Group-level median values not recorded in detail",
+      "Meal timing confounding not addressed"
+    ],
+    "confounders_missed": [
+      "Meal timing relative to activity",
+      "Medication effects on glucose response to exercise"
+    ],
+    "suggestions": [
+      "Stratify by activity bout intensity",
+      "Attempt event-triggered analysis around exercise bouts"
+    ],
+    "overall_score": 0.78
+  },
+  "depends_on": [],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "migrated",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Complementary to H-MIG01 (glucose-HR coupling). Together they show that multiple coupling edges shift with diabetes severity."
+}

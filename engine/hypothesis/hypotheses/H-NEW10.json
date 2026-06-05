@@ -1,0 +1,143 @@
+{
+  "id": "H-NEW10",
+  "title": "Activity-glucose coupling direction reverses between exercise and recovery phases",
+  "category": "event_dynamics",
+  "statement": "During acute activity bouts (sustained elevated step count for >15 min), glucose typically decreases in healthy individuals due to skeletal muscle glucose uptake (activity drives glucose DOWN). During the 1-3 hour recovery period after exercise cessation, glucose may transiently rise (hepatic glucose repletion and counterregulatory hormones), creating a rebound. In diabetes, the exercise-induced glucose decrease is blunted (impaired muscle glucose uptake, insulin resistance) and the post-exercise rebound is exaggerated (hepatic glucose overproduction). This produces a reversal of the activity-glucose coupling direction between exercise and recovery that is more pronounced with diabetes severity.",
+  "mechanism": "During exercise, insulin-independent glucose uptake by contracting skeletal muscle (via GLUT4 translocation) decreases circulating glucose. Simultaneously, hepatic glucose output increases to match demand, but in healthy individuals muscle uptake exceeds hepatic output, resulting in net glucose decrease. After exercise, muscle uptake decreases rapidly while hepatic output remains elevated (counterregulatory hormones: glucagon, cortisol, catecholamines), causing a transient glucose rebound. In diabetes, skeletal muscle insulin resistance impairs glucose uptake during exercise, and hepatic insulin resistance causes exaggerated post-exercise glucose output. This reduces the during-exercise glucose drop and amplifies the post-exercise rebound, creating a more asymmetric and potentially reversed coupling pattern.",
+  "predictions": [
+    "During activity bouts, activity-glucose correlation is more negative (larger glucose decrease per step) in healthy vs insulin-dependent (d > 0.3)",
+    "During 1-3h post-activity recovery, activity-glucose correlation reverses to positive (glucose rebound) and this rebound magnitude is larger in insulin-dependent (d > 0.25)",
+    "The exercise-recovery coupling asymmetry (difference between during and post coupling) increases with diabetes severity",
+    "Negative control: during rest periods (no activity), the activity-glucose coupling is near zero in all groups",
+    "The effect is strongest for moderate activity bouts (50-200 steps in 15 min) and less clear for very light activity"
+  ],
+  "literature": [
+    {
+      "title": "Continuous glucose monitoring and physical activity",
+      "authors": "Munan et al.",
+      "journal": "Journal of Diabetes Science and Technology",
+      "year": 2022,
+      "key_finding": "CGM reveals that post-exercise glucose effects persist for >24h, and that exercise type and intensity differentially affect glucose profiles.",
+      "relevance": "Establishes that exercise effects on glucose are phase-dependent (during vs after) and measurable by CGM.",
+      "doi": "10.1177/19322968221120830",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9564842/"
+    },
+    {
+      "title": "Exercise and Glucose Metabolism in Persons with Diabetes Mellitus",
+      "authors": "Yardley et al.",
+      "journal": "Journal of Diabetes Science and Technology",
+      "year": 2009,
+      "key_finding": "The acute and late glucose-lowering effects of exercise differ by exercise type and diabetes status, with counterregulatory responses creating post-exercise hyperglycemia in some diabetes subtypes.",
+      "relevance": "Provides the physiological basis for exercise-recovery phase asymmetry in glucose response across diabetes groups.",
+      "doi": "10.1177/193229680900300420",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2769951/"
+    },
+    {
+      "title": "Glucose and unstructured physical activity coupling during sleep and wake in young adults with type 1 diabetes",
+      "authors": "Fabris et al.",
+      "journal": "Scientific Reports",
+      "year": 2022,
+      "key_finding": "Glucose-activity coupling varies by time of day and activity phase in T1D, with complex patterns that differ from non-diabetic controls.",
+      "relevance": "Demonstrates that glucose-activity coupling is phase-dependent and diabetes-modulated, supporting our more specific phase-reversal hypothesis.",
+      "doi": "10.1038/s41598-022-09728-2",
+      "url": "https://www.nature.com/articles/s41598-022-09728-2"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_activity"
+    ],
+    "participant_coverage": 0.9,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "acute (during exercise: 15-60 min; recovery: 1-3h post)",
+    "computational_cost": "medium",
+    "statistical_power": "N~2000 participants, expect 5-20 identifiable activity bouts per person over 10 days",
+    "key_challenges": [
+      "Activity bout detection from 5-min step counts is imprecise",
+      "Distinguishing exercise from incidental walking",
+      "Meal timing (unobserved) during recovery confounds glucose rebound",
+      "Steps may not capture exercise intensity (just frequency)"
+    ],
+    "dataset_limitations": [
+      "Garmin step counts are aggregated (not raw accelerometry); bout detection is approximate",
+      "No meal data to separate post-exercise glucose rebound from postprandial glucose",
+      "No exercise type information (aerobic vs resistance)"
+    ]
+  },
+  "priority": 0.72,
+  "status": "validated",
+  "test_plan": {
+    "primary_method": "Event-triggered analysis: identify activity bouts from step counts, compute glucose change during bout and during 1-3h recovery, compare coupling direction between phases across severity groups",
+    "implementation_steps": [
+      "Step 1: Define activity bout as >= 3 consecutive 5-min bins with >20 steps each (>=15 min sustained activity)",
+      "Step 2: Define recovery period as 1-3h after bout ends with <10 steps per bin",
+      "Step 3: Compute glucose change during bout (linear slope of glucose vs time) and during recovery",
+      "Step 4: Compute per-person mean during-exercise glucose change and mean recovery glucose change",
+      "Step 5: Test group differences in both metrics across severity groups",
+      "Step 6: Compute asymmetry index: (recovery_change - exercise_change) per person",
+      "Step 7: Test group trend in asymmetry index",
+      "Step 8: Negative control: same analysis for random rest periods (no bout trigger)"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "bout_intensity_proxy",
+      "time_of_day"
+    ],
+    "time_window": "During-bout (15-60 min) and recovery (1-3h post-bout)",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d 0.25-0.4 for asymmetry index across severity gradient",
+    "success_criterion": "Significant group trend in exercise-recovery glucose asymmetry, with diabetes groups showing blunted exercise glucose drop and exaggerated recovery rebound",
+    "refutation_criterion": "No group difference in either during-exercise or recovery glucose changes. Rest-period negative control shows equal group differences (the activity trigger is irrelevant). Effect disappears after adjusting for bout intensity.",
+    "sensitivity_checks": [
+      "Vary activity bout threshold: 10, 20, 30 steps per bin",
+      "Stratify by time of day (morning vs afternoon bouts)",
+      "Exclude bouts that overlap with likely meal times (12-1pm, 6-7pm local time)",
+      "Test dose-response: do more intense bouts show larger asymmetry differences?"
+    ],
+    "secondary_methods": [
+      "Conditional glucose response curves using GAMs per group",
+      "Random forest for bout-level glucose change prediction"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "PASS",
+    "statistical_rigor": 0.75,
+    "biological_plausibility": 0.85,
+    "novelty": 0.7,
+    "importance": 0.7,
+    "reproducibility": 0.75,
+    "issues": [
+      "The inability to distinguish post-exercise glucose rebound from postprandial glucose rise is the single biggest limitation. Many people eat AFTER exercise (post-gym meal), so the 'recovery period glucose rise' may simply be a meal-driven spike occurring during recovery. Without meal timing data, these are inseparable.",
+      "Activity bout detection from 5-min step counts is crude. The threshold of '>20 steps per 5-min bin for 3 consecutive bins' captures brisk walking but misses cycling, swimming, or gym workouts that do not produce steps. The 'activity bouts' are really 'walking bouts.'",
+      "The expected effect size (d 0.25-0.4) is moderate and plausible, but the confounding from concurrent eating during recovery may inflate or deflate the estimate unpredictably."
+    ],
+    "confounders_missed": [
+      "Post-exercise eating: the most likely confounder, cannot be addressed without meal data",
+      "Exercise type: walking vs structured exercise have different glucose responses; step counts only capture ambulatory activity",
+      "Time since last meal: a bout 30 min after a meal vs 3 hours after a meal will have very different baseline glucose trajectories",
+      "Insulin timing (redacted): insulin-dependent participants may adjust bolus around exercise, creating artificial glucose patterns during recovery"
+    ],
+    "suggestions": [
+      "Focus the analysis on morning bouts before the typical breakfast time window (6-8am) when post-exercise eating is less likely.",
+      "Stratify by bout timing relative to typical meal windows (exclude bouts starting within 1h of 12pm or 6pm).",
+      "Compute the glucose-activity coupling SIGN (positive vs negative) rather than magnitude during exercise vs recovery -- the sign reversal is the key prediction and is less sensitive to confounders."
+    ],
+    "overall_score": 0.75
+  },
+  "depends_on": [
+    "H-MIG02"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG02"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Extends H-MIG02 (glucose-activity coupling shift) by decomposing into during-exercise and recovery phases. The phase-reversal is a specific, testable prediction with clinical relevance for exercise prescription."
+}

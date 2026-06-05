@@ -1,0 +1,19 @@
+# Optional conda environment for the LongevityOS backend + engine.
+# The frontend uses Node 20+ (see frontend/package.json), not conda.
+name: longevityos
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - scikit-learn
+  - pyarrow
+  - python-dateutil
+  - pip:
+      - fastapi>=0.110
+      - "uvicorn[standard]>=0.29"
+      - pydantic>=2.6
+      - python-multipart>=0.0.9
+      # - anthropic>=0.39          # uncomment to enable the live agent layer

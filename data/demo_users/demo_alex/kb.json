@@ -1,0 +1,124 @@
+{
+  "profile": { "display_name": "Alex Rivera", "synthetic": true },
+  "scorecard": {
+    "chronological_age": 47.0,
+    "biological_age": 44.7,
+    "age_accel": -2.3,
+    "age_accel_percentile": 38.0,
+    "delta_vs_baseline": -0.4,
+    "as_of": "2026-06-01",
+    "status": "good"
+  },
+  "systems": [
+    { "system": "metabolic", "age_accel": 1.8, "percentile": 64, "status": "watch" },
+    { "system": "cardiac", "age_accel": -3.1, "percentile": 29, "status": "good" },
+    { "system": "autonomic", "age_accel": 2.4, "percentile": 71, "status": "watch" },
+    { "system": "retinal", "age_accel": -1.2, "percentile": 41, "status": "good" },
+    { "system": "renal", "age_accel": -0.6, "percentile": 47, "status": "good" },
+    { "system": "inflammatory", "age_accel": 0.9, "percentile": 55, "status": "good" }
+  ],
+  "coupling": [
+    {
+      "key": "nocturnal_glucose_hr_coupling",
+      "label": "Nocturnal glucose–HR coupling",
+      "value": 0.41,
+      "baseline": 0.59,
+      "delta_vs_baseline": -0.18,
+      "unit": "r",
+      "read": "Your overnight glucose and heart rate are moving together less than they used to — a leading indicator for next-day glycemic control.",
+      "evidence_card": "KC-NOCTURNAL-COUPLING"
+    },
+    {
+      "key": "coupling_circadian_amplitude",
+      "label": "Circadian swing of coupling",
+      "value": 0.22,
+      "baseline": 0.31,
+      "delta_vs_baseline": -0.09,
+      "unit": "a.u.",
+      "read": "The day–night rhythm in your coupling has flattened slightly versus your baseline.",
+      "evidence_card": "KC-CIRCADIAN-COUPLING"
+    },
+    {
+      "key": "glucose_hr_coupling",
+      "label": "Daytime glucose–HR coupling",
+      "value": 0.53,
+      "baseline": 0.55,
+      "delta_vs_baseline": -0.02,
+      "unit": "r",
+      "read": "Daytime coupling is stable and within your normal range.",
+      "evidence_card": "KC-COUPLING-SEVERITY"
+    },
+    {
+      "key": "glucose_mse_1_3h",
+      "label": "Glucose complexity (1–3 h)",
+      "value": 1.34,
+      "baseline": 1.29,
+      "delta_vs_baseline": 0.05,
+      "unit": "MSE",
+      "read": "Your glucose signal complexity is holding up — a good sign of metabolic flexibility.",
+      "evidence_card": "KC-GLUCOSE-COMPLEXITY"
+    }
+  ],
+  "knowledge_base": [
+    { "modality": "glucose", "label": "Time in range (70–180)", "value": "82%", "trend": "down", "as_of": "2026-06-01", "evidence_card": "KC-GLUCOSE-COMPLEXITY" },
+    { "modality": "glucose", "label": "Glucose complexity (1–3 h)", "value": "1.34 MSE", "trend": "up", "as_of": "2026-06-01", "evidence_card": "KC-GLUCOSE-COMPLEXITY" },
+    { "modality": "wearable", "label": "Resting heart rate", "value": "58 bpm", "trend": "flat", "as_of": "2026-06-01", "evidence_card": null },
+    { "modality": "wearable", "label": "Sleep efficiency", "value": "88%", "trend": "down", "as_of": "2026-06-01", "evidence_card": "KC-SLEEPWAKE-REORG" },
+    { "modality": "wearable", "label": "Sleep–wake coupling reorganization", "value": "slow", "trend": "down", "as_of": "2026-06-01", "evidence_card": "KC-SLEEPWAKE-REORG" },
+    { "modality": "cardiac", "label": "Cardiac age gap", "value": "−3.1 yrs", "trend": "flat", "as_of": "2026-05-20", "evidence_card": "KC-STATIC-DOMINANCE" },
+    { "modality": "retinal", "label": "Retinal age gap", "value": "−1.2 yrs", "trend": "flat", "as_of": "2026-05-20", "evidence_card": "KC-RETINA-COGNITION" },
+    { "modality": "clinical", "label": "HbA1c", "value": "5.6%", "trend": "up", "as_of": "2026-05-10", "evidence_card": null },
+    { "modality": "environment", "label": "Avg evening light exposure", "value": "elevated", "trend": "up", "as_of": "2026-06-01", "evidence_card": "KC-CIRCADIAN-COUPLING" }
+  ],
+  "timeline": [
+    { "timestamp": "2026-03-03", "label": "Baseline", "biological_age": 45.1, "modalities_present": ["glucose", "wearable", "clinical"] },
+    { "timestamp": "2026-04-15", "label": "+ retinal & cardiac", "biological_age": 44.9, "modalities_present": ["glucose", "wearable", "clinical", "retinal", "cardiac"] },
+    { "timestamp": "2026-06-01", "label": "Latest", "biological_age": 44.7, "modalities_present": ["glucose", "wearable", "clinical", "retinal", "cardiac", "environment"] }
+  ],
+  "observations": [
+    {
+      "id": "OBS-0001",
+      "text": "Across your first three months, biological age edged down from 45.1 to 44.7 — driven mostly by cardiac and retinal systems, while metabolic and autonomic systems run slightly ahead of your chronological age.",
+      "evidence_cards": ["KC-STATIC-DOMINANCE"],
+      "as_of": "2026-06-01"
+    },
+    {
+      "id": "OBS-0002",
+      "text": "Your nocturnal glucose–HR coupling has dropped from 0.59 to 0.41 versus your baseline. In AI-READI, overnight coupling predicted next-day glycemic control, so this is worth watching and is the most actionable signal in your data right now.",
+      "evidence_cards": ["KC-NOCTURNAL-COUPLING", "KC-CIRCADIAN-COUPLING"],
+      "as_of": "2026-06-01"
+    }
+  ],
+  "interventions": [
+    {
+      "id": "INT-0001",
+      "title": "Advance your bedtime by 30 minutes",
+      "rationale": "Your nocturnal glucose–HR coupling and the circadian swing of your coupling have both declined versus your baseline, alongside elevated evening light. Earlier, more consistent sleep timing supports overnight cardiometabolic synchronization.",
+      "evidence_cards": ["KC-NOCTURNAL-COUPLING", "KC-CIRCADIAN-COUPLING"],
+      "expected_benefit": "Stronger overnight coupling; better next-day glucose stability",
+      "effort": "low",
+      "status": "new",
+      "reasoning_trace": "Largest baseline deviation is nocturnal coupling (−0.18). Evening light is elevated and circadian coupling amplitude is down (−0.09). Both KC-NOCTURNAL-COUPLING and KC-CIRCADIAN-COUPLING point to sleep-timing levers. Chose a low-effort, wellness-scoped change over any clinical action."
+    },
+    {
+      "id": "INT-0002",
+      "title": "Add a 15-minute post-dinner walk",
+      "rationale": "A light evening activity bout can blunt the post-meal glucose rise and support glucose–HR coupling in the hours that set up your overnight window.",
+      "evidence_cards": ["KC-NOCTURNAL-COUPLING", "KC-COUPLING-BURDEN"],
+      "expected_benefit": "Lower post-dinner excursions; supports overnight coupling",
+      "effort": "low",
+      "status": "new",
+      "reasoning_trace": "Targets the evening pre-sleep window feeding nocturnal coupling. Wellness-scoped activity guidance; grounded in KC-NOCTURNAL-COUPLING and the resilience framing of KC-COUPLING-BURDEN."
+    },
+    {
+      "id": "INT-0003",
+      "title": "Keep your morning light routine",
+      "rationale": "Your glucose complexity is holding up and morning light supports a healthy circadian swing in coupling. Maintaining this is a reinforce-what-works recommendation.",
+      "evidence_cards": ["KC-CIRCADIAN-COUPLING", "KC-GLUCOSE-COMPLEXITY"],
+      "expected_benefit": "Maintained circadian coupling amplitude",
+      "effort": "low",
+      "status": "new",
+      "reasoning_trace": "Positive-reinforcement intervention; metabolic flexibility (KC-GLUCOSE-COMPLEXITY) is stable, so the recommendation is to sustain morning-light habits supporting KC-CIRCADIAN-COUPLING."
+    }
+  ]
+}

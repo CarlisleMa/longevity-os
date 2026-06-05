@@ -1,0 +1,149 @@
+{
+  "id": "H-NEW03",
+  "title": "Post-excursion HR recovery is prolonged and stereotyped in diabetes",
+  "category": "event_dynamics",
+  "statement": "Following glucose excursions (defined as glucose rising >30 mg/dL above the preceding 2-hour mean), HR shows a characteristic post-excursion response: an initial rise followed by a return to baseline. In insulin-dependent diabetes, the HR response amplitude is larger, the peak latency is shorter (faster sympathetic activation), and the recovery time is longer (impaired parasympathetic restoration), compared to healthy controls. Furthermore, the response becomes more stereotyped (lower inter-excursion variability) in diabetes, reflecting loss of context-dependent autonomic modulation.",
+  "mechanism": "Glucose excursions activate sympathetic outflow through central glucose sensing (area postrema, hypothalamus) and hepato-portal glucose sensors. In health, the baroreceptor reflex and vagal tone rapidly counteract the sympathetic drive, producing variable HR responses depending on concurrent activity, posture, and time of day. In diabetes with autonomic neuropathy, vagal damage reduces the ability to buffer sympathetic HR acceleration, leading to larger and longer HR responses. Additionally, the loss of vagal tone reduces context-dependent modulation of the response, making it more stereotyped. The faster peak latency reflects unopposed sympathetic activation without parasympathetic competition.",
+  "predictions": [
+    "Mean post-excursion HR increase (area under the curve, 0-90 min) is larger in insulin-dependent vs healthy (d > 0.4)",
+    "Peak HR latency is shorter in insulin-dependent (15-30 min) vs healthy (30-60 min)",
+    "HR recovery half-time (time to return to 50% of peak response) is longer in insulin-dependent (d > 0.3)",
+    "Inter-excursion coefficient of variation of HR response amplitude is lower in insulin-dependent (more stereotyped, d > 0.25)",
+    "Negative control: randomly selected time windows (not excursion-triggered) should show no group difference in HR response shape",
+    "The effect is strongest during waking hours and attenuated during sleep (when excursion-driven HR responses are dampened)"
+  ],
+  "literature": [
+    {
+      "title": "Multimodal AI correlates of glucose spikes in people with normal glucose regulation, pre-diabetes and type 2 diabetes",
+      "authors": "Carletti et al.",
+      "journal": "Nature Medicine",
+      "year": 2025,
+      "key_finding": "Glucose spike resolution time differs systematically by diabetes status; spike dynamics are multimodal predictors of glycemic health beyond mean glucose.",
+      "relevance": "Establishes that spike dynamics (including resolution time) carry diagnostic information; we extend this to the HR response to spikes.",
+      "doi": "10.1038/s41591-025-03849-7",
+      "url": "https://www.nature.com/articles/s41591-025-03849-7"
+    },
+    {
+      "title": "Disruption of multisystem responses to stress in type 2 diabetes",
+      "authors": "Hackett et al.",
+      "journal": "PNAS",
+      "year": 2014,
+      "key_finding": "Post-stress HR recovery is attenuated in T2D, consistent with impaired parasympathetic reactivation.",
+      "relevance": "Directly supports the prediction that post-excursion HR recovery is prolonged in diabetes.",
+      "doi": "10.1073/pnas.1410401111",
+      "url": "https://www.pnas.org/doi/10.1073/pnas.1410401111"
+    },
+    {
+      "title": "Loss of 'complexity' and aging: potential applications of fractals and chaos theory to senescence",
+      "authors": "Lipsitz & Goldberger",
+      "journal": "JAMA",
+      "year": 1992,
+      "key_finding": "Aging and disease reduce physiological complexity, leading to more stereotyped, less context-dependent responses.",
+      "relevance": "Grounds the prediction that excursion responses become more stereotyped (reduced inter-excursion variability) in diabetes.",
+      "doi": "10.1001/jama.1992.03480130122036",
+      "url": ""
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_activity",
+      "wearable_sleep"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "acute (0-90 min post-excursion)",
+    "computational_cost": "medium",
+    "statistical_power": "N~1900, expect 10-30 excursions per person over 10 days; total events >30,000",
+    "key_challenges": [
+      "Need robust excursion detection algorithm (threshold-based with debouncing)",
+      "Must separate meal-driven vs spontaneous excursions (no meal log available)",
+      "Activity during excursion window confounds HR response",
+      "Garmin HR smoothing may dampen true peak HR response"
+    ],
+    "dataset_limitations": [
+      "No meal timing data to confirm excursion etiology",
+      "No medication timing to account for insulin bolus effects",
+      "Garmin HR is averaged/interpolated, not beat-to-beat"
+    ]
+  },
+  "priority": 0.78,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Event-triggered averaging: identify glucose excursions, extract HR in [-30, +90] min windows, compute per-person average response profile and derived metrics (AUC, peak latency, recovery half-time, inter-event CV)",
+    "implementation_steps": [
+      "Step 1: Define glucose excursion as glucose rising >30 mg/dL above the rolling 2-hour mean within a 60-min window",
+      "Step 2: Exclude excursions within 120 min of a previous excursion (debounce)",
+      "Step 3: For each excursion, extract HR in [-30, +90] min window relative to excursion onset",
+      "Step 4: Baseline-subtract HR (subtract mean HR in [-30, 0] min pre-excursion window)",
+      "Step 5: Compute per-person: mean response profile, peak amplitude, peak latency, AUC(0-90), recovery half-time, inter-excursion CV of peak amplitude",
+      "Step 6: Generate negative control: same analysis at randomly selected non-excursion timepoints",
+      "Step 7: Test group differences in each metric across diabetes severity groups",
+      "Step 8: Stratify by awake/sleep, adjust for age/site/HbA1c/BMI/excursion magnitude"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "excursion_magnitude_mg_dl",
+      "activity_during_window",
+      "time_of_day"
+    ],
+    "time_window": "[-30, +90] min relative to glucose excursion onset",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d 0.3-0.5 for HR AUC and recovery time; d 0.25-0.35 for inter-excursion CV",
+    "success_criterion": "FDR-significant group differences in at least 2 of: peak amplitude, peak latency, recovery half-time, inter-excursion CV",
+    "refutation_criterion": "No significant group differences in any excursion-triggered HR metric after adjusting for excursion magnitude and activity. Negative control (random windows) showing equal or larger group differences.",
+    "sensitivity_checks": [
+      "Vary excursion threshold from 20 to 50 mg/dL",
+      "Stratify by daytime (8am-8pm) vs nighttime excursions",
+      "Exclude excursions during high activity (>100 steps in preceding 30 min)",
+      "Bootstrap 1000x per-person excursion averages",
+      "Adjust for number of excursions per person (persons with more excursions may differ systematically)"
+    ],
+    "secondary_methods": [
+      "Gaussian process regression of response profiles per group",
+      "Functional data analysis (FDA) of response curves"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.75,
+    "biological_plausibility": 0.8,
+    "novelty": 0.7,
+    "importance": 0.8,
+    "reproducibility": 0.7,
+    "issues": [
+      "The core problem: Garmin HR is averaged/interpolated at 1-5 min resolution. 'Peak HR latency' in the 15-60 minute range requires detecting the timing of the HR maximum within a post-excursion window -- but with 5-min bins, the timing resolution is +/- 5 min, which is a large fraction of the predicted 15-30 min latency. The difference between 15-30 min (healthy) and 30-60 min (diabetes) could easily be within measurement noise.",
+      "Without meal timing data, a 'glucose excursion' defined by threshold crossing cannot distinguish: (a) genuine postprandial rise, (b) dawn phenomenon, (c) rebound after exercise, (d) insulin wearing off. These have very different HR response profiles. Pooling them together adds noise and may wash out the signal.",
+      "The 'stereotypy' prediction (lower inter-excursion CV in diabetes) is clever but vulnerable to a confound: diabetes groups have more excursions on average, and the CV of a metric decreases with sample size. Must correct for number of excursions.",
+      "Activity during the excursion window is a massive confounder. Walking to lunch (excursion + activity) vs sitting while eating (excursion alone) produce very different HR responses. The plan mentions excluding high-activity windows but does not address moderate activity confounding."
+    ],
+    "confounders_missed": [
+      "Insulin bolus timing (redacted): insulin-dependent participants often bolus at meals, creating a simultaneous pharmacological glucose drop + potential vagal response that contaminates the post-excursion HR recovery profile",
+      "Excursion magnitude: larger excursions produce larger HR responses mechanically; if diabetes groups have larger excursions, the 'larger HR response' finding is confounded by excursion size even after adjusting for mean excursion magnitude",
+      "Time-of-day: meal-driven excursions cluster at 7-9am, 12-1pm, 6-7pm; the HR response to a given glucose rise varies with circadian autonomic tone"
+    ],
+    "suggestions": [
+      "Use change-point detection (PELT) on glucose rather than fixed threshold for more robust excursion identification.",
+      "Normalize HR response by excursion magnitude (delta-HR per delta-glucose) to remove the confound of excursion amplitude.",
+      "For the stereotypy analysis, use a sample-size-corrected CV or permutation test (within each participant, shuffle excursion labels and recompute CV to establish null) to avoid the CV-vs-N artifact.",
+      "Focus on waking-only excursions during low-activity windows (first 30 min steps < 50) to minimize activity confounding. This will reduce N of events but increase signal purity."
+    ],
+    "overall_score": 0.75
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "This tests whether the broadband coupling effect (H-MIG01) is driven by specific event dynamics. High clinical relevance: post-excursion HR recovery could be a practical autonomic neuropathy screening marker."
+}

@@ -1,0 +1,6 @@
+retrieval_index.sqlite
+*.tmp
+logs/
+slurm_runs/
+archive/
+execution_proposals/

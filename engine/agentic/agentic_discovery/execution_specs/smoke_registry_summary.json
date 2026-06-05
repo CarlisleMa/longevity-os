@@ -1,0 +1,27 @@
+{
+  "spec_id": "smoke_registry_summary",
+  "description": "Safe smoke analysis that writes registry summary metrics to a JSON artifact.",
+  "script": "agentic_discovery/analysis/smoke_summary.py",
+  "args": [
+    "--state-root",
+    "{state_root}",
+    "--output",
+    "results/agentic_discovery/{spec_id}/{run_id}/summary.json"
+  ],
+  "candidate_id": "",
+  "hypothesis_id": "",
+  "plan_id": "",
+  "split_id": "none",
+  "required_inputs": [],
+  "expected_outputs": [
+    "results/agentic_discovery/{spec_id}/{run_id}/summary.json"
+  ],
+  "output_dir": "results/agentic_discovery/{spec_id}/{run_id}",
+  "slurm": {
+    "job_name": "ad-smoke-summary",
+    "time": "00:05:00",
+    "cpus_per_task": 1,
+    "mem": "2G"
+  },
+  "notes": "This spec is intended for validating the guarded Slurm submitter. It does not access PHI or train models."
+}

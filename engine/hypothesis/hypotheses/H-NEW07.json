@@ -1,0 +1,148 @@
+{
+  "id": "H-NEW07",
+  "title": "Evening light exposure amplifies overnight glucose-HR coupling in diabetes",
+  "category": "environmental_modulation",
+  "statement": "Higher evening light exposure (measured by the environmental sensor in the 3 hours before sleep onset) amplifies overnight glucose-HR coupling specifically in the diabetes groups but not in healthy controls. This occurs because evening light suppresses melatonin, which impairs insulin secretion and exacerbates nocturnal hepatic glucose output. The resulting hyperglycemia drives sympathetic activation, strengthening glucose-HR coupling. In healthy individuals, intact insulin reserves compensate for melatonin suppression, preventing the coupling amplification.",
+  "mechanism": "Melatonin is secreted by the pineal gland in darkness and acts on pancreatic beta cells to modulate insulin secretion timing. Evening light exposure suppresses melatonin, shifting insulin secretion timing and reducing its overnight efficacy. In individuals with intact beta-cell function (healthy), this suppression is compensated by increased basal insulin secretion. In diabetes, where beta-cell reserve is diminished and hepatic insulin resistance is present, melatonin suppression removes a secondary brake on overnight hepatic glucose output, leading to greater nocturnal hyperglycemia. This hyperglycemia triggers sympathetic activation via central glucose sensing, strengthening the glucose-HR coupling signal. The AI-READI environmental sensor captures ambient light levels that can serve as a proxy for light exposure.",
+  "predictions": [
+    "Within-person: nights preceded by higher evening light (top tertile vs bottom tertile of 3h pre-sleep light) show stronger glucose-HR coupling during sleep in diabetes groups",
+    "This light-coupling interaction is absent or weak in healthy controls",
+    "The light-coupling amplification effect increases with diabetes severity (group x light interaction)",
+    "The effect is stronger for short-wavelength-enriched light (if spectrum data available) than long-wavelength light",
+    "Negative control: evening temperature and humidity do not modulate overnight glucose-HR coupling similarly"
+  ],
+  "literature": [
+    {
+      "title": "Light exposure during sleep impairs cardiometabolic function",
+      "authors": "Mason et al.",
+      "journal": "PNAS",
+      "year": 2022,
+      "key_finding": "Room light during sleep increased nighttime heart rate, reduced heart rate variability, and increased insulin resistance the following morning.",
+      "relevance": "Directly demonstrates that light exposure affects both HR and glucose metabolism through autonomic and metabolic pathways.",
+      "doi": "10.1073/pnas.2113290119",
+      "url": "https://www.pnas.org/doi/10.1073/pnas.2113290119"
+    },
+    {
+      "title": "Personal light exposure patterns and incidence of type 2 diabetes: analysis of 13 million hours of light sensor data",
+      "authors": "Burns et al.",
+      "journal": "Lancet Regional Health Europe",
+      "year": 2024,
+      "key_finding": "Greater light exposure during night (12:30am-6:00am) was associated with higher T2D risk in UK Biobank; greater bright daytime light was protective.",
+      "relevance": "Establishes the epidemiological link between light exposure timing and diabetes risk at population scale.",
+      "doi": "10.1016/j.lanepe.2024.100943",
+      "url": "https://www.thelancet.com/journals/lanepe/article/PIIS2666-7762(24)00110-8/fulltext"
+    },
+    {
+      "title": "Artificial light at night and type 2 diabetes mellitus",
+      "authors": "Koo et al.",
+      "journal": "Diabetes & Metabolism Journal",
+      "year": 2024,
+      "key_finding": "Artificial light at night disrupts melatonin, circadian rhythm, and metabolic homeostasis through oxidative stress, inflammation, and autonomic imbalance.",
+      "relevance": "Provides the melatonin-mediated mechanism linking light exposure to glucose-autonomic dysregulation.",
+      "doi": "10.4093/dmj.2024.0054",
+      "url": "https://www.e-dmj.org/journal/view.php?number=2879"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_sleep",
+      "environment_light"
+    ],
+    "participant_coverage": 0.75,
+    "time_resolution_needed": "5-min for coupling; hourly for light aggregation",
+    "analysis_timescale": "evening-to-overnight (3h pre-sleep + sleep period)",
+    "computational_cost": "low",
+    "statistical_power": "N~1500 with environment + sleep data x ~8 nights each = ~12,000 night observations",
+    "key_challenges": [
+      "Environmental sensor measures room light, not retinal light exposure; wearing patterns matter",
+      "Light spectrum data may not be available at sufficient quality",
+      "Evening light exposure correlates with screen time and social activity, confounding behavioral context"
+    ],
+    "dataset_limitations": [
+      "Environmental sensor placement (room-level, not wrist-level) limits exposure accuracy",
+      "No direct melatonin measurements to confirm suppression",
+      "Medications that affect melatonin (beta-blockers suppress melatonin) are redacted"
+    ]
+  },
+  "priority": 0.52,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Mixed-effects regression: nocturnal_glucose_hr_r ~ evening_light_level * study_group + covariates + (1|person_id)",
+    "implementation_steps": [
+      "Step 1: Identify sleep onset per night from Garmin sleep data",
+      "Step 2: Compute mean light level from environmental sensor in the 3 hours preceding sleep onset",
+      "Step 3: Compute glucose-HR Pearson correlation during each sleep period",
+      "Step 4: Fit mixed-effects model with evening light x group interaction predicting nocturnal coupling",
+      "Step 5: Test whether the interaction is significant for diabetes groups but not healthy",
+      "Step 6: Negative control: repeat with evening temperature and humidity as predictors",
+      "Step 7: Test whether the effect is mediated by nocturnal mean glucose (causal mediation analysis)",
+      "Step 8: Sensitivity: vary pre-sleep window from 1h to 4h"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "sleep_duration",
+      "evening_activity_level",
+      "season_month"
+    ],
+    "time_window": "3h pre-sleep onset + subsequent sleep period",
+    "frequency_bands": [],
+    "expected_effect_size": "Interaction d 0.15-0.25 for light x group on coupling; within-person light effect in diabetes d 0.1-0.2",
+    "success_criterion": "Significant light x diabetes severity interaction on nocturnal glucose-HR coupling (p < 0.01), with effect present in diabetes groups and absent in healthy",
+    "refutation_criterion": "No interaction between evening light and group on coupling. Evening temperature/humidity predict coupling equally well (non-specific environmental effect). Effect disappears after adjusting for evening activity or screen time proxy.",
+    "sensitivity_checks": [
+      "Vary pre-sleep window: 1h, 2h, 3h, 4h",
+      "Use screen time instead of light if available from environmental sensor",
+      "Exclude nights with very early or very late sleep onset (>1 SD from person mean)",
+      "Stratify by site (different light environments across UAB, UW, UCSD)",
+      "Test light exposure during sleep (if sensor records overnight) as separate predictor"
+    ],
+    "secondary_methods": [
+      "Bayesian hierarchical model for participant-level light sensitivity",
+      "Causal mediation: light -> nocturnal glucose -> coupling"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.65,
+    "biological_plausibility": 0.65,
+    "novelty": 0.7,
+    "importance": 0.6,
+    "reproducibility": 0.6,
+    "issues": [
+      "The environmental sensor measures room-level light, NOT personal retinal light exposure. The relationship between room light and melatonin suppression depends on: (1) whether the person is in the room, (2) whether they are facing the sensor, (3) screen use (not captured by room sensor), (4) whether lights are on in a different room. This is a very noisy proxy for the biological exposure that supposedly drives the mechanism.",
+      "The expected effect size is tiny (interaction d 0.15-0.25, within-person d 0.1-0.2). With noisy room-level light measurements, consumer-grade sleep staging, and only ~8 nights per person, detecting a d=0.1-0.2 within-person effect is unrealistic.",
+      "The melatonin -> insulin -> glucose -> HR causal chain involves 4 steps, each with its own noise and individual variation. The end-to-end effect (evening light -> overnight coupling) is likely attenuated to near zero after these intermediaries.",
+      "The negative control (temperature/humidity do not modulate coupling) may fail because room temperature independently affects sleep quality and autonomic tone."
+    ],
+    "confounders_missed": [
+      "Screen time: blue light from screens is the dominant melatonin-suppressing exposure in modern environments, and room light sensors do not capture it",
+      "Ambient light from outside: window orientation, curtain use, street lights -- all affect room light measurement independent of personal behavior",
+      "Alcohol consumption: evening alcohol affects both sleep quality and glucose metabolism, confounding the light-coupling relationship"
+    ],
+    "suggestions": [
+      "Consider dropping this hypothesis or reframing as purely exploratory.",
+      "If proceeding, use the strongest available proxy: combine room light + activity (proxy for being in room) + time (evening only) into a composite exposure score.",
+      "Set a priori minimum detectable effect size and report if the analysis is adequately powered for it.",
+      "Consider testing light during sleep (if recorded) rather than pre-sleep light, as Mason et al. (2022) found effects of light DURING sleep on cardiometabolic function."
+    ],
+    "overall_score": 0.64
+  },
+  "depends_on": [
+    "H-MIG06",
+    "H-NEW06"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG06"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Builds on the weak PM2.5 result (H-MIG06) by testing a more mechanistically specific environmental pathway (light -> melatonin -> glucose -> coupling). AI-READI's co-located environment sensor is the key enabler."
+}

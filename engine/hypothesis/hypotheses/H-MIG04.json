@@ -1,0 +1,153 @@
+{
+  "id": "H-MIG04",
+  "title": "Coupling features link to clinical burden (frailty, allostatic load)",
+  "category": "temporal_coupling",
+  "statement": "Dynamic coupling features are associated with systemic clinical burden markers (frailty index, allostatic load, homeostatic dysregulation) after adjusting for age and site, indicating that inter-organ coupling disruption reflects whole-body physiological deterioration.",
+  "mechanism": "Frailty, allostatic load, and homeostatic dysregulation are integrative measures of cumulative physiological damage across multiple organ systems. If inter-organ coupling (glucose-HR, glucose-activity) reflects the functional integrity of regulatory feedback loops, then coupling disruption should correlate with these burden markers because both arise from the same underlying process: progressive failure of multi-system homeostatic coordination.",
+  "predictions": [
+    "Glucose-HR awake correlation is positively associated with frailty index after adjusting for age and site",
+    "Glucose multiscale entropy is associated with allostatic load",
+    "Glucose-activity coupling is associated with homeostatic dysregulation",
+    "Associations survive adjustment for age and site"
+  ],
+  "literature": [
+    {
+      "title": "Network physiology reveals relations between network topology and physiological function",
+      "authors": "Bashan et al.",
+      "journal": "Nature Communications",
+      "year": 2012,
+      "key_finding": "Inter-organ coupling topology reflects physiological state.",
+      "relevance": "Supports the link between coupling disruption and systemic physiological deterioration.",
+      "doi": "",
+      "url": ""
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_activity",
+      "clinical_labs",
+      "survey_data"
+    ],
+    "participant_coverage": 0.8,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "multi-day (2-10d)",
+    "computational_cost": "medium",
+    "statistical_power": "N~1900 provides excellent power for partial correlations of r~0.15",
+    "key_challenges": [
+      "Frailty index and allostatic load construction requires multiple clinical variables",
+      "Confounding by diabetes severity itself"
+    ],
+    "dataset_limitations": [
+      "Cross-sectional design prevents determining if coupling disruption precedes or follows clinical burden accumulation"
+    ]
+  },
+  "priority": 0.9,
+  "status": "supported",
+  "test_plan": {
+    "primary_method": "Partial correlation between coupling features and clinical burden markers, adjusted for age and site, with FDR correction",
+    "implementation_steps": [
+      "Construct frailty index, allostatic load, and homeostatic dysregulation scores from clinical data",
+      "Compute partial correlations between each coupling feature and each burden marker",
+      "Apply FDR correction across all tests",
+      "Report top associations"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "site"
+    ],
+    "time_window": "Full 10-day overlap for coupling; clinical measures at enrollment",
+    "frequency_bands": [],
+    "expected_effect_size": "Partial r ~ 0.10-0.20",
+    "success_criterion": "FDR-significant partial correlations between at least one coupling feature and each burden marker",
+    "refutation_criterion": "No FDR-significant associations after age/site adjustment",
+    "sensitivity_checks": [
+      "Adjustment for diabetes severity group",
+      "Comparison with raw physiological features"
+    ],
+    "secondary_methods": []
+  },
+  "results": {
+    "method_used": "Partial correlation with FDR correction, adjusted for age and site",
+    "sample_size": 1939,
+    "primary_metric": "Partial correlation (FDR-corrected)",
+    "primary_value": 0.148,
+    "effect_size": 0.148,
+    "effect_size_type": "partial_r",
+    "p_value": 2.18e-09,
+    "fdr_p_value": 2.18e-09,
+    "confidence_interval": null,
+    "confounders_adjusted": [
+      "age",
+      "site"
+    ],
+    "sensitivity_checks": [
+      {
+        "name": "glucose_hr_awake_r vs frailty index",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "FDR=2.18e-09, partial r=0.148"
+      },
+      {
+        "name": "glucose_ms_entropy_s3 vs allostatic load",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "FDR=4.40e-07, partial r=0.130"
+      },
+      {
+        "name": "glucose_activity_spearman_r vs homeostatic dysregulation",
+        "passed": true,
+        "effect_preserved": true,
+        "details": "FDR=1.57e-09, partial r=0.151"
+      }
+    ],
+    "group_values": {},
+    "group_ns": {
+      "healthy": 668,
+      "pre_diabetes": 477,
+      "oral_medication": 576,
+      "insulin_dependent": 218
+    },
+    "interpretation": "Dynamic coupling features are significantly associated with all three systemic burden markers. Glucose-HR coupling links to frailty, glucose entropy links to allostatic load, and glucose-activity coupling links to homeostatic dysregulation. This suggests coupling disruption is a general marker of physiological deterioration, not specific to glycemic control alone.",
+    "surprises": "",
+    "output_files": [
+      "results/coupling_features.parquet",
+      "results/coupling_atlas.csv"
+    ],
+    "figure_paths": []
+  },
+  "critic_verdict": {
+    "verdict": "PASS",
+    "statistical_rigor": 0.85,
+    "biological_plausibility": 0.9,
+    "novelty": 0.75,
+    "importance": 0.8,
+    "reproducibility": 0.8,
+    "issues": [
+      "Partial correlations of r~0.15 are statistically significant but explain only ~2% of variance",
+      "May be confounded by diabetes severity driving both coupling and burden"
+    ],
+    "confounders_missed": [
+      "Diabetes severity group as potential confounder",
+      "Medication burden"
+    ],
+    "suggestions": [
+      "Test whether coupling-burden associations persist within diabetes severity strata",
+      "Use structural equation modeling to separate direct and mediated paths"
+    ],
+    "overall_score": 0.8
+  },
+  "depends_on": [
+    "H-MIG01",
+    "H-MIG02"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "migrated",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Coupling features link to systemic burden markers, supporting their interpretation as general physiological deterioration indicators rather than purely glycemic markers."
+}

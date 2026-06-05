@@ -1,0 +1,149 @@
+{
+  "id": "H-MIG06",
+  "title": "PM2.5-glucose coupling varies with diabetes severity",
+  "category": "environmental_modulation",
+  "statement": "PM2.5-glucose coupling (zero-lag correlation and peak cross-correlation) differs across diabetes severity groups, suggesting environmental pollutant exposure modulates glycemic dynamics in a severity-dependent manner.",
+  "mechanism": "PM2.5 exposure triggers systemic inflammation and oxidative stress, which impairs insulin signaling and promotes hepatic glucose output. In healthy individuals, homeostatic mechanisms buffer these effects, maintaining weak PM2.5-glucose coupling. As diabetes progresses and homeostatic reserves diminish, the glucose system becomes more sensitive to environmental perturbations, potentially amplifying PM2.5-glucose coupling. Alternatively, PM2.5 may differentially affect autonomic tone, indirectly modulating glucose dynamics.",
+  "predictions": [
+    "PM2.5-glucose zero-lag correlation differs across diabetes severity groups",
+    "PM2.5-glucose peak cross-correlation amplitude increases with severity",
+    "PM2.5-HR coupling may also show severity-dependent differences"
+  ],
+  "literature": [
+    {
+      "title": "Air pollution and diabetes association",
+      "authors": "Various",
+      "journal": "Environmental Health Perspectives",
+      "year": 2020,
+      "key_finding": "PM2.5 exposure is associated with increased diabetes incidence and worsened glycemic control.",
+      "relevance": "Epidemiological basis for PM2.5-glucose coupling hypothesis.",
+      "doi": "",
+      "url": ""
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "environmental_pm25",
+      "wearable_hr"
+    ],
+    "participant_coverage": 0.75,
+    "time_resolution_needed": "hourly",
+    "analysis_timescale": "multi-day (2-10d)",
+    "computational_cost": "medium",
+    "statistical_power": "Marginal for small effects (d~0.16) given environmental data noise",
+    "key_challenges": [
+      "PM2.5 data is spatially interpolated, not personal exposure",
+      "Temporal resolution mismatch between environmental and physiological data",
+      "Multiple testing across coupling metrics and environmental variables"
+    ],
+    "dataset_limitations": [
+      "PM2.5 is ambient (outdoor), not personal exposure",
+      "Short 10-day window may not capture sufficient PM2.5 variability",
+      "No indoor air quality data"
+    ]
+  },
+  "priority": 0.4,
+  "status": "inconclusive",
+  "test_plan": {
+    "primary_method": "Kruskal-Wallis test for PM2.5-glucose coupling features across severity groups with FDR correction",
+    "implementation_steps": [
+      "Align PM2.5 hourly data with CGM and HR streams",
+      "Compute zero-lag correlation and peak cross-correlation between PM2.5 and glucose per person",
+      "Compute PM2.5-HR coupling metrics",
+      "Test for group differences across severity"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "site",
+      "season"
+    ],
+    "time_window": "Full 10-day overlap",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d ~ 0.15-0.25 (weak)",
+    "success_criterion": "FDR-significant PM2.5-glucose coupling differences across severity groups with consistent direction",
+    "refutation_criterion": "No significant differences, or effects driven by site/season confounding",
+    "sensitivity_checks": [
+      "Adjustment for site (geographic PM2.5 variation)",
+      "Seasonal stratification",
+      "PM2.5-HR coupling as comparison"
+    ],
+    "secondary_methods": [
+      "Cross-correlation function analysis at multiple lags"
+    ]
+  },
+  "results": {
+    "method_used": "Kruskal-Wallis with FDR correction",
+    "sample_size": 1939,
+    "primary_metric": "pm25_glucose_zero_lag_r (FDR-corrected p-value)",
+    "primary_value": 0.164,
+    "effect_size": 0.164,
+    "effect_size_type": "cohen_d",
+    "p_value": 0.014,
+    "fdr_p_value": 0.014,
+    "confidence_interval": null,
+    "confounders_adjusted": [
+      "age",
+      "site"
+    ],
+    "sensitivity_checks": [
+      {
+        "name": "pm25_glucose_peak_abs_xcorr",
+        "passed": false,
+        "effect_preserved": false,
+        "details": "FDR=0.080 \u2014 not significant after correction"
+      },
+      {
+        "name": "PM2.5-HR coupling metrics",
+        "passed": false,
+        "effect_preserved": false,
+        "details": "Mostly null \u2014 no consistent PM2.5-HR coupling differences"
+      }
+    ],
+    "group_values": {},
+    "group_ns": {
+      "healthy": 668,
+      "pre_diabetes": 477,
+      "oral_medication": 576,
+      "insulin_dependent": 218
+    },
+    "interpretation": "Weak signal for PM2.5-glucose zero-lag coupling differing by severity (FDR=0.014, d=0.164), but peak cross-correlation is not significant (FDR=0.080) and PM2.5-HR coupling is largely null. The signal is too weak and inconsistent to draw firm conclusions about environmental modulation of glycemic coupling.",
+    "surprises": "PM2.5-HR coupling was mostly null, whereas PM2.5-glucose showed a borderline signal. Environmental modulation may be glucose-specific rather than systemic.",
+    "output_files": [
+      "results/coupling_features.parquet"
+    ],
+    "figure_paths": []
+  },
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.55,
+    "biological_plausibility": 0.65,
+    "novelty": 0.7,
+    "importance": 0.5,
+    "reproducibility": 0.4,
+    "issues": [
+      "Very weak effect size (d=0.164)",
+      "Ambient PM2.5 is a poor proxy for personal exposure",
+      "Site confounding may drive the signal",
+      "Borderline significance even for the primary metric"
+    ],
+    "confounders_missed": [
+      "Indoor vs outdoor time",
+      "Ventilation and building characteristics",
+      "Other pollutants correlated with PM2.5"
+    ],
+    "suggestions": [
+      "Need personal PM2.5 exposure monitors for stronger test",
+      "Require more rigorous time-series controls (e.g., surrogate data testing)",
+      "Consider temperature and humidity as alternative environmental drivers"
+    ],
+    "overall_score": 0.5
+  },
+  "depends_on": [],
+  "contradicts": [],
+  "supports": [],
+  "source": "migrated",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Weak signal that needs stronger time-series controls before causal claims. PM2.5 data quality (ambient, not personal) is a major limitation."
+}

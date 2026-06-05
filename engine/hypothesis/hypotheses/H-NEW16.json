@@ -1,0 +1,134 @@
+{
+  "id": "H-NEW16",
+  "title": "Frailty is better predicted by coupling feature instability than by coupling feature level",
+  "category": "physiotype_discovery",
+  "statement": "Frailty index (the strongest clinical discriminator of diabetes severity in AI-READI, AUROC 0.90) is better predicted by the instability (variance, range, entropy) of coupling features across the 10-day window than by their mean levels. This is because frailty reflects cumulative regulatory failure (deficit accumulation), and the instability of coupling captures moment-to-moment regulatory strain, whereas mean coupling reflects a chronic steady-state adaptation.",
+  "mechanism": "Frailty in the Rockwood deficit-accumulation framework is the fraction of bodily systems that have crossed their failure threshold. Each failed system reduces the organism's ability to maintain stable inter-organ coordination under varying daily demands. This manifests not as a fixed coupling pattern but as erratic, unpredictable coupling: some hours show pathologically high coupling (sympathetic storms), others show decoupled dynamics (autonomic fatigue), and the transitions between these states are less organized. The variance and range of coupling features across the 10-day window capture this regulatory instability. Mean coupling, by contrast, reflects the average state, which may converge to a deceptively 'normal' value even in frail individuals whose coupling oscillates wildly.",
+  "predictions": [
+    "Variance of glucose-HR coupling features (computed across days or 4h blocks within each person's 10-day window) predicts frailty index better than mean coupling (incremental R2 > 0.03)",
+    "Range (max - min) of daily coupling also predicts frailty independently",
+    "The instability-frailty association survives adjustment for age, site, HbA1c, BMI, and mean coupling level",
+    "Negative control: instability of glucose MEAN across days does not predict frailty as well (coupling instability is specific, not just glycemic instability)",
+    "Instability features also improve allostatic load prediction but less strongly than frailty prediction"
+  ],
+  "literature": [
+    {
+      "title": "Disruption of multisystem responses to stress in type 2 diabetes",
+      "authors": "Hackett et al.",
+      "journal": "PNAS",
+      "year": 2014,
+      "key_finding": "Multisystem response instability (erratic stress reactivity and recovery) characterizes T2D, consistent with allostatic load model.",
+      "relevance": "Supports the idea that instability of physiological responses (not just their mean level) reflects disease burden.",
+      "doi": "10.1073/pnas.1410401111",
+      "url": "https://www.pnas.org/doi/10.1073/pnas.1410401111"
+    },
+    {
+      "title": "A Study of Physical Resilience and Aging (SPRING): Conceptual Framework",
+      "authors": "Whitson et al.",
+      "journal": "Journal of the American Geriatrics Society",
+      "year": 2023,
+      "key_finding": "Resilience in aging is the ability to maintain homeostasis under perturbation; reduced resilience manifests as increased variability in physiological responses.",
+      "relevance": "Theoretical framework connecting response instability to frailty and reduced resilience.",
+      "doi": "",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10608799/"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "per-day or per-4h-block (then summarize instability per person)",
+    "analysis_timescale": "10-day summary of coupling variability",
+    "computational_cost": "low",
+    "statistical_power": "N~1900; well-powered for R2 comparison between mean and variance features",
+    "key_challenges": [
+      "With only 10 days, variance estimates are noisy (df ~ 8-9 for daily estimates)",
+      "Instability may correlate strongly with mean level (collinearity)",
+      "Must separate measurement noise from genuine physiological instability"
+    ],
+    "dataset_limitations": [
+      "10-day window limits variance estimation precision",
+      "Cross-sectional: cannot determine whether instability precedes or follows frailty",
+      "No longitudinal outcomes to validate instability as a prognostic marker"
+    ]
+  },
+  "priority": 0.6,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Compare predictive models: frailty ~ mean_coupling_features vs frailty ~ instability_features (variance, range, entropy of coupling across days/blocks) vs combined model",
+    "implementation_steps": [
+      "Step 1: For each participant, segment 10-day window into overlapping 4h blocks (stride=2h)",
+      "Step 2: Compute glucose-HR coupling (Pearson r, Spearman r) within each 4h block",
+      "Step 3: Compute per-person: mean, SD, CV, range, IQR, Shannon entropy (binned) of block-level coupling values",
+      "Step 4: Fit Ridge regression: frailty ~ mean_coupling_features + age + site + HbA1c + BMI (Model A)",
+      "Step 5: Fit Ridge regression: frailty ~ instability_features + age + site + HbA1c + BMI (Model B)",
+      "Step 6: Fit combined: frailty ~ mean_features + instability_features + covariates (Model C)",
+      "Step 7: Compare R2 of Model A, B, C on held-out test set",
+      "Step 8: Negative control: same with glucose mean instability instead of coupling instability"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI"
+    ],
+    "time_window": "10-day window segmented into 4h blocks",
+    "frequency_bands": [],
+    "expected_effect_size": "Incremental R2 > 0.03 from instability features beyond mean features for frailty prediction",
+    "success_criterion": "Model B (instability only) outperforms Model A (mean only) for frailty prediction, and Model C (combined) outperforms both",
+    "refutation_criterion": "Model A outperforms Model B. Instability features are fully redundant with mean features (Model C no better than Model A). Glucose mean instability predicts frailty equally well.",
+    "sensitivity_checks": [
+      "Use 6h and 12h blocks instead of 4h",
+      "Use per-day coupling instead of per-block",
+      "Robust variance estimation (MAD, IQR) instead of SD",
+      "Cross-validate with train/val/test split",
+      "Test for confounding: does instability correlate with data completeness?"
+    ],
+    "secondary_methods": [
+      "Functional data analysis: coupling as a function of time, predict frailty from shape features",
+      "Random forest feature importance for mean vs instability features"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.7,
+    "biological_plausibility": 0.7,
+    "novelty": 0.6,
+    "importance": 0.7,
+    "reproducibility": 0.65,
+    "issues": [
+      "This is largely redundant with H-NEW11 (day-to-day coupling CV predicts clinical burden). The key difference is temporal granularity (4h blocks vs daily) and the specific focus on frailty prediction. But the core insight is identical: coupling variability matters beyond coupling mean.",
+      "The comparison between Model A (mean features) and Model B (instability features) for frailty prediction may be confounded by the different number of features and their reliability. Instability features (variance, range, IQR, Shannon entropy of coupling across blocks) have more dimensions than the single mean, potentially giving Model B an unfair advantage from overfitting even with Ridge regression.",
+      "The incremental R2 > 0.03 threshold is modest but reasonable. However, without longitudinal validation, it is unclear whether this incremental prediction reflects genuine prognostic information or cross-sectional confounding (e.g., frail people have more erratic daily routines, which creates more variable coupling).",
+      "Using 4h blocks with 2h stride creates overlapping windows. The coupling estimates from overlapping blocks are autocorrelated, which inflates the apparent variability and must be accounted for."
+    ],
+    "confounders_missed": [
+      "Activity pattern regularity: frail people may have less regular daily routines, creating more variable coupling as a behavioral artifact rather than a physiological marker",
+      "Data quality: frail participants may wear devices less consistently, creating data gaps that artificially increase measured coupling variability",
+      "Number of blocks with valid data: participants with fewer valid blocks mechanically have noisier variability estimates"
+    ],
+    "suggestions": [
+      "Merge this with H-NEW11 as a single 'coupling variability as resilience/frailty marker' hypothesis with both daily and sub-daily resolutions.",
+      "Match the number of features between Model A and Model B (e.g., use mean + SD for both: mean of coupling and SD of coupling for both time resolutions).",
+      "Use non-overlapping blocks (4h stride) to avoid autocorrelation artifacts.",
+      "Report the correlation between coupling instability features and activity regularity features. If r > 0.5, the instability metric may be capturing behavioral patterns, not physiological resilience."
+    ],
+    "overall_score": 0.67
+  },
+  "depends_on": [
+    "H-MIG04",
+    "H-NEW11"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG04",
+    "H-NEW11"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Complementary to H-NEW11 (day-to-day CV) but more focused on frailty prediction and using finer temporal resolution (4h blocks). The practical implication: if instability predicts frailty better, monitoring coupling VARIABILITY over time becomes more clinically useful than a single coupling measurement."
+}

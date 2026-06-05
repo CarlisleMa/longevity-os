@@ -1,0 +1,48 @@
+{
+  "args": [
+    "--coupling-features",
+    "results/coupling/coupling_features.parquet",
+    "--participant-index",
+    "results/features/participant_index.parquet",
+    "--feature-matrix",
+    "results/features/feature_matrix.parquet",
+    "--feature",
+    "glucose_hr_awake_r",
+    "--candidate-id",
+    "CAND-LEGACY-H-MIG01",
+    "--plan-id",
+    "PLAN-20260515-0001",
+    "--output-json",
+    "results/agentic_discovery/{spec_id}/{run_id}/summary.json",
+    "--group-csv",
+    "results/agentic_discovery/{spec_id}/{run_id}/group_summary.csv",
+    "--model-csv",
+    "results/agentic_discovery/{spec_id}/{run_id}/model_summary.csv"
+  ],
+  "candidate_id": "CAND-LEGACY-H-MIG01",
+  "description": "Executable cached-feature reanalysis for PLAN-20260515-0001 / H-MIG01 glucose-HR coupling severity gradient.",
+  "expected_outputs": [
+    "results/agentic_discovery/{spec_id}/{run_id}/summary.json",
+    "results/agentic_discovery/{spec_id}/{run_id}/group_summary.csv",
+    "results/agentic_discovery/{spec_id}/{run_id}/model_summary.csv"
+  ],
+  "hypothesis_id": "H-MIG01",
+  "notes": "Generated through execution proposal compiler. Uses cached coupling features; does not recompute raw streams or test medication confounding.\nPromoted from quarantined execution proposal EXECPROP-20260515-0001.",
+  "output_dir": "results/agentic_discovery/{spec_id}/{run_id}",
+  "plan_id": "PLAN-20260515-0001",
+  "proposal_id": "EXECPROP-20260515-0001",
+  "required_inputs": [
+    "results/coupling/coupling_features.parquet",
+    "results/features/participant_index.parquet",
+    "results/features/feature_matrix.parquet"
+  ],
+  "script": "agentic_discovery/analysis/generated/h_mig01_glucose_hr_retest.py",
+  "slurm": {
+    "cpus_per_task": 2,
+    "job_name": "ad-hmig01-retest",
+    "mem": "8G",
+    "time": "00:20:00"
+  },
+  "spec_id": "h_mig01_glucose_hr_retest",
+  "split_id": "none_cross_sectional_full_cohort_cached_features"
+}

@@ -1,0 +1,722 @@
+{
+  "critic_session": "2026-04-27",
+  "verdicts": {
+    "H-NEW01": {
+      "verdict": "PASS",
+      "statistical_rigor": 0.85,
+      "biological_plausibility": 0.80,
+      "novelty": 0.65,
+      "importance": 0.85,
+      "reproducibility": 0.85,
+      "issues": [
+        "The 10-day window provides only ~2.5 full cycles at the >8h band, making circadian-scale coherence estimates unreliable and likely inflating confidence intervals. The cone-of-influence will eat a large fraction of usable data at these long periods.",
+        "The <30min negative control is confounded by Garmin HR smoothing: Garmin averages HR at 1-5 min resolution, so any sub-30min coherence is mechanically attenuated regardless of physiology. This makes the negative control trivially satisfied.",
+        "No meal timing data means the 1-4h band coherence cannot be attributed to meal-driven excursions specifically. It could reflect ultradian hormonal oscillations (cortisol, GH) that happen to peak at similar frequencies.",
+        "Adjusting for HbA1c AND mean glucose is borderline redundant; both capture glycemic level and their joint inclusion may create collinearity problems."
+      ],
+      "confounders_missed": [
+        "Beta-blocker use (redacted): dampens HR oscillations across all timescales, could selectively reduce 1-4h coherence in medicated participants",
+        "Meal frequency/regularity: participants who eat on rigid schedules vs. grazing will have different ultradian glucose periodicity regardless of disease state",
+        "Physical fitness level: affects autonomic tone and HR dynamics at all timescales"
+      ],
+      "suggestions": [
+        "Drop the >8h band analysis entirely -- 10 days is insufficient for circadian coherence estimates. Focus on the 30min-8h range where statistical power is adequate.",
+        "Replace the <30min negative control with a surrogate-based test (time-shifted glucose vs real HR) at 1-4h band, which is a stronger null test that is not confounded by Garmin smoothing.",
+        "Report both raw and activity-conditioned coherence at each band to separate activity-driven from autonomic-driven coupling.",
+        "Pre-register that the 1-4h band d must exceed 1.2x the broadband d (not just be 'larger'), giving a quantitative bar for timescale selectivity."
+      ],
+      "overall_score": 0.80,
+      "revised_priority": 0.88,
+      "rationale": "Strong extension of H-MIG01 that adds mechanistic specificity by decomposing coupling by frequency. The core prediction (ultradian selectivity) is plausible and well-grounded in Costa et al. and Fabris et al. However, the circadian-band test is underpowered at 10 days, and the sub-30min negative control is trivially satisfied due to Garmin HR smoothing. With the suggested modifications (dropping >8h, using surrogate controls), this becomes a high-priority test."
+    },
+    "H-NEW02": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.70,
+      "biological_plausibility": 0.75,
+      "novelty": 0.80,
+      "importance": 0.80,
+      "reproducibility": 0.60,
+      "issues": [
+        "Transfer entropy estimation from 5-min averaged Garmin HR is deeply problematic. TE requires capturing the fine-grained temporal structure of information flow. At 5-min resolution, a single TE 'step' is 5 minutes -- far too coarse to capture the actual timescale of glucose->HR neural signaling (seconds to minutes). The TE estimate will reflect statistical dependence structure, not genuine causal dynamics.",
+        "CCM requires sufficient library length for shadow manifold reconstruction. With ~2880 points per person at 5-min resolution, and typical embedding dimension E=3-5 with lag tau=2-5, the effective library is marginal. CCM convergence (the diagnostic for causality) requires testing at multiple library lengths, and 2880 points may not show clear convergence.",
+        "The claim that 'HR->glucose weakens in diabetes' conflates two different things: (1) exercise-mediated glucose uptake (which is a behavioral pathway, not an autonomic one) and (2) autonomic modulation of hepatic glucose output (which is a genuine HR->glucose autonomic pathway). These operate at completely different timescales and the 5-min resolution cannot separate them.",
+        "Activity is a massive confounder for transfer entropy in both directions. Activity drives both glucose and HR. Conditioning on activity state (awake/sleep binary) is too coarse -- need continuous activity conditioning."
+      ],
+      "confounders_missed": [
+        "Medications (redacted): insulin bolus timing creates artificial glucose->HR temporal structure (bolus -> glucose drop -> sympathetic counter-regulation -> HR); beta-blockers attenuate HR response, reducing apparent TE in both directions",
+        "Posture changes: cause rapid HR changes that may create spurious TE from activity proxy (steps) to HR, contaminating the glucose->HR pathway",
+        "CGM sensor lag: CGM glucose reading lags true blood glucose by 5-15 minutes, which will bias TE estimates in the glucose->HR direction"
+      ],
+      "suggestions": [
+        "Pilot on 50 participants first to verify TE estimation is feasible and stable at 5-min resolution before committing to full analysis.",
+        "Use conditional transfer entropy conditioned on continuous activity (log-steps, not binary awake/sleep) to partial out activity confounding.",
+        "Acknowledge upfront that 'causal direction' from TE at 5-min resolution really means 'dominant statistical dependency direction at multi-minute timescales,' not genuine neural causal dynamics.",
+        "Consider Granger causality as primary method (simpler, better understood, robust at coarse resolution) and use TE/CCM as secondary/confirmatory.",
+        "Report surrogate-data significance rates per group: if >30% of individual TE values are non-significant by surrogate test, the method has insufficient sensitivity and the group comparison is unreliable."
+      ],
+      "overall_score": 0.72,
+      "revised_priority": 0.72,
+      "rationale": "Conceptually important -- understanding causal directionality would be a genuine advance over symmetric correlation. However, the methodological feasibility is the Achilles heel. TE and CCM at 5-min resolution from smoothed Garmin HR data are operating far outside their comfort zone. The results will be noisy, parameter-dependent, and difficult to interpret causally. Downgraded from proposed priority 0.88 to 0.72 due to feasibility concerns. Would upgrade to PASS if pilot validation shows stable TE estimates."
+    },
+    "H-NEW03": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.75,
+      "biological_plausibility": 0.80,
+      "novelty": 0.70,
+      "importance": 0.80,
+      "reproducibility": 0.70,
+      "issues": [
+        "The core problem: Garmin HR is averaged/interpolated at 1-5 min resolution. 'Peak HR latency' in the 15-60 minute range requires detecting the timing of the HR maximum within a post-excursion window -- but with 5-min bins, the timing resolution is +/- 5 min, which is a large fraction of the predicted 15-30 min latency. The difference between 15-30 min (healthy) and 30-60 min (diabetes) could easily be within measurement noise.",
+        "Without meal timing data, a 'glucose excursion' defined by threshold crossing cannot distinguish: (a) genuine postprandial rise, (b) dawn phenomenon, (c) rebound after exercise, (d) insulin wearing off. These have very different HR response profiles. Pooling them together adds noise and may wash out the signal.",
+        "The 'stereotypy' prediction (lower inter-excursion CV in diabetes) is clever but vulnerable to a confound: diabetes groups have more excursions on average, and the CV of a metric decreases with sample size. Must correct for number of excursions.",
+        "Activity during the excursion window is a massive confounder. Walking to lunch (excursion + activity) vs sitting while eating (excursion alone) produce very different HR responses. The plan mentions excluding high-activity windows but does not address moderate activity confounding."
+      ],
+      "confounders_missed": [
+        "Insulin bolus timing (redacted): insulin-dependent participants often bolus at meals, creating a simultaneous pharmacological glucose drop + potential vagal response that contaminates the post-excursion HR recovery profile",
+        "Excursion magnitude: larger excursions produce larger HR responses mechanically; if diabetes groups have larger excursions, the 'larger HR response' finding is confounded by excursion size even after adjusting for mean excursion magnitude",
+        "Time-of-day: meal-driven excursions cluster at 7-9am, 12-1pm, 6-7pm; the HR response to a given glucose rise varies with circadian autonomic tone"
+      ],
+      "suggestions": [
+        "Use change-point detection (PELT) on glucose rather than fixed threshold for more robust excursion identification.",
+        "Normalize HR response by excursion magnitude (delta-HR per delta-glucose) to remove the confound of excursion amplitude.",
+        "For the stereotypy analysis, use a sample-size-corrected CV or permutation test (within each participant, shuffle excursion labels and recompute CV to establish null) to avoid the CV-vs-N artifact.",
+        "Focus on waking-only excursions during low-activity windows (first 30 min steps < 50) to minimize activity confounding. This will reduce N of events but increase signal purity."
+      ],
+      "overall_score": 0.75,
+      "revised_priority": 0.78,
+      "rationale": "The event-triggered approach is a smart complement to the broadband coupling analysis and has direct clinical relevance (excursion-triggered HR response as a screening marker). However, the Garmin HR temporal resolution limits the peak latency analysis, and the lack of meal timing data makes excursion identification imprecise. The stereotypy prediction is novel but needs careful correction for the CV-sample-size confound. With the suggested modifications, this is worth pursuing but should be considered exploratory rather than confirmatory."
+    },
+    "H-NEW04": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.70,
+      "biological_plausibility": 0.70,
+      "novelty": 0.60,
+      "importance": 0.65,
+      "reproducibility": 0.75,
+      "issues": [
+        "The 10-day window is fundamentally limiting for circadian phase estimation. Cosinor fitting to 10 days of data gives phase estimates with substantial uncertainty (SE of ~0.5-1 hour for a typical cosinor fit with moderate R2). The predicted effect (0.5-2 hour phase shift) is within the noise range for many participants.",
+        "Glucose circadian rhythm is NOT well-described by a single 24h cosinor. Postprandial peaks create a multi-peak pattern (3 meals = 3 daily peaks). The cosinor R2 will be low for glucose in many participants, and the R2 > 0.1 threshold is very lenient -- that means 90% of the glucose variance is NOT explained by the 24h rhythm.",
+        "The claim that 'glucose phase advances in diabetes due to exaggerated dawn phenomenon' assumes the dawn phenomenon is the dominant circadian glucose signal. But in free-living conditions with ad libitum meals, postprandial glucose peaks likely dominate the circadian signal, and meal timing varies between individuals based on lifestyle, not disease state.",
+        "The negative control (glucose-activity phase difference should track severity LESS strongly) may fail for interesting reasons: activity phase is also correlated with chronotype and employment status, which correlate with diabetes risk."
+      ],
+      "confounders_missed": [
+        "Chronotype / social jetlag: early chronotypes have earlier glucose peaks regardless of diabetes status; if diabetes groups have different age distributions, chronotype confounding is likely",
+        "Meal timing: the dominant determinant of glucose circadian phase in free-living conditions is meal timing, not endogenous circadian physiology",
+        "Employment status: retired vs working participants have very different activity and meal timing patterns"
+      ],
+      "suggestions": [
+        "Use a two-harmonic cosinor (24h + 12h) to better capture the multi-peak glucose pattern.",
+        "Require cosinor R2 > 0.25 (not 0.1) to ensure phase estimates are meaningful.",
+        "Report the fraction of participants with adequate cosinor fit -- if <60% have R2 > 0.25, the analysis is underpowered due to poor model fit, not sample size.",
+        "Consider using the phase of the FIRST glucose rise after the nadir (dawn phenomenon timing) as a more specific phase marker rather than global cosinor acrophase."
+      ],
+      "overall_score": 0.68,
+      "revised_priority": 0.62,
+      "rationale": "Circadian desynchronization in diabetes is a real phenomenon but the analytical approach is poorly matched to the data. Cosinor models fit glucose poorly due to meal-driven peaks, 10 days provides noisy phase estimates, and meal timing confounding is unaddressed. This is better suited for controlled protocol studies with standardized meal timing. Downgraded priority substantially."
+    },
+    "H-NEW05": {
+      "verdict": "PASS",
+      "statistical_rigor": 0.85,
+      "biological_plausibility": 0.90,
+      "novelty": 0.55,
+      "importance": 0.80,
+      "reproducibility": 0.85,
+      "issues": [
+        "Costa et al. (2014) already demonstrated glucose MSE differences by diabetes status in CGM data. The novelty here is linking MSE to allostatic load and frailty BEYOND HbA1c, not the MSE group difference itself.",
+        "The existing Shannon entropy proxy in coupling_features.py already captures some complexity information. The incremental value of formal SampEn over this proxy needs to be tested explicitly. If the Shannon proxy already does the job, the formal SampEn adds methodological complexity without proportional benefit.",
+        "CGM sensor noise at short scales (scale 1, 5 min) and CGM sensor drift at long scales (>6h) bracket the useful range. The proposer acknowledges this for short scales but not for long scales."
+      ],
+      "confounders_missed": [
+        "Medications (redacted): metformin stabilizes glucose fluctuations, insulin creates artificial oscillations -- both alter MSE independent of underlying regulatory physiology",
+        "CGM sensor type: different CGM devices (Dexcom G6 vs Libre) have different signal processing and noise characteristics that affect entropy at short scales",
+        "Dietary patterns: low-carb diets produce less variable glucose (lower MSE at meal scales) regardless of disease state"
+      ],
+      "suggestions": [
+        "Test the Shannon entropy proxy from coupling_features.py first. If it already predicts allostatic load after HbA1c adjustment, formal SampEn may be unnecessary.",
+        "Report which specific SampEn scales carry the incremental prediction over HbA1c. If only 1-3h scales matter, this reinforces H-NEW01's ultradian-selectivity finding.",
+        "Use cross-validated incremental R2 (not in-sample) to avoid overfitting when testing incremental prediction."
+      ],
+      "overall_score": 0.79,
+      "revised_priority": 0.82,
+      "rationale": "Solid extension of established work (Costa et al.) with a clinically meaningful endpoint (allostatic load, frailty beyond HbA1c). The biological plausibility is strong -- glucose complexity genuinely reflects regulatory capacity from overlapping feedback loops. The main weakness is limited novelty (MSE in CGM is well-established) and the need to demonstrate incremental value over the existing Shannon entropy proxy. Worth doing but should be framed as validation and clinical extension, not discovery."
+    },
+    "H-NEW06": {
+      "verdict": "PASS",
+      "statistical_rigor": 0.80,
+      "biological_plausibility": 0.75,
+      "novelty": 0.75,
+      "importance": 0.75,
+      "reproducibility": 0.75,
+      "issues": [
+        "Only ~8-9 night-day pairs per person severely limits within-person analysis. The within-person r=0.15 prediction requires about 30 paired observations for 80% power at alpha=0.05. With 8 pairs, individual-level significance is impossible; the analysis depends entirely on the mixed-effects model borrowing strength across participants.",
+        "The proposed mediation through 'morning fasting glucose (dawn phenomenon amplitude)' is sensible but creates a near-tautology: nocturnal glucose-HR coupling is partly driven by nocturnal glucose level, and nocturnal glucose level mechanically predicts morning glucose. The 'mediation' may be capturing glucose autocorrelation, not a genuine autonomic pathway.",
+        "Garmin sleep period detection may not accurately capture sleep onset/offset, introducing noise into the nocturnal vs daytime segmentation."
+      ],
+      "confounders_missed": [
+        "Insulin-on-board: insulin-dependent participants may inject long-acting insulin at bedtime, which mechanically lowers overnight glucose and thus reduces glucose-HR coupling -- confounding the disease-specific prediction",
+        "Sleep apnea: undiagnosed sleep apnea (common in T2D) causes repeated autonomic activations during sleep that strengthen glucose-HR coupling independent of the proposed dawn phenomenon mechanism",
+        "Evening meal timing/composition: a late heavy meal drives both overnight glucose and overnight HR independently of the hypothesized endogenous mechanism"
+      ],
+      "suggestions": [
+        "Adjust for nocturnal mean glucose as a covariate (not just as a mediator) to test whether coupling INDEPENDENT of glucose level predicts next-day glycemia.",
+        "Use fixed time windows (11pm-6am, 6am-11pm) as sensitivity check against Garmin sleep timing.",
+        "Frame the analysis as population-level (random slopes model) rather than individual-level prediction, given the 8-pair limitation."
+      ],
+      "overall_score": 0.76,
+      "revised_priority": 0.76,
+      "rationale": "Novel and clinically interesting: if overnight coupling predicts next-day glycemia, this has direct implications for real-time CGM-wearable monitoring. The mechanism (dawn phenomenon driving both coupling and next-day glucose) is plausible. However, the limited number of night-day pairs and the risk of confounding by glucose autocorrelation temper enthusiasm. The mediation analysis should be interpreted cautiously."
+    },
+    "H-NEW07": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.65,
+      "biological_plausibility": 0.65,
+      "novelty": 0.70,
+      "importance": 0.60,
+      "reproducibility": 0.60,
+      "issues": [
+        "The environmental sensor measures room-level light, NOT personal retinal light exposure. The relationship between room light and melatonin suppression depends on: (1) whether the person is in the room, (2) whether they are facing the sensor, (3) screen use (not captured by room sensor), (4) whether lights are on in a different room. This is a very noisy proxy for the biological exposure that supposedly drives the mechanism.",
+        "The expected effect size is tiny (interaction d 0.15-0.25, within-person d 0.1-0.2). With noisy room-level light measurements, consumer-grade sleep staging, and only ~8 nights per person, detecting a d=0.1-0.2 within-person effect is unrealistic.",
+        "The melatonin -> insulin -> glucose -> HR causal chain involves 4 steps, each with its own noise and individual variation. The end-to-end effect (evening light -> overnight coupling) is likely attenuated to near zero after these intermediaries.",
+        "The negative control (temperature/humidity do not modulate coupling) may fail because room temperature independently affects sleep quality and autonomic tone."
+      ],
+      "confounders_missed": [
+        "Screen time: blue light from screens is the dominant melatonin-suppressing exposure in modern environments, and room light sensors do not capture it",
+        "Ambient light from outside: window orientation, curtain use, street lights -- all affect room light measurement independent of personal behavior",
+        "Alcohol consumption: evening alcohol affects both sleep quality and glucose metabolism, confounding the light-coupling relationship"
+      ],
+      "suggestions": [
+        "Consider dropping this hypothesis or reframing as purely exploratory.",
+        "If proceeding, use the strongest available proxy: combine room light + activity (proxy for being in room) + time (evening only) into a composite exposure score.",
+        "Set a priori minimum detectable effect size and report if the analysis is adequately powered for it.",
+        "Consider testing light during sleep (if recorded) rather than pre-sleep light, as Mason et al. (2022) found effects of light DURING sleep on cardiometabolic function."
+      ],
+      "overall_score": 0.64,
+      "revised_priority": 0.52,
+      "rationale": "The biological story (light -> melatonin -> insulin -> glucose -> HR coupling) has too many intermediary steps to produce a detectable signal through room-level light measurements. The expected effect sizes are below what this dataset can reliably detect given measurement noise and limited within-person observations. This is a 'sounds plausible on paper but not testable here' hypothesis. Significantly downgraded."
+    },
+    "H-NEW08": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.70,
+      "biological_plausibility": 0.70,
+      "novelty": 0.75,
+      "importance": 0.80,
+      "reproducibility": 0.65,
+      "issues": [
+        "Unsupervised clustering is fundamentally exploratory and prone to finding structure in noise. The silhouette score threshold of 0.15 is very low -- this means substantial cluster overlap, which questions whether the 'physiotypes' are genuinely discrete or just continuous variation being arbitrarily discretized.",
+        "The claim that clusters 'cross-cut HbA1c categories' is almost guaranteed by design: if you cluster on features other than HbA1c, of course the clusters will not align perfectly with HbA1c. The ARI < 0.15 criterion is too easy to satisfy. A more meaningful test is whether the coupling-based clusters have distinct CLINICAL profiles beyond what HbA1c grouping achieves.",
+        "Medications are redacted. In diabetes care, medication regimens create systematic patterns in glucose dynamics (metformin smooths glucose, insulin creates specific oscillation patterns, SGLT2i cause nocturnal hypoglycemia). Coupling-based clusters may simply be recovering medication regimen subgroups, not fundamental physiological phenotypes.",
+        "Cross-sectional clustering cannot validate that physiotypes are stable over time. The same person might cluster differently in another 10-day window."
+      ],
+      "confounders_missed": [
+        "Medication regimen (redacted): the strongest determinant of glucose dynamics pattern within each severity group",
+        "Dietary patterns: vegan vs omnivore, regular meals vs erratic eating -- create distinct coupling patterns",
+        "Physical activity patterns: athletes vs sedentary -- create distinct glucose-activity and glucose-HR coupling profiles",
+        "CGM sensor type and placement: different devices produce systematically different signal characteristics"
+      ],
+      "suggestions": [
+        "Replace the arbitrary ARI < 0.15 threshold with a more demanding test: do coupling clusters predict frailty/allostatic load in a cross-validated model BETTER than the best single coupling feature? If not, the cluster structure adds noise, not information.",
+        "Use consensus clustering (perturbation-based stability) and report the fraction of participants with stable cluster assignment across 1000 resamples. Reject if <70% are stable.",
+        "Name the hypothesis more honestly: this is 'exploratory subtype discovery' not 'coupling-defined physiotypes capture distinct metabolic phenotypes.' The latter implies validation that cross-sectional clustering cannot provide.",
+        "Include a split-half validation: cluster on one half of participants, project the other half into cluster space, test whether the cluster profiles replicate."
+      ],
+      "overall_score": 0.72,
+      "revised_priority": 0.68,
+      "rationale": "Conceptually appealing -- moving beyond HbA1c to dynamic regulation-based phenotyping is an important direction. But unsupervised clustering on cross-sectional data with redacted medications is a minefield. The clusters may reflect medication patterns, dietary habits, or random noise rather than fundamental physiological phenotypes. Needs much stronger validation framework than proposed. Downgraded but worth exploring with appropriate caveats."
+    },
+    "H-NEW09": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.65,
+      "biological_plausibility": 0.70,
+      "novelty": 0.65,
+      "importance": 0.70,
+      "reproducibility": 0.55,
+      "issues": [
+        "This hypothesis depends on results from H-NEW02 (TE asymmetry) and H-NEW03 (post-excursion HR recovery), neither of which has been validated yet. Building a hypothesis on top of unvalidated features creates a dependency chain where failure at any link invalidates the whole structure.",
+        "The predicted effect size (partial r 0.08-0.15) is very small. After adjustment for age, HbA1c, BMI, and site, detecting a partial r of 0.08 requires N~1200 for 80% power. This is feasible but leaves little room for error from OCTA quality issues, feature noise, or additional confounders.",
+        "OCTA superficial vessel density extraction is not trivial -- it requires image processing pipelines that may not exist in the current codebase. Using RETFound embedding PCs as a proxy introduces an additional layer of abstraction that makes interpretation harder.",
+        "H-MIG05 was already REFUTED for broadband coupling. The claim that 'autonomic-specific' coupling features will succeed where broadband failed is plausible but may also reflect researcher degrees of freedom (trying different features until one works)."
+      ],
+      "confounders_missed": [
+        "Intraocular pressure (IOP): affects OCTA measurements and is associated with diabetes status",
+        "Diabetic retinopathy treatment history (laser/anti-VEGF): directly affects vessel density but may not be recorded",
+        "OCTA signal quality: signal strength varies with media opacity (cataracts, common in diabetes) and affects SVD measurement"
+      ],
+      "suggestions": [
+        "Wait for H-NEW02 and H-NEW03 results before pursuing this. If either fails, the 'autonomic-specific features' are not available.",
+        "Start with the simplest possible test: does 11-second ECG RMSSD (which IS a validated autonomic marker available in AI-READI) correlate with OCTA SVD? If not, the shared autonomic-microvascular damage hypothesis fails at the most basic level.",
+        "If RMSSD-SVD correlation is present, THEN test whether continuous coupling features add incrementally over RMSSD.",
+        "Register this as conditional on H-NEW02/H-NEW03 results."
+      ],
+      "overall_score": 0.65,
+      "revised_priority": 0.55,
+      "rationale": "A more targeted retry of H-MIG05, which is methodologically sound. But it depends on unvalidated upstream features, expects small effects from noisy measurements, and risks being a post-hoc search for any feature that correlates with retinal structure. The simplest version (RMSSD -> SVD) should be tested first before invoking complex coupling features. Downgraded priority."
+    },
+    "H-NEW10": {
+      "verdict": "PASS",
+      "statistical_rigor": 0.75,
+      "biological_plausibility": 0.85,
+      "novelty": 0.70,
+      "importance": 0.70,
+      "reproducibility": 0.75,
+      "issues": [
+        "The inability to distinguish post-exercise glucose rebound from postprandial glucose rise is the single biggest limitation. Many people eat AFTER exercise (post-gym meal), so the 'recovery period glucose rise' may simply be a meal-driven spike occurring during recovery. Without meal timing data, these are inseparable.",
+        "Activity bout detection from 5-min step counts is crude. The threshold of '>20 steps per 5-min bin for 3 consecutive bins' captures brisk walking but misses cycling, swimming, or gym workouts that do not produce steps. The 'activity bouts' are really 'walking bouts.'",
+        "The expected effect size (d 0.25-0.4) is moderate and plausible, but the confounding from concurrent eating during recovery may inflate or deflate the estimate unpredictably."
+      ],
+      "confounders_missed": [
+        "Post-exercise eating: the most likely confounder, cannot be addressed without meal data",
+        "Exercise type: walking vs structured exercise have different glucose responses; step counts only capture ambulatory activity",
+        "Time since last meal: a bout 30 min after a meal vs 3 hours after a meal will have very different baseline glucose trajectories",
+        "Insulin timing (redacted): insulin-dependent participants may adjust bolus around exercise, creating artificial glucose patterns during recovery"
+      ],
+      "suggestions": [
+        "Focus the analysis on morning bouts before the typical breakfast time window (6-8am) when post-exercise eating is less likely.",
+        "Stratify by bout timing relative to typical meal windows (exclude bouts starting within 1h of 12pm or 6pm).",
+        "Compute the glucose-activity coupling SIGN (positive vs negative) rather than magnitude during exercise vs recovery -- the sign reversal is the key prediction and is less sensitive to confounders."
+      ],
+      "overall_score": 0.75,
+      "revised_priority": 0.72,
+      "rationale": "Good physiological reasoning about exercise-recovery phase asymmetry with clear predictions. The meal confounding during recovery is the critical limitation that cannot be fully addressed without meal timing data. Still worth pursuing because the exercise-induced glucose decrease during the bout itself is interpretable, even if the recovery phase is confounded. Moderately downgraded."
+    },
+    "H-NEW11": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.65,
+      "biological_plausibility": 0.75,
+      "novelty": 0.70,
+      "importance": 0.75,
+      "reproducibility": 0.65,
+      "issues": [
+        "Computing a CV from ~8-10 daily values is statistically fragile. The sampling distribution of CV from N=10 is very wide; the estimated CV has a CV of its own that is ~30%. Group differences in coupling CV will be dominated by noise in the CV estimate, not genuine physiological differences.",
+        "The prediction that 'lower CV = higher mean coupling' creates a potential statistical artifact: if coupling has a ceiling effect (bounded above), high-mean coupling mechanically has lower variance. The correlation between mean and CV may be mathematical rather than biological.",
+        "Day-to-day variability in coupling could reflect measurement noise (CGM sensor drift, HR data gaps, varying data quality across days) rather than genuine physiological variability. Without a noise model, genuine and artifactual variability are inseparable.",
+        "The 'loss of complexity' framing is borrowed from Lipsitz & Goldberger, but their framework applies to within-signal complexity (MSE of HR, fractal dimension), not to the variability of inter-signal coupling across days. Extending the concept to day-to-day coupling variability is an extrapolation, not a direct application."
+      ],
+      "confounders_missed": [
+        "Data quality variability across days: days with more missing data have noisier coupling estimates, inflating apparent CV",
+        "Weekend/weekday cycling: behavioral differences between weekend and weekday create systematic (non-random) day-to-day coupling variability that is not 'resilience'",
+        "Weather and season: outdoor activity patterns change with weather, creating day-to-day behavioral variability that drives coupling variability"
+      ],
+      "suggestions": [
+        "Use 4h blocks within days (giving ~60 blocks per person) rather than daily estimates. This provides a more robust variability estimate with enough degrees of freedom.",
+        "Explicitly test and report the mean-CV correlation. If r(mean, CV) > 0.5, the CV is largely a mathematical consequence of the mean and not an independent metric.",
+        "Compute coupling variability from AWAKE-ONLY periods to reduce the confound of varying sleep quality across nights.",
+        "Report split-half reliability of the CV estimate (first 5 days vs last 5 days). If reliability < 0.5, the metric is too noisy to be useful."
+      ],
+      "overall_score": 0.70,
+      "revised_priority": 0.64,
+      "rationale": "The concept is appealing (variability of inter-organ coupling as resilience marker), but the 10-day window provides too few daily observations for reliable CV estimation. The mean-CV correlation artifact is a serious concern. With 4h blocks instead of daily estimates, this becomes more feasible. Downgraded due to measurement precision limitations."
+    },
+    "H-NEW12": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.65,
+      "biological_plausibility": 0.70,
+      "novelty": 0.55,
+      "importance": 0.65,
+      "reproducibility": 0.60,
+      "issues": [
+        "This is essentially a within-person retest of H-MIG06 (PM2.5-glucose coupling, which was already inconclusive). The key improvement (within-person detrending) is methodologically sound, but the fundamental problem remains: room-level PM2.5 from an indoor environmental sensor is a poor proxy for personal PM2.5 exposure.",
+        "Indoor PM2.5 in controlled environments (which many AI-READI participants likely inhabit during their 10-day sensor period) has very limited day-to-day variability. If PM2.5 ranges from 5-15 ug/m3 across most days, the within-person variation is too small to detect a meaningful coupling change.",
+        "The expected standardized beta of 0.03-0.08 is extremely small. This is a 3-8% of a standard deviation change in coupling per 1 SD change in PM2.5. At this effect size, even a tiny unmeasured confounder can create or eliminate the signal.",
+        "The lag structure analysis (0, 1, 2 day lags) assumes the PM2.5 effect is day-level. But indoor PM2.5 spikes can occur from cooking, cleaning, or candle burning -- these are acute events, not day-level exposures. Hourly PM2.5 data should be used with distributed lag models, not daily averages."
+      ],
+      "confounders_missed": [
+        "Cooking and cleaning: acute indoor PM2.5 sources that co-occur with meal timing and physical activity, both of which independently affect coupling",
+        "Window/door opening: ventilation changes affect indoor PM2.5 and are correlated with weather and activity patterns",
+        "Sensor placement: if the sensor is in the bedroom vs kitchen, it captures very different exposure profiles"
+      ],
+      "suggestions": [
+        "First check PM2.5 within-person day-to-day variance. If the IQR is < 5 ug/m3 for most participants, there is insufficient variation to detect anything.",
+        "Use the distributed lag nonlinear model (DLNM) as the primary method with hourly PM2.5, not daily averages.",
+        "Stratify by site to see if the effect is only present at high-variability sites.",
+        "If PM2.5 variability is insufficient, honestly report this as a negative feasibility finding rather than a null result."
+      ],
+      "overall_score": 0.63,
+      "revised_priority": 0.50,
+      "rationale": "An improvement over H-MIG06 methodologically, but the fundamental data quality problem remains: indoor PM2.5 from a room sensor is a poor exposure metric. The expected effect is vanishingly small and the measurement is noisy. Without outdoor exposure data or personal exposure monitoring, this hypothesis is effectively untestable at meaningful effect sizes. Significantly downgraded."
+    },
+    "H-NEW13": {
+      "verdict": "PASS",
+      "statistical_rigor": 0.75,
+      "biological_plausibility": 0.80,
+      "novelty": 0.85,
+      "importance": 0.80,
+      "reproducibility": 0.70,
+      "issues": [
+        "Computing glucose-HR correlation in 30-min sliding windows (6 data points at 5-min resolution) yields very noisy per-window estimates. The Pearson r from 6 points has a standard error of ~0.35, meaning individual window estimates are essentially uninformative. The approach relies on averaging across 8 mornings, but the noise is still substantial.",
+        "Garmin sleep end-time does not necessarily correspond to the moment of waking. Participants may lie in bed awake, check their phones, or be recorded as 'asleep' while partially awake. This timing imprecision adds noise to the reorganization latency estimate.",
+        "The negative control (wake-to-sleep transition should show weaker group differences) could fail because the sleep-onset transition involves melatonin, cortisol decline, and parasympathetic activation -- which are also affected by autonomic neuropathy."
+      ],
+      "confounders_missed": [
+        "Morning medication: many diabetes patients take medication upon waking, which affects HR and glucose within the analysis window",
+        "Alarm vs natural waking: alarm-driven waking produces different autonomic responses than natural waking; this varies by employment status",
+        "Coffee/caffeine: morning caffeine intake affects HR and glucose within the first 30-60 min of waking"
+      ],
+      "suggestions": [
+        "Use a larger window (45-60 min sliding window) to get more stable per-window coupling estimates. This reduces temporal resolution but improves reliability.",
+        "Use first-activity-detected (first 5-min bin with >10 steps) as an alternative waking marker to validate against Garmin sleep-end.",
+        "Consider using the CHANGE in coupling (difference between consecutive windows) rather than absolute coupling to detect the transition dynamics.",
+        "This is a genuinely novel metric -- publish with a pilot subsample first to establish feasibility before the full analysis."
+      ],
+      "overall_score": 0.78,
+      "revised_priority": 0.80,
+      "rationale": "The most novel hypothesis in the batch. Coupling reorganization speed at the sleep-wake transition is a creative application of network physiology principles that has not been tested in diabetes. The biological mechanism (autonomic mode-switching degradation) is plausible and well-grounded. Main concerns are the noisy per-window coupling estimates and Garmin sleep timing imprecision, but these can be partially addressed with wider windows and alternative waking markers. High priority despite technical challenges."
+    },
+    "H-NEW14": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.70,
+      "biological_plausibility": 0.75,
+      "novelty": 0.65,
+      "importance": 0.65,
+      "reproducibility": 0.60,
+      "issues": [
+        "CRQA has a large number of free parameters (embedding dimension E, time delay tau, recurrence threshold epsilon, minimum line length l_min) that substantially affect the output metrics. Different reasonable parameter choices can give qualitatively different results. The plan acknowledges this but underestimates the problem -- CRQA parameter sensitivity is a major reproducibility concern.",
+        "The interpretation of CRQA metrics (DET, LAM, TT) in terms of 'attractor convergence' and 'loss of degrees of freedom' sounds compelling but is not unique. Higher DET and LAM can also result from: (1) both signals becoming smoother (Garmin HR smoothing!), (2) both signals having stronger trends, (3) both signals having lower noise. The 'attractor collapse' interpretation requires ruling out these simpler explanations.",
+        "The random-pairing negative control is necessary but may be too easy to pass. Randomly paired participants from different sites or groups will have systematically different glucose levels and HR means, which can create spurious structure in the cross-recurrence plot. The control should pair participants within the same group.",
+        "Computational cost is a practical concern: the cross-recurrence matrix for N=2880 is ~8 million elements per participant. For 1900 participants, this is substantial."
+      ],
+      "confounders_missed": [
+        "Signal smoothness: Garmin HR smoothing mechanically increases determinism and laminarity by removing high-frequency variability, independent of autonomic physiology",
+        "Non-stationarity: 10-day time series are non-stationary (circadian rhythms, weekday/weekend cycles), which inflates DET because recurrence from circadian patterns is 'deterministic' but not pathological",
+        "Data gaps: interpolated gaps create artificially smooth segments that inflate DET/LAM"
+      ],
+      "suggestions": [
+        "Compare CRQA metrics with the simpler cross-correlation or Pearson r. If CRQA DET correlates r > 0.8 with Pearson coupling r, the 'nonlinear' method adds nothing beyond the linear metric.",
+        "Compute CRQA on surrogate data (phase-randomized, preserving power spectrum) to establish a null for DET/LAM. Only the excess over surrogate-expected values is interpretable as nonlinear dynamics.",
+        "Segment the 10-day series into 24h blocks and compute CRQA per block, then average. This reduces non-stationarity artifacts.",
+        "Report CRQA metrics sensitivity to epsilon (recurrence threshold) over a range, not just the single value that gives 5% recurrence rate."
+      ],
+      "overall_score": 0.67,
+      "revised_priority": 0.58,
+      "rationale": "CRQA is a sophisticated nonlinear dynamics tool, but applying it to 5-min Garmin data is pushing the method beyond its comfort zone. The parameter sensitivity, confounding by signal smoothness, and risk of redundancy with simpler metrics are serious concerns. The 'attractor convergence' narrative is appealing but may be an over-interpretation. Should only be pursued after demonstrating that CRQA adds incremental information beyond linear coupling measures."
+    },
+    "H-NEW15": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.55,
+      "biological_plausibility": 0.55,
+      "novelty": 0.70,
+      "importance": 0.55,
+      "reproducibility": 0.55,
+      "issues": [
+        "The U-shaped hypothesis is highly specific and based on a post-hoc mechanistic story that invokes two different biological mechanisms (sympathetic for the left arm, parasympathetic for the right arm) to explain a single pattern. This is classic 'just so' reasoning: any observed pattern can be explained by invoking the right combination of mechanisms. Without prior empirical evidence for U-shaped coupling-sleep relationships, this is speculative.",
+        "The claim that 'very deep/efficient sleep also shows stronger coupling because parasympathetic control coherently modulates both glucose and HR' contradicts the existing finding that coupling INCREASES with diabetes (which involves parasympathetic DAMAGE). If parasympathetic function drives coupling upward during good sleep in healthy people, why doesn't parasympathetic damage (diabetes) reduce coupling during good sleep? The two arms of the U-shape have contradictory autonomic mechanisms.",
+        "Garmin sleep efficiency is a consumer-grade metric with ~70% agreement with PSG. The quadratic term requires precise measurement at the extremes (very good and very poor sleep), which is exactly where consumer devices are least accurate.",
+        "Testing a quadratic relationship with ~8 nights per person and consumer-grade sleep metrics is underpowered for detecting the curvature. The AIC/BIC comparison between linear and quadratic models is sensitive to outliers at sleep quality extremes.",
+        "The prediction that 'in insulin-dependent participants, the U-shape is attenuated because coupling is rigidly high' is essentially saying the effect is only present in the MIDDLE severity groups. This reduces the effective sample size and makes the finding even harder to detect."
+      ],
+      "confounders_missed": [
+        "Sleep-disordered breathing: sleep apnea events create high coupling during poor sleep (repeated desaturation + sympathetic activation + glucose spikes) -- this could create the LEFT arm of the U without any parasympathetic mechanism",
+        "Nocturia: diabetes patients with poor sleep often have nocturia, which involves waking + walking + glucose changes, confounding the coupling-sleep relationship",
+        "Hypoglycemia: nocturnal hypoglycemia causes both poor sleep quality and strong sympathetic HR response, creating a confound specifically at the 'poor sleep' extreme"
+      ],
+      "suggestions": [
+        "Drop the U-shaped hypothesis and instead test the simpler claim: 'poor sleep amplifies coupling, especially in diabetes.' This is testable, mechanistically clear, and avoids the speculative right arm of the U.",
+        "If insisting on testing the U-shape, require the quadratic coefficient to have the correct sign AND the vertex to be in the predicted range (75-85% sleep efficiency) as a dual criterion.",
+        "Increase effective sample size by using 1-hour sleep quality blocks within nights (e.g., first vs last hour) rather than whole-night sleep efficiency."
+      ],
+      "overall_score": 0.58,
+      "revised_priority": 0.45,
+      "rationale": "The U-shaped prediction is overly specific, based on contradictory mechanistic logic (parasympathetic damage increases coupling in diabetes, but parasympathetic function increases coupling during good sleep), and likely underpowered with consumer-grade sleep metrics and ~8 nights per person. The simpler 'poor sleep amplifies coupling' test is more defensible. Significantly downgraded."
+    },
+    "H-NEW16": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.70,
+      "biological_plausibility": 0.70,
+      "novelty": 0.60,
+      "importance": 0.70,
+      "reproducibility": 0.65,
+      "issues": [
+        "This is largely redundant with H-NEW11 (day-to-day coupling CV predicts clinical burden). The key difference is temporal granularity (4h blocks vs daily) and the specific focus on frailty prediction. But the core insight is identical: coupling variability matters beyond coupling mean.",
+        "The comparison between Model A (mean features) and Model B (instability features) for frailty prediction may be confounded by the different number of features and their reliability. Instability features (variance, range, IQR, Shannon entropy of coupling across blocks) have more dimensions than the single mean, potentially giving Model B an unfair advantage from overfitting even with Ridge regression.",
+        "The incremental R2 > 0.03 threshold is modest but reasonable. However, without longitudinal validation, it is unclear whether this incremental prediction reflects genuine prognostic information or cross-sectional confounding (e.g., frail people have more erratic daily routines, which creates more variable coupling).",
+        "Using 4h blocks with 2h stride creates overlapping windows. The coupling estimates from overlapping blocks are autocorrelated, which inflates the apparent variability and must be accounted for."
+      ],
+      "confounders_missed": [
+        "Activity pattern regularity: frail people may have less regular daily routines, creating more variable coupling as a behavioral artifact rather than a physiological marker",
+        "Data quality: frail participants may wear devices less consistently, creating data gaps that artificially increase measured coupling variability",
+        "Number of blocks with valid data: participants with fewer valid blocks mechanically have noisier variability estimates"
+      ],
+      "suggestions": [
+        "Merge this with H-NEW11 as a single 'coupling variability as resilience/frailty marker' hypothesis with both daily and sub-daily resolutions.",
+        "Match the number of features between Model A and Model B (e.g., use mean + SD for both: mean of coupling and SD of coupling for both time resolutions).",
+        "Use non-overlapping blocks (4h stride) to avoid autocorrelation artifacts.",
+        "Report the correlation between coupling instability features and activity regularity features. If r > 0.5, the instability metric may be capturing behavioral patterns, not physiological resilience."
+      ],
+      "overall_score": 0.67,
+      "revised_priority": 0.60,
+      "rationale": "Substantially overlaps with H-NEW11 and should be merged. The frailty prediction angle is the distinctive element, but the incremental information content over H-NEW11 is limited. The 4h block resolution is an improvement over daily estimates, but overlapping windows and feature count imbalance are methodological concerns. Worth doing as part of H-NEW11 but not as a standalone hypothesis."
+    },
+    "H-NEW17": {
+      "verdict": "PASS",
+      "statistical_rigor": 0.80,
+      "biological_plausibility": 0.80,
+      "novelty": 0.70,
+      "importance": 0.75,
+      "reproducibility": 0.80,
+      "issues": [
+        "The time-of-day coupling analysis confounds two sources of coupling variation: (1) circadian autonomic modulation (the proposed mechanism) and (2) behavioral clustering (meals and activity occur at specific times). The afternoon coupling peak may simply reflect meal-driven glucose + postprandial activity-driven HR, not circadian autonomic modulation per se.",
+        "The 4h blocks are large enough for reasonably stable coupling estimates (24-48 points per block per day, pooled across 10 days gives 240-480 points per block). The cosinor model fit to 6 time-of-day points is reasonable.",
+        "The negative control (glucose-activity coupling should show preserved diurnal variation) is imperfect: if diabetes groups have less physical activity overall, the diurnal amplitude of glucose-activity coupling could also decrease, not because of coupling flattening but because of activity flattening."
+      ],
+      "confounders_missed": [
+        "Meal timing regularity: participants with rigid meal schedules will show strong diurnal coupling patterns regardless of diabetes status",
+        "Employment status: working vs retired participants have very different diurnal activity and coupling patterns",
+        "Napping: daytime napping (more common in diabetes) would create coupling troughs during afternoon, potentially masking the afternoon peak"
+      ],
+      "suggestions": [
+        "Adjust for time-of-day activity level within each block to separate activity-driven from autonomic-driven coupling.",
+        "Report the mean coupling at each time block per group (raw data) before fitting the cosinor, so readers can evaluate whether a sinusoidal model is appropriate.",
+        "Compare diurnal coupling amplitude with diurnal HR amplitude (which reflects autonomic circadian modulation). If they correlate, the coupling flattening may be downstream of HR rhythm flattening."
+      ],
+      "overall_score": 0.77,
+      "revised_priority": 0.76,
+      "rationale": "Well-designed test of whether diabetes flattens the diurnal modulation of coupling, not just elevates its mean. The 4h block approach is appropriately powered and the cosinor model is reasonable for 6 time-of-day points. Main concern is separating circadian autonomic modulation from behavioral clustering. With activity-adjusted coupling per block, this becomes a strong test. Complements H-NEW01 (frequency decomposition) and H-NEW04 (circadian phase)."
+    },
+    "H-NEW18": {
+      "verdict": "CONCERN",
+      "statistical_rigor": 0.70,
+      "biological_plausibility": 0.80,
+      "novelty": 0.65,
+      "importance": 0.70,
+      "reproducibility": 0.65,
+      "issues": [
+        "The fundamental measurement problem: HR MSE from 5-min averaged Garmin HR is NOT equivalent to HR MSE from beat-to-beat R-R intervals. The Garmin averaging mechanically reduces MSE at all scales by smoothing out high-frequency variability. The measured HR MSE reflects BOTH genuine autonomic complexity AND the degree of Garmin smoothing, which may vary with activity level, skin contact quality, and device firmware.",
+        "The mechanism (HR complexity loss -> increased apparent coupling) is plausible but circular: if both HR MSE and coupling are affected by autonomic neuropathy, they will correlate, but the 'HR complexity moderates coupling' interpretation implies a specific causal direction that cross-sectional data cannot test.",
+        "The expected interaction effect (1 SD decrease in HR MSE -> 0.02-0.04 increase in coupling) is very small and requires precise measurement of both HR MSE and coupling to detect. With Garmin HR smoothing artifacts, this precision may not be achievable.",
+        "The comparison with glucose MSE as a negative control is reasonable but may fail: glucose complexity loss ALSO reflects regulatory failure, and might also moderate coupling for the same reason (fewer glucose controllers -> glucose becomes a simpler 'input' to the coupling)."
+      ],
+      "confounders_missed": [
+        "Garmin HR sampling rate and smoothing algorithm: varies with activity state and device model, directly affects MSE",
+        "Physical fitness: fit individuals have higher HRV (and likely higher MSE) AND may have different coupling patterns, confounding the MSE-coupling relationship",
+        "Resting HR: strongly correlated with HR MSE; the MSE-coupling interaction may be a proxy for resting HR-coupling interaction"
+      ],
+      "suggestions": [
+        "Test the hypothesis first using the 11-second ECG RMSSD as a validated autonomic marker instead of Garmin-based HR MSE. If RMSSD moderates coupling, the hypothesis has merit. Then test whether Garmin HR MSE adds information beyond RMSSD.",
+        "Control for mean HR and HR SD when testing HR MSE effects. If the MSE effect disappears after controlling for mean and SD, the 'complexity' interpretation is not supported.",
+        "Compute HR MSE only during rest periods (no activity) to minimize Garmin smoothing artifacts from movement."
+      ],
+      "overall_score": 0.70,
+      "revised_priority": 0.62,
+      "rationale": "The conceptual insight -- that coupling strength is partly an artifact of reduced HR complexity -- is mechanistically important. But testing it with Garmin HR MSE is problematic because Garmin smoothing itself reduces apparent MSE independent of physiology. Using ECG RMSSD as a first step would be more defensible. Downgraded due to measurement concerns."
+    }
+  },
+  "final_ranking": [
+    {
+      "rank": 1,
+      "id": "H-MIG01",
+      "title": "Glucose-HR coupling increases with diabetes severity",
+      "revised_priority": 0.95,
+      "verdict": "SUPPORTED",
+      "one_line": "The foundational finding (d=0.585, FDR=1.3e-19) -- all subsequent hypotheses build on this. Already confirmed."
+    },
+    {
+      "rank": 2,
+      "id": "H-MIG03",
+      "title": "Coupling-only classification of insulin-dependent vs healthy",
+      "revised_priority": 0.93,
+      "verdict": "SUPPORTED",
+      "one_line": "AUROC 0.805 demonstrates practical diagnostic relevance of coupling features. Already confirmed."
+    },
+    {
+      "rank": 3,
+      "id": "H-MIG02",
+      "title": "Glucose-activity coupling shifts with diabetes severity",
+      "revised_priority": 0.92,
+      "verdict": "SUPPORTED",
+      "one_line": "Second coupling axis (d=0.475) providing complementary information to glucose-HR. Already confirmed."
+    },
+    {
+      "rank": 4,
+      "id": "H-MIG04",
+      "title": "Coupling links to frailty and allostatic load",
+      "revised_priority": 0.90,
+      "verdict": "SUPPORTED",
+      "one_line": "Critical clinical validation: coupling is not just a diabetes marker but indexes systemic regulatory burden. Already confirmed."
+    },
+    {
+      "rank": 5,
+      "id": "H-NEW01",
+      "title": "Glucose-HR coupling rigidity is timescale-selective: strongest at ultradian scales",
+      "revised_priority": 0.88,
+      "verdict": "PASS",
+      "one_line": "The highest-priority new hypothesis -- decomposes the broadband finding into mechanistically interpretable frequency bands. Modify by dropping >8h band."
+    },
+    {
+      "rank": 6,
+      "id": "H-NEW05",
+      "title": "Glucose complexity loss at 1-3h scales predicts allostatic load beyond HbA1c",
+      "revised_priority": 0.82,
+      "verdict": "PASS",
+      "one_line": "Well-grounded in established MSE literature; extends to clinically meaningful endpoints. Test Shannon proxy first."
+    },
+    {
+      "rank": 7,
+      "id": "H-NEW13",
+      "title": "Sleep-wake transition dynamics reveal coupling reorganization speed as a diabetes marker",
+      "revised_priority": 0.80,
+      "verdict": "PASS",
+      "one_line": "Most novel hypothesis in the batch -- coupling reorganization speed is a genuinely new metric. Technical challenges addressable."
+    },
+    {
+      "rank": 8,
+      "id": "H-NEW03",
+      "title": "Post-excursion HR recovery is prolonged and stereotyped in diabetes",
+      "revised_priority": 0.78,
+      "verdict": "CONCERN",
+      "one_line": "Clinically relevant event-triggered analysis, but Garmin HR resolution limits peak latency detection and meal timing is unavailable."
+    },
+    {
+      "rank": 9,
+      "id": "H-NEW06",
+      "title": "Nocturnal glucose-HR coupling predicts next-day glycemic control",
+      "revised_priority": 0.76,
+      "verdict": "PASS",
+      "one_line": "Novel night-to-day predictive framework; limited by ~8 night-day pairs per person but population-level analysis is feasible."
+    },
+    {
+      "rank": 10,
+      "id": "H-NEW17",
+      "title": "Glucose-HR coupling strength exhibits a circadian rhythm that flattens with diabetes severity",
+      "revised_priority": 0.76,
+      "verdict": "PASS",
+      "one_line": "Well-designed test of diurnal coupling modulation; complements H-NEW01. Needs activity adjustment per time block."
+    },
+    {
+      "rank": 11,
+      "id": "H-NEW10",
+      "title": "Activity-glucose coupling direction reverses between exercise and recovery phases",
+      "revised_priority": 0.72,
+      "verdict": "PASS",
+      "one_line": "Good physiology, clear predictions, but post-exercise meal confounding cannot be fully addressed."
+    },
+    {
+      "rank": 12,
+      "id": "H-NEW02",
+      "title": "Asymmetric causal direction: glucose drives HR more than HR drives glucose in diabetes",
+      "revised_priority": 0.72,
+      "verdict": "CONCERN",
+      "one_line": "Conceptually important but methodologically challenging -- TE/CCM at 5-min Garmin resolution is at the edge of feasibility."
+    },
+    {
+      "rank": 13,
+      "id": "H-MIG08",
+      "title": "Static aging clocks are poor classifiers of diabetes-severity",
+      "revised_priority": 0.70,
+      "verdict": "SUPPORTED",
+      "one_line": "Important negative result (AUROC 0.47) motivating the shift to dynamic coupling markers. Already confirmed."
+    },
+    {
+      "rank": 14,
+      "id": "H-NEW08",
+      "title": "Coupling-defined physiotypes capture distinct metabolic phenotypes missed by HbA1c stratification",
+      "revised_priority": 0.68,
+      "verdict": "CONCERN",
+      "one_line": "Appealing concept but unsupervised clustering with redacted medications is a minefield. Needs much stronger validation."
+    },
+    {
+      "rank": 15,
+      "id": "H-NEW11",
+      "title": "Day-to-day coupling instability is a resilience marker",
+      "revised_priority": 0.64,
+      "verdict": "CONCERN",
+      "one_line": "Good concept (coupling variability as resilience) but CV from ~10 daily values is statistically fragile. Use sub-daily blocks."
+    },
+    {
+      "rank": 16,
+      "id": "H-NEW04",
+      "title": "Circadian phase misalignment between glucose and HR rhythms widens with diabetes severity",
+      "revised_priority": 0.62,
+      "verdict": "CONCERN",
+      "one_line": "Cosinor fits glucose poorly (meals dominate), 10 days gives noisy phase estimates, and meal timing confounding is unaddressed."
+    },
+    {
+      "rank": 17,
+      "id": "H-NEW18",
+      "title": "HR complexity loss amplifies the glucose-HR coupling signal in diabetes",
+      "revised_priority": 0.62,
+      "verdict": "CONCERN",
+      "one_line": "Important mechanistic question but Garmin HR MSE is unreliable due to device smoothing. Test with ECG RMSSD first."
+    },
+    {
+      "rank": 18,
+      "id": "H-NEW16",
+      "title": "Frailty is better predicted by coupling feature instability than by coupling feature level",
+      "revised_priority": 0.60,
+      "verdict": "CONCERN",
+      "one_line": "Largely redundant with H-NEW11. Should be merged as a sub-analysis rather than standalone hypothesis."
+    },
+    {
+      "rank": 19,
+      "id": "H-NEW14",
+      "title": "Cross-recurrence of glucose-HR trajectories reveals attractor convergence in diabetes",
+      "revised_priority": 0.58,
+      "verdict": "CONCERN",
+      "one_line": "Sophisticated method but parameter sensitivity, Garmin smoothing artifacts, and likely redundancy with simpler metrics are serious concerns."
+    },
+    {
+      "rank": 20,
+      "id": "H-NEW09",
+      "title": "Glucose-HR coupling links to retinal OCTA vessel density through shared autonomic damage",
+      "revised_priority": 0.55,
+      "verdict": "CONCERN",
+      "one_line": "Depends on unvalidated upstream features. Test RMSSD -> SVD first before invoking complex coupling features."
+    },
+    {
+      "rank": 21,
+      "id": "H-NEW07",
+      "title": "Evening light exposure amplifies overnight glucose-HR coupling in diabetes",
+      "revised_priority": 0.52,
+      "verdict": "CONCERN",
+      "one_line": "Room-level light is too noisy a proxy for retinal exposure; expected effects are below detection threshold."
+    },
+    {
+      "rank": 22,
+      "id": "H-NEW12",
+      "title": "PM2.5 acutely amplifies glucose-HR coupling through inflammation-mediated autonomic activation",
+      "revised_priority": 0.50,
+      "verdict": "CONCERN",
+      "one_line": "Indoor PM2.5 has insufficient day-to-day variability; expected beta of 0.03-0.08 is below meaningful detection."
+    },
+    {
+      "rank": 23,
+      "id": "H-MIG07",
+      "title": "Cross-modal predictability is directionally interesting",
+      "revised_priority": 0.48,
+      "verdict": "INCONCLUSIVE",
+      "one_line": "Weak signal in first-generation analysis; not yet clear how to sharpen this into a testable second-generation hypothesis."
+    },
+    {
+      "rank": 24,
+      "id": "H-NEW15",
+      "title": "Glucose-HR coupling strength has a U-shaped relationship with sleep quality",
+      "revised_priority": 0.45,
+      "verdict": "CONCERN",
+      "one_line": "Overly specific prediction based on contradictory mechanisms; consumer sleep metrics are too noisy; underpowered for quadratic detection."
+    },
+    {
+      "rank": 25,
+      "id": "H-MIG06",
+      "title": "PM2.5-glucose coupling is weak",
+      "revised_priority": 0.40,
+      "verdict": "INCONCLUSIVE",
+      "one_line": "Already tested and found weak (d=0.164). H-NEW12 is a better version of this test."
+    },
+    {
+      "rank": 26,
+      "id": "H-MIG05",
+      "title": "No link to retinal/cardiac structural damage",
+      "revised_priority": 0.35,
+      "verdict": "REFUTED",
+      "one_line": "Already tested and refuted for broadband coupling. H-NEW09 attempts a more targeted retry."
+    }
+  ],
+  "meta_observations": [
+    "REDUNDANCY CLUSTER: H-NEW11, H-NEW16, and the CV analysis within H-NEW01 all test variants of 'coupling variability matters.' These should be consolidated into a single coherent investigation rather than three separate hypotheses competing for priority.",
+    "GARMIN HR RESOLUTION IS THE BINDING CONSTRAINT: At least 8 of the 18 hypotheses (H-NEW01, H-NEW02, H-NEW03, H-NEW13, H-NEW14, H-NEW15, H-NEW17, H-NEW18) are limited by Garmin HR being averaged at 1-5 minute resolution rather than beat-to-beat. The entire hypothesis portfolio would be transformed by access to higher-resolution HR data (e.g., ECG patches). This should be flagged as a dataset-level limitation for future AI-READI data collection.",
+    "MEDICATION CONFOUNDING IS THE ELEPHANT IN THE ROOM: With sex and medications both redacted, the strongest confounders for glucose dynamics (insulin timing, metformin, SGLT2i) and HR dynamics (beta-blockers) are unobservable. Every hypothesis that finds a coupling-severity gradient must acknowledge that this may partly reflect medication regimen differences, not disease biology. This cannot be fixed analytically -- it is a fundamental limitation.",
+    "ENVIRONMENTAL HYPOTHESES (H-NEW07, H-NEW12) ARE LIKELY DEAD ON ARRIVAL: Both rely on room-level environmental sensors as proxies for personal exposure. The expected effect sizes (d < 0.25) are below what these noisy measurements can reliably detect. Resources would be better spent on the temporal coupling and complexity hypotheses where the measurements are direct.",
+    "THE HYPOTHESIS SET IS HEAVILY GLUCOSE-HR FOCUSED: 14 of 18 new hypotheses involve glucose-HR coupling as a primary variable. The glucose-activity axis (H-NEW10 is the only new activity-focused hypothesis) is underexplored despite H-MIG02 showing a strong finding (d=0.475). Future proposals should explore glucose-activity coupling dynamics, sleep-activity coupling, and multi-way coupling more systematically.",
+    "CROSS-SECTIONAL LIMITATION IS UNDER-ACKNOWLEDGED: Several hypotheses use causal language ('glucose drives HR,' 'coupling predicts next-day glycemia,' 'PM2.5 amplifies coupling') that implies temporal or causal ordering. All analyses are cross-sectional within a 10-day window. Temporal precedence within 10 days does not establish causality. All causal claims should be reframed as associational or predictive.",
+    "PRIORITY CALIBRATION: The proposer assigned priorities in the 0.68-0.92 range, with most clustered between 0.70-0.85. After critic review, the revised priorities range from 0.45-0.88, with a clearer separation between feasible high-priority tests (H-NEW01, H-NEW05, H-NEW13, H-NEW17) and challenging low-priority ones (H-NEW07, H-NEW12, H-NEW15). The proposer was systematically overconfident about environmental hypotheses and CRQA/TE methods.",
+    "SUGGESTED EXECUTION ORDER: Phase 1 (quick wins, low computational cost): H-NEW05, H-NEW17, H-NEW06, H-NEW11/16 merged. Phase 2 (moderate cost, high novelty): H-NEW01, H-NEW13, H-NEW03, H-NEW10. Phase 3 (high cost, uncertain payoff): H-NEW02, H-NEW14, H-NEW08. Defer/Drop: H-NEW07, H-NEW12, H-NEW15, H-NEW09 (conditional on Phase 2)."
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "id": "H-NEW15",
+  "title": "Glucose-HR coupling strength has a U-shaped relationship with sleep quality",
+  "category": "temporal_coupling",
+  "statement": "Within each diabetes severity group, glucose-HR coupling shows a U-shaped (quadratic) relationship with sleep quality metrics (sleep efficiency, total sleep time): both very poor and very good sleepers have stronger glucose-HR coupling than moderate sleepers. Poor sleep increases coupling through sleep fragmentation-driven sympathetic activation. Paradoxically, very deep/efficient sleep also shows stronger coupling because autonomic regulation during consolidated deep sleep creates coherent glucose-HR co-modulation through intact parasympathetic control of hepatic glucose output. The quadratic term is strongest in the pre-diabetes and oral medication groups, where autonomic function is partially but not fully impaired.",
+  "mechanism": "Sleep quality modulates autonomic balance bidirectionally. Poor sleep (low efficiency, high WASO, fragmented) increases sympathetic activation and reduces vagal tone, which amplifies the pathological glucose-HR locking by removing autonomic buffering. High-quality deep sleep, conversely, involves strong parasympathetic drive that coherently modulates both hepatic glucose output (via vagal regulation of liver) and HR (via vagal bradycardia), creating a different form of glucose-HR co-regulation. At moderate sleep quality, neither mechanism dominates, producing the weakest coupling. In early/moderate diabetes (pre-diabetes, oral medication), autonomic function is partially impaired: enough to create the sympathetic arm of the U-shape (poor sleep drives coupling up) but with enough residual vagal function to create the parasympathetic arm (deep sleep also drives coupling up). In advanced diabetes, rigid sympathetic dominance flattens the U-shape because coupling is high regardless of sleep quality.",
+  "predictions": [
+    "Within each diabetes severity group, a quadratic model (coupling ~ sleep_efficiency + sleep_efficiency^2) fits significantly better than linear (p < 0.01 for quadratic term) for at least the pre-diabetes and oral medication groups",
+    "The U-shape minimum (weakest coupling) occurs at moderate sleep efficiency (75-85%)",
+    "In healthy participants, the U-shape is attenuated (flatter) because autonomic regulation buffers sleep quality effects",
+    "In insulin-dependent participants, the U-shape is attenuated because coupling is rigidly high regardless of sleep quality",
+    "Negative control: glucose-activity coupling does NOT show a U-shaped relationship with sleep quality (activity coupling is behaviorally driven, not autonomically)"
+  ],
+  "literature": [
+    {
+      "title": "Slow-oscillation/spindle coupling predicts next-day fasting glucose",
+      "authors": "Vallat et al.",
+      "journal": "Cell Reports Medicine",
+      "year": 2023,
+      "key_finding": "Sleep quality (specifically SO-spindle coupling) modulates next-day glucose; autonomic activity during sleep mediates the effect.",
+      "relevance": "Establishes that sleep quality modulates glucose-autonomic dynamics; we test whether this manifests as a nonlinear coupling-sleep relationship.",
+      "doi": "10.1016/j.xcrm.2023.101121",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10394167/"
+    },
+    {
+      "title": "Mining associations between glycemic variability in awake-time and in-sleep among non-diabetic adults",
+      "authors": "Jarvis et al.",
+      "journal": "Metabolism",
+      "year": 2022,
+      "key_finding": "In-sleep glycemic variability is associated with awake-time glycemic variability and sleep quality metrics from wearables.",
+      "relevance": "Shows that sleep quality metrics from consumer wearables relate to glucose dynamics, supporting the feasibility of this analysis.",
+      "doi": "10.1016/j.metabol.2022.155312",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9671935/"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_sleep"
+    ],
+    "participant_coverage": 0.8,
+    "time_resolution_needed": "per-night",
+    "analysis_timescale": "nightly (within-person across nights)",
+    "computational_cost": "low",
+    "statistical_power": "N~1500 with sleep data x ~8 nights = ~12,000 night-coupling pairs",
+    "key_challenges": [
+      "Garmin sleep staging is consumer-grade; sleep efficiency estimates are approximate",
+      "U-shaped relationships need sufficient range in sleep quality (restricted range reduces power)",
+      "Must use mixed-effects models to handle repeated measures within person"
+    ],
+    "dataset_limitations": [
+      "Consumer-grade sleep staging may misclassify sleep architecture",
+      "10 nights per person limits the range of sleep quality variation",
+      "No PSG validation of Garmin sleep metrics"
+    ]
+  },
+  "priority": 0.45,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Mixed-effects polynomial regression: nocturnal_coupling ~ sleep_efficiency + sleep_efficiency^2 + (1|person_id), stratified by study group",
+    "implementation_steps": [
+      "Step 1: Compute per-night glucose-HR coupling (Pearson r during Garmin-detected sleep)",
+      "Step 2: Extract per-night sleep efficiency, total sleep time, WASO from Garmin sleep data",
+      "Step 3: Fit mixed-effects model with linear + quadratic sleep efficiency terms per study group",
+      "Step 4: Compare quadratic vs linear model fit using AIC/BIC and likelihood ratio test",
+      "Step 5: Identify the sleep efficiency value at the coupling minimum (vertex of quadratic)",
+      "Step 6: Test group interaction: does the curvature (quadratic coefficient) differ by diabetes severity?",
+      "Step 7: Negative control: same analysis with glucose-activity coupling instead of glucose-HR",
+      "Step 8: Replicate with total sleep time and with WASO as alternative sleep quality metrics"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "night_of_week"
+    ],
+    "time_window": "Per-night sleep periods across 10-day window",
+    "frequency_bands": [],
+    "expected_effect_size": "Quadratic coefficient significantly different from zero; U-shape curvature d 0.15-0.25 across middle severity groups",
+    "success_criterion": "Significant quadratic term (p < 0.01) in at least pre-diabetes and oral medication groups, with U-shape minimum at moderate sleep efficiency",
+    "refutation_criterion": "Linear model fits as well or better than quadratic in all groups. No U-shape: coupling monotonically decreases or increases with sleep quality. Glucose-activity coupling shows the same pattern (non-specific).",
+    "sensitivity_checks": [
+      "Use cubic spline instead of quadratic to test for more complex nonlinearity",
+      "Stratify by weekday vs weekend nights",
+      "Exclude very short nights (<4h total sleep time)",
+      "Use deep sleep percentage instead of sleep efficiency",
+      "Bootstrap 1000x to assess stability of the quadratic coefficient"
+    ],
+    "secondary_methods": [
+      "GAM (generalized additive model) for flexible nonlinear fitting",
+      "Quantile regression to test U-shape at different coupling quantiles"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.55,
+    "biological_plausibility": 0.55,
+    "novelty": 0.7,
+    "importance": 0.55,
+    "reproducibility": 0.55,
+    "issues": [
+      "The U-shaped hypothesis is highly specific and based on a post-hoc mechanistic story that invokes two different biological mechanisms (sympathetic for the left arm, parasympathetic for the right arm) to explain a single pattern. This is classic 'just so' reasoning: any observed pattern can be explained by invoking the right combination of mechanisms. Without prior empirical evidence for U-shaped coupling-sleep relationships, this is speculative.",
+      "The claim that 'very deep/efficient sleep also shows stronger coupling because parasympathetic control coherently modulates both glucose and HR' contradicts the existing finding that coupling INCREASES with diabetes (which involves parasympathetic DAMAGE). If parasympathetic function drives coupling upward during good sleep in healthy people, why doesn't parasympathetic damage (diabetes) reduce coupling during good sleep? The two arms of the U-shape have contradictory autonomic mechanisms.",
+      "Garmin sleep efficiency is a consumer-grade metric with ~70% agreement with PSG. The quadratic term requires precise measurement at the extremes (very good and very poor sleep), which is exactly where consumer devices are least accurate.",
+      "Testing a quadratic relationship with ~8 nights per person and consumer-grade sleep metrics is underpowered for detecting the curvature. The AIC/BIC comparison between linear and quadratic models is sensitive to outliers at sleep quality extremes.",
+      "The prediction that 'in insulin-dependent participants, the U-shape is attenuated because coupling is rigidly high' is essentially saying the effect is only present in the MIDDLE severity groups. This reduces the effective sample size and makes the finding even harder to detect."
+    ],
+    "confounders_missed": [
+      "Sleep-disordered breathing: sleep apnea events create high coupling during poor sleep (repeated desaturation + sympathetic activation + glucose spikes) -- this could create the LEFT arm of the U without any parasympathetic mechanism",
+      "Nocturia: diabetes patients with poor sleep often have nocturia, which involves waking + walking + glucose changes, confounding the coupling-sleep relationship",
+      "Hypoglycemia: nocturnal hypoglycemia causes both poor sleep quality and strong sympathetic HR response, creating a confound specifically at the 'poor sleep' extreme"
+    ],
+    "suggestions": [
+      "Drop the U-shaped hypothesis and instead test the simpler claim: 'poor sleep amplifies coupling, especially in diabetes.' This is testable, mechanistically clear, and avoids the speculative right arm of the U.",
+      "If insisting on testing the U-shape, require the quadratic coefficient to have the correct sign AND the vertex to be in the predicted range (75-85% sleep efficiency) as a dual criterion.",
+      "Increase effective sample size by using 1-hour sleep quality blocks within nights (e.g., first vs last hour) rather than whole-night sleep efficiency."
+    ],
+    "overall_score": 0.58
+  },
+  "depends_on": [
+    "H-MIG01",
+    "H-NEW06"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Risky hypothesis: the U-shaped prediction is specific and could easily be refuted. But if confirmed, it reveals a nuanced coupling-sleep interaction that could inform sleep-targeted diabetes interventions. Garmin sleep quality is the main measurement concern."
+}

@@ -1,0 +1,142 @@
+{
+  "id": "H-NEW04",
+  "title": "Circadian phase misalignment between glucose and HR rhythms widens with diabetes severity",
+  "category": "circadian_organization",
+  "statement": "Glucose and HR each exhibit circadian rhythms (cosinor-detectable 24h periodicity). In healthy individuals, the glucose circadian peak slightly leads the HR circadian peak (glucose peaks ~1-2h after the morning cortisol surge; HR peaks later with daytime activity). In diabetes, the phase relationship between these two rhythms becomes misaligned: the glucose circadian phase advances (earlier glucose rise from impaired dawn phenomenon regulation and hepatic glucose overproduction) while the HR circadian phase is preserved, widening the phase gap. This circadian glucose-HR phase misalignment increases monotonically with diabetes severity.",
+  "mechanism": "The circadian system coordinates glucose metabolism (via SCN -> hypothalamic-pituitary-adrenal axis -> cortisol -> hepatic glucose output) and autonomic tone (via SCN -> sympathetic/parasympathetic balance -> HR). In healthy physiology, these are phase-locked. In diabetes, hepatic insulin resistance causes exaggerated dawn phenomenon (early morning glucose surge), while the central clock's control of HR circadian rhythm is relatively preserved through non-insulin-dependent pathways. This creates a progressive decoupling of the circadian phase alignment between glucose and HR as insulin resistance and autonomic neuropathy advance. Additionally, disrupted sleep patterns in diabetes (more fragmented, shifted timing) further disrupt the phase relationship.",
+  "predictions": [
+    "Cosinor-fitted circadian glucose acrophase occurs earlier (by 0.5-2 hours) in insulin-dependent vs healthy participants",
+    "Cosinor-fitted circadian HR acrophase does not differ as strongly across groups",
+    "The glucose-HR phase difference (glucose acrophase minus HR acrophase) changes monotonically with diabetes severity (d > 0.3)",
+    "Phase misalignment correlates with HOMA-IR (r > 0.12) after age/site adjustment, reflecting the insulin resistance mechanism",
+    "Negative control: glucose-activity phase difference should track diabetes severity less strongly than glucose-HR phase difference, because activity patterns are behaviorally determined rather than autonomically driven"
+  ],
+  "literature": [
+    {
+      "title": "Adverse metabolic and cardiovascular consequences of circadian misalignment",
+      "authors": "Scheer et al.",
+      "journal": "PNAS",
+      "year": 2009,
+      "key_finding": "Controlled circadian misalignment causes glucose intolerance, elevated BP, and altered cortisol rhythms, demonstrating that phase misalignment directly impairs metabolism.",
+      "relevance": "Establishes the causal link between circadian phase disruption and metabolic dysfunction; we test whether this manifests as glucose-HR phase misalignment in free-living diabetes.",
+      "doi": "10.1073/pnas.0808180106",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2657421/"
+    },
+    {
+      "title": "Circadian clock, diurnal glucose metabolic rhythm, and dawn phenomenon",
+      "authors": "Kim et al.",
+      "journal": "Endocrinology and Metabolism",
+      "year": 2022,
+      "key_finding": "The dawn phenomenon reflects circadian-regulated hepatic glucose output that becomes exaggerated in diabetes due to insulin resistance.",
+      "relevance": "Supports the mechanism that glucose circadian phase advances in diabetes while HR phase is preserved.",
+      "doi": "10.3803/EnM.2022.1402",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9117496/"
+    },
+    {
+      "title": "Impact of circadian disruption on glucose metabolism: implications for type 2 diabetes",
+      "authors": "Stenvers et al.",
+      "journal": "Diabetologia",
+      "year": 2019,
+      "key_finding": "Circadian disruption from mistimed light, sleep, or food intake worsens glycemic control through multiple coordinated pathways.",
+      "relevance": "Provides the broader framework linking circadian misalignment to diabetes progression.",
+      "doi": "10.1007/s00125-019-05059-6",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7002226/"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_activity"
+    ],
+    "participant_coverage": 0.85,
+    "time_resolution_needed": "5-min (hourly averages sufficient for cosinor)",
+    "analysis_timescale": "circadian (24h period extraction over 10 days)",
+    "computational_cost": "low",
+    "statistical_power": "N~1900 with 10 days of data; cosinor fits are robust with >7 days",
+    "key_challenges": [
+      "Cosinor model assumes sinusoidal 24h rhythm which may be imperfect for glucose (multi-peak from meals)",
+      "Need to verify cosinor goodness-of-fit (R2) is sufficient per participant before extracting phase",
+      "Phase estimation from 10 days is more reliable than single-day but still limited"
+    ],
+    "dataset_limitations": [
+      "No meal timing to separate endogenous circadian glucose from postprandial effects",
+      "Sleep timing variability (social jetlag) is a confounder",
+      "10-day window limits precision of circadian phase estimation vs longer studies"
+    ]
+  },
+  "priority": 0.62,
+  "status": "critiqued",
+  "test_plan": {
+    "primary_method": "Cosinor analysis: fit 24h cosinor model to glucose and HR time series per participant, extract acrophase, amplitude, and mesor. Compute phase difference. Test group trend.",
+    "implementation_steps": [
+      "Step 1: Compute hourly means of glucose and HR per participant over full 10-day window",
+      "Step 2: Fit single-component cosinor model (24h period) to each signal per participant",
+      "Step 3: Extract acrophase (peak time), amplitude, mesor, and goodness-of-fit for each signal",
+      "Step 4: Filter to participants with cosinor R2 > 0.1 for both signals (sufficient rhythmicity)",
+      "Step 5: Compute glucose-HR phase difference (circular subtraction)",
+      "Step 6: Test group differences in phase difference using circular ANOVA (Watson-Williams test)",
+      "Step 7: Test linear trend with severity using circular-linear correlation",
+      "Step 8: Correlate phase difference with HOMA-IR, frailty index, allostatic load after age/site adjustment"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "sleep_timing_midpoint",
+      "activity_rhythm_phase"
+    ],
+    "time_window": "Full 10-day window (hourly binned)",
+    "frequency_bands": [
+      "24h (circadian)"
+    ],
+    "expected_effect_size": "Phase difference shift of 0.5-2 hours; Cohen's d 0.3-0.5 for severity trend",
+    "success_criterion": "FDR-significant circadian phase misalignment between glucose and HR that increases with diabetes severity and correlates with insulin resistance markers",
+    "refutation_criterion": "No group difference in glucose-HR phase relationship. Glucose and HR acrophases shift in parallel (preserved phase coupling). Phase difference unrelated to HOMA-IR.",
+    "sensitivity_checks": [
+      "Use two-component cosinor (24h + 12h harmonics) to handle non-sinusoidal waveforms",
+      "Stratify by weekday vs weekend to assess social jetlag effects",
+      "Compare phase from first 5 days vs last 5 days for stability",
+      "Exclude participants with irregular sleep schedules (high sleep onset variability)"
+    ],
+    "secondary_methods": [
+      "Lomb-Scargle periodogram for rhythm detection",
+      "Cross-correlation at 24h lag to assess circadian coupling strength"
+    ]
+  },
+  "results": null,
+  "critic_verdict": {
+    "verdict": "CONCERN",
+    "statistical_rigor": 0.7,
+    "biological_plausibility": 0.7,
+    "novelty": 0.6,
+    "importance": 0.65,
+    "reproducibility": 0.75,
+    "issues": [
+      "The 10-day window is fundamentally limiting for circadian phase estimation. Cosinor fitting to 10 days of data gives phase estimates with substantial uncertainty (SE of ~0.5-1 hour for a typical cosinor fit with moderate R2). The predicted effect (0.5-2 hour phase shift) is within the noise range for many participants.",
+      "Glucose circadian rhythm is NOT well-described by a single 24h cosinor. Postprandial peaks create a multi-peak pattern (3 meals = 3 daily peaks). The cosinor R2 will be low for glucose in many participants, and the R2 > 0.1 threshold is very lenient -- that means 90% of the glucose variance is NOT explained by the 24h rhythm.",
+      "The claim that 'glucose phase advances in diabetes due to exaggerated dawn phenomenon' assumes the dawn phenomenon is the dominant circadian glucose signal. But in free-living conditions with ad libitum meals, postprandial glucose peaks likely dominate the circadian signal, and meal timing varies between individuals based on lifestyle, not disease state.",
+      "The negative control (glucose-activity phase difference should track severity LESS strongly) may fail for interesting reasons: activity phase is also correlated with chronotype and employment status, which correlate with diabetes risk."
+    ],
+    "confounders_missed": [
+      "Chronotype / social jetlag: early chronotypes have earlier glucose peaks regardless of diabetes status; if diabetes groups have different age distributions, chronotype confounding is likely",
+      "Meal timing: the dominant determinant of glucose circadian phase in free-living conditions is meal timing, not endogenous circadian physiology",
+      "Employment status: retired vs working participants have very different activity and meal timing patterns"
+    ],
+    "suggestions": [
+      "Use a two-harmonic cosinor (24h + 12h) to better capture the multi-peak glucose pattern.",
+      "Require cosinor R2 > 0.25 (not 0.1) to ensure phase estimates are meaningful.",
+      "Report the fraction of participants with adequate cosinor fit -- if <60% have R2 > 0.25, the analysis is underpowered due to poor model fit, not sample size.",
+      "Consider using the phase of the FIRST glucose rise after the nadir (dawn phenomenon timing) as a more specific phase marker rather than global cosinor acrophase."
+    ],
+    "overall_score": 0.68
+  },
+  "depends_on": [],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-27T23:00:00",
+  "notes": "Complements H-NEW01 by specifically testing the circadian timescale. If cosinor R2 is too low for many participants, consider switching to Lomb-Scargle or wavelet-based circadian phase extraction."
+}

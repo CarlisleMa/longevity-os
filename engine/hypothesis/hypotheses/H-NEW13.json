@@ -1,0 +1,163 @@
+{
+  "id": "H-NEW13",
+  "title": "Sleep-wake transition dynamics reveal coupling reorganization speed as a diabetes marker",
+  "category": "resilience",
+  "statement": "The transition from sleep to wakefulness requires rapid reorganization of physiological coupling: glucose-HR coupling must shift from sleep-mode (weak, vagally-dominated) to wake-mode (stronger, activity-responsive). In diabetes, this reorganization is slower, taking 30-60 minutes longer to reach stable wake-mode coupling compared to healthy controls (who reorganize within 15-30 minutes of waking). This 'coupling reorganization latency' is a resilience metric that reflects the speed of autonomic mode-switching, which degrades with autonomic neuropathy.",
+  "mechanism": "The sleep-to-wake transition involves a rapid shift in autonomic balance: vagal withdrawal, sympathetic activation, cortisol surge, and behavioral activation. In healthy individuals, the autonomic nervous system executes this transition rapidly, reflected in quick stabilization of the wake-mode glucose-HR coupling pattern (stronger positive coupling driven by activity-metabolism coordination). In diabetes with autonomic neuropathy, both the vagal withdrawal (already partially denervated) and sympathetic recruitment are sluggish, creating a prolonged transition period where coupling fluctuates between sleep and wake modes. This parallels the known impairment of heart rate recovery after exercise in diabetic autonomic neuropathy, but at the sleep-wake transition.",
+  "predictions": [
+    "Glucose-HR coupling in a sliding 30-min window stabilizes to wake-mode values within 15-30 min of waking in healthy participants",
+    "In insulin-dependent participants, stabilization takes 45-90 min (coupling reorganization latency 2-3x longer, d > 0.3)",
+    "Reorganization latency increases monotonically with diabetes severity",
+    "Negative control: the wake-to-sleep transition latency does not differ as strongly (falling asleep is more passive, less demanding of rapid autonomic mode-switching)",
+    "Reorganization latency correlates with clinical RMSSD from ECG (both index vagal function)"
+  ],
+  "literature": [
+    {
+      "title": "Network physiology reveals relations between network topology and physiological function",
+      "authors": "Bashan et al.",
+      "journal": "Nature Communications",
+      "year": 2012,
+      "key_finding": "Network coupling topology reorganizes between sleep stages within minutes, and the speed of reorganization may be a marker of network health.",
+      "relevance": "Directly motivates measuring reorganization speed at sleep-wake transitions as a network physiology metric.",
+      "doi": "10.1038/ncomms1705",
+      "url": "https://www.nature.com/articles/ncomms1705"
+    },
+    {
+      "title": "Heart rate variability for the early detection of cardiac autonomic dysfunction in type 1 diabetes",
+      "authors": "Jaiswal et al.",
+      "journal": "Frontiers in Physiology",
+      "year": 2022,
+      "key_finding": "Early autonomic dysfunction in diabetes manifests as impaired HR responsiveness to physiological challenges, detectable before overt neuropathy symptoms.",
+      "relevance": "Supports the idea that autonomic mode-switching speed (including sleep-wake transitions) degrades early in diabetes.",
+      "doi": "10.3389/fphys.2022.937701",
+      "url": "https://www.frontiersin.org/journals/physiology/articles/10.3389/fphys.2022.937701/full"
+    },
+    {
+      "title": "Disruption of multisystem responses to stress in type 2 diabetes",
+      "authors": "Hackett et al.",
+      "journal": "PNAS",
+      "year": 2014,
+      "key_finding": "Post-stress recovery of HR, BP, and cortisol is attenuated in T2D, reflecting impaired autonomic mode-switching.",
+      "relevance": "The sleep-wake transition is a natural 'stress' that requires rapid autonomic recovery/reorganization.",
+      "doi": "10.1073/pnas.1410401111",
+      "url": "https://www.pnas.org/doi/10.1073/pnas.1410401111"
+    }
+  ],
+  "feasibility": {
+    "required_modalities": [
+      "cgm",
+      "wearable_hr",
+      "wearable_sleep"
+    ],
+    "participant_coverage": 0.8,
+    "time_resolution_needed": "5-min",
+    "analysis_timescale": "acute (0-120 min post-waking)",
+    "computational_cost": "medium",
+    "statistical_power": "N~1500 with sleep data x ~8 mornings = ~12,000 waking transitions",
+    "key_challenges": [
+      "Garmin sleep end-time may not precisely mark waking moment",
+      "Morning routine variability (bathroom, coffee, breakfast) confounds the transition period",
+      "30-min sliding window needs enough points (6 x 5-min = 6 data points) for meaningful correlation",
+      "Need to define 'stabilization' operationally (e.g., coupling within 1 SD of 2-hour post-waking mean)"
+    ],
+    "dataset_limitations": [
+      "Consumer-grade sleep staging; waking time precision is limited",
+      "No behavioral log to distinguish 'lying awake in bed' from 'active morning routine'",
+      "Only ~8 mornings per person limits per-person averaging"
+    ]
+  },
+  "priority": 0.8,
+  "status": "completed",
+  "test_plan": {
+    "primary_method": "Sliding-window coupling analysis: compute glucose-HR correlation in 30-min windows sliding by 5 min from 30 min pre-waking to 120 min post-waking. Define reorganization latency as time to reach stable wake-mode coupling.",
+    "implementation_steps": [
+      "Step 1: Identify waking time from Garmin sleep end_time per morning",
+      "Step 2: Extract glucose and HR in [-30, +120] min window around waking",
+      "Step 3: Compute glucose-HR Pearson r in 30-min sliding windows (step = 5 min)",
+      "Step 4: Define wake-mode coupling as mean r from +60 to +120 min post-waking (stable period)",
+      "Step 5: Define reorganization latency as time post-waking when sliding-window r first enters and stays within 1 SD of wake-mode value for >= 15 min",
+      "Step 6: Average reorganization latency across mornings per person",
+      "Step 7: Test group differences in mean reorganization latency",
+      "Step 8: Correlate with RMSSD from ECG and with frailty index"
+    ],
+    "confounders_to_adjust": [
+      "age",
+      "clinical_site",
+      "HbA1c",
+      "BMI",
+      "sleep_duration",
+      "waking_time_local"
+    ],
+    "time_window": "[-30, +120] min relative to waking",
+    "frequency_bands": [],
+    "expected_effect_size": "Cohen's d 0.3-0.5 for reorganization latency across severity gradient",
+    "success_criterion": "Reorganization latency increases monotonically with diabetes severity (FDR p < 0.01) and correlates with ECG RMSSD",
+    "refutation_criterion": "No group difference in reorganization latency. Wake-to-sleep transition shows equal or larger group differences (no direction specificity). Reorganization latency is fully explained by waking glucose level.",
+    "sensitivity_checks": [
+      "Vary sliding window width: 20, 30, 45 min",
+      "Vary stabilization criterion: 0.5 SD, 1 SD, 1.5 SD of wake-mode value",
+      "Test wake-to-sleep transition as negative comparator",
+      "Exclude mornings with very early (<5am) or very late (>10am) waking",
+      "Compare Garmin-detected waking vs first activity (>10 steps) as waking marker"
+    ],
+    "secondary_methods": [
+      "Change-point detection (PELT algorithm) on coupling time series at wake transition",
+      "Dynamic time warping to align coupling reorganization curves across participants"
+    ]
+  },
+  "results": {
+    "status": "not_supported",
+    "interpretation": "Sleep-wake coupling reorganization speed does NOT differ by diabetes severity. The 45-min sliding windows at 5-min resolution produce very noisy per-window estimates (6 points per window). The critic correctly warned about this limitation. The negative result may reflect insufficient measurement resolution rather than absence of the biological effect. Beat-to-beat HR data would be needed to test this properly.",
+    "primary_metric": "reorganization_time_min Kruskal-Wallis",
+    "primary_value": 2.12,
+    "effect_size": -0.0625,
+    "effect_size_type": "cohen_d",
+    "p_value": 0.548,
+    "fdr_p_value": 0.607,
+    "sample_size": 1891,
+    "median_reorganization_time_min": 10,
+    "reorganization_time_group_fdr": 0.61,
+    "pre_wake_coupling_fdr": 0.33,
+    "post_wake_coupling_fdr": 0.61,
+    "wake_coupling_change_kw_p": 0.01,
+    "wake_coupling_change_fdr": 0.07,
+    "method_used": "Sliding 45-min window coupling around Garmin-detected wake time; reorganization time defined as minutes until coupling enters stable-state band",
+    "output_files": ["results/h_new13_sleepwake_transition.csv"]
+  },
+  "critic_verdict": {
+    "verdict": "PASS",
+    "statistical_rigor": 0.75,
+    "biological_plausibility": 0.8,
+    "novelty": 0.85,
+    "importance": 0.8,
+    "reproducibility": 0.7,
+    "issues": [
+      "Computing glucose-HR correlation in 30-min sliding windows (6 data points at 5-min resolution) yields very noisy per-window estimates. The Pearson r from 6 points has a standard error of ~0.35, meaning individual window estimates are essentially uninformative. The approach relies on averaging across 8 mornings, but the noise is still substantial.",
+      "Garmin sleep end-time does not necessarily correspond to the moment of waking. Participants may lie in bed awake, check their phones, or be recorded as 'asleep' while partially awake. This timing imprecision adds noise to the reorganization latency estimate.",
+      "The negative control (wake-to-sleep transition should show weaker group differences) could fail because the sleep-onset transition involves melatonin, cortisol decline, and parasympathetic activation -- which are also affected by autonomic neuropathy."
+    ],
+    "confounders_missed": [
+      "Morning medication: many diabetes patients take medication upon waking, which affects HR and glucose within the analysis window",
+      "Alarm vs natural waking: alarm-driven waking produces different autonomic responses than natural waking; this varies by employment status",
+      "Coffee/caffeine: morning caffeine intake affects HR and glucose within the first 30-60 min of waking"
+    ],
+    "suggestions": [
+      "Use a larger window (45-60 min sliding window) to get more stable per-window coupling estimates. This reduces temporal resolution but improves reliability.",
+      "Use first-activity-detected (first 5-min bin with >10 steps) as an alternative waking marker to validate against Garmin sleep-end.",
+      "Consider using the CHANGE in coupling (difference between consecutive windows) rather than absolute coupling to detect the transition dynamics.",
+      "This is a genuinely novel metric -- publish with a pilot subsample first to establish feasibility before the full analysis."
+    ],
+    "overall_score": 0.78
+  },
+  "depends_on": [
+    "H-MIG01"
+  ],
+  "contradicts": [],
+  "supports": [
+    "H-MIG01"
+  ],
+  "source": "proposer",
+  "created": "2026-04-27T00:00:00",
+  "updated": "2026-04-28T00:00:00",
+  "notes": "Novel metric directly inspired by Bashan et al. network reorganization dynamics. The AI-READI dataset uniquely enables this because it has concurrent CGM + HR + sleep staging across the waking transition, which most standalone CGM or wearable studies lack."
+}
