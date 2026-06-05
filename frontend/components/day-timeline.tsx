@@ -35,6 +35,12 @@ const CATS: Record<string, Cat> = {
 };
 const LANES = ["Sleep & recovery", "Fuel", "Movement", "Light & context"];
 
+const H = 132; // signal height (px)
+const LANE_H = 46;
+const AXIS_H = 18;
+const PILL_H = 30;
+const CONTENT_H = H + LANES.length * LANE_H;
+
 const cat = (t: string): Cat => CATS[t] ?? { color: "#8b8577", Icon: Brain, lane: 3, label: t };
 const toMin = (s: string) => {
   const [h, m] = s.split(":").map(Number);
@@ -60,46 +66,42 @@ export function DayTimeline({ day }: { day: DayResponse }) {
     }),
   );
   const [selected, setSelected] = useState<string | null>("EV-10");
-  const [scrub, setScrub] = useState(13 * 60 + 30);
+  const [scrub, setScrub] = useState(12 * 60 + 50);
   const [playing, setPlaying] = useState(false);
-  const [w, setW] = useState(0);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const plotRef = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
 
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setW(el.clientWidth));
-    ro.observe(el);
-    setW(el.clientWidth);
-    return () => ro.disconnect();
-  }, []);
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
 
   // ── signal geometry ──────────────────────────────────────────────
-  const H = 120;
-  const { gArea, gLine, hLine, gy, hy } = useMemo(() => {
+  const { gArea, gLine, hLine } = useMemo(() => {
     const s = day.summary;
     const gMin = s.glucose_min - 6,
       gMax = s.glucose_max + 6;
     const hMin = s.hr_min - 6,
       hMax = s.hr_max + 6;
-    const gy = (v: number) => H - 8 - ((v - gMin) / (gMax - gMin)) * (H - 30);
-    const hy = (v: number) => H - 8 - ((v - hMin) / (hMax - hMin)) * (H - 44);
+    const gy = (v: number) => H - 10 - ((v - gMin) / (gMax - gMin)) * (H - 26);
+    const hy = (v: number) => H - 10 - ((v - hMin) / (hMax - hMin)) * (H - 40);
     const gl = day.signals.map((p, i) => `${i ? "L" : "M"} ${p.t} ${gy(p.glucose).toFixed(1)}`).join(" ");
     const hl = day.signals.map((p, i) => `${i ? "L" : "M"} ${p.t} ${hy(p.hr).toFixed(1)}`).join(" ");
-    return { gArea: `${gl} L 1440 ${H} L 0 ${H} Z`, gLine: gl, hLine: hl, gy, hy };
+    return { gArea: `${gl} L 1440 ${H} L 0 ${H} Z`, gLine: gl, hLine: hl };
   }, [day]);
 
   const sampleAt = (min: number) => day.signals[clamp(Math.round(min / 10), 0, day.signals.length - 1)];
   const cur = sampleAt(scrub);
   const sel = events.find((e) => e.id === selected) ?? null;
+  const sleeps = events.filter((e) => e.type === "sleep");
 
-  // ── dragging ─────────────────────────────────────────────────────
+  // ── interaction ─────────────────────────────────────────────────
+  function pxWidth() {
+    return plotRef.current?.clientWidth ?? 0;
+  }
   function dragPill(e: React.PointerEvent, ev: Ev) {
     e.preventDefault();
+    e.stopPropagation();
     const startX = e.clientX,
-      orig = ev.startMin;
+      orig = ev.startMin,
+      w = pxWidth();
     let moved = false;
     const move = (me: PointerEvent) => {
       const dx = me.clientX - startX;
@@ -120,9 +122,8 @@ export function DayTimeline({ day }: { day: DayResponse }) {
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
   }
-
   function scrubFrom(clientX: number) {
-    const el = trackRef.current;
+    const el = plotRef.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
     setScrub(clamp(Math.round(((clientX - r.left) / r.width) * 1440), 0, 1440));
@@ -138,7 +139,6 @@ export function DayTimeline({ day }: { day: DayResponse }) {
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
   }
-
   function togglePlay() {
     if (playing) {
       cancelAnimationFrame(raf.current);
@@ -157,7 +157,7 @@ export function DayTimeline({ day }: { day: DayResponse }) {
     raf.current = requestAnimationFrame(tick);
   }
 
-  const scrubPct = (scrub / 1440) * 100;
+  const pct = (min: number) => (min / 1440) * 100;
 
   return (
     <div className="rounded-2xl border border-border bg-surface p-5 shadow-card sm:p-6">
@@ -172,14 +172,12 @@ export function DayTimeline({ day }: { day: DayResponse }) {
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <Chip icon={Utensils} label={`${day.summary.meals} meals`} />
           <Chip icon={Dumbbell} label={`${day.summary.workouts} workout`} />
-          <Chip icon={Droplet} label={`${day.summary.glucose_min}–${day.summary.glucose_max} mg/dL`} color="#ff5a1f" />
-          <Chip icon={HeartPulse} label={`${day.summary.hr_min}–${day.summary.hr_max} bpm`} color="#575ecf" />
           <button
             onClick={togglePlay}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-vital to-ai px-3 py-1.5 font-medium text-white transition-all hover:-translate-y-px"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-vital to-ai px-3 py-1.5 font-medium text-white transition-transform hover:-translate-y-px"
           >
             {playing ? <Pause size={13} /> : <Play size={13} />}
-            {playing ? "Playing" : "Replay day"}
+            {playing ? "Playing…" : "Replay day"}
           </button>
         </div>
       </div>
@@ -194,59 +192,114 @@ export function DayTimeline({ day }: { day: DayResponse }) {
         ))}
       </div>
 
-      {/* track */}
-      <div className="mt-4 select-none">
-        <div ref={trackRef} className="relative" onPointerDown={dragScrub} style={{ touchAction: "none" }}>
+      {/* track: gutter + plot */}
+      <div className="mt-4 flex select-none">
+        {/* gutter */}
+        <div className="w-24 shrink-0 pr-3 text-right">
+          <div style={{ height: H }} className="flex flex-col justify-center gap-2">
+            <span className="flex items-center justify-end gap-1.5 text-[11px] font-medium" style={{ color: "#e2581a" }}>
+              Glucose <span className="h-2 w-2 rounded-full" style={{ background: "#ff5a1f" }} />
+            </span>
+            <span className="flex items-center justify-end gap-1.5 text-[11px] font-medium text-ai">
+              Heart rate <span className="h-2 w-2 rounded-full bg-ai" />
+            </span>
+          </div>
+          {LANES.map((l) => (
+            <div
+              key={l}
+              style={{ height: LANE_H }}
+              className="flex items-center justify-end text-[10px] font-medium uppercase leading-tight tracking-wide text-faint"
+            >
+              {l}
+            </div>
+          ))}
+          <div style={{ height: AXIS_H }} />
+        </div>
+
+        {/* plot */}
+        <div
+          ref={plotRef}
+          onPointerDown={dragScrub}
+          style={{ touchAction: "none" }}
+          className="relative flex-1 cursor-ew-resize"
+        >
+          {/* background: night + gridlines + lane separators */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-0" style={{ height: CONTENT_H }}>
+            {sleeps.map((e) => (
+              <div
+                key={e.id}
+                className="absolute inset-y-0 bg-ai/[0.05]"
+                style={{ left: `${pct(e.startMin)}%`, width: `${pct(e.durMin)}%` }}
+              />
+            ))}
+            {Array.from({ length: 9 }, (_, i) => i * 3).map((h) => (
+              <div key={h} className="absolute inset-y-0 w-px bg-border/40" style={{ left: `${(h / 24) * 100}%` }} />
+            ))}
+            {LANES.map((_, li) => (
+              <div
+                key={li}
+                className="absolute inset-x-0 border-t border-border/40"
+                style={{ top: H + li * LANE_H }}
+              />
+            ))}
+          </div>
+
           {/* signal */}
-          <div className="day-wipe">
+          <div className="day-wipe relative z-10" style={{ height: H }}>
             <svg viewBox={`0 0 1440 ${H}`} preserveAspectRatio="none" width="100%" height={H} className="block">
               <defs>
                 <linearGradient id="gFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ff5a1f" stopOpacity="0.20" />
+                  <stop offset="0%" stopColor="#ff5a1f" stopOpacity="0.22" />
                   <stop offset="100%" stopColor="#ff5a1f" stopOpacity="0" />
                 </linearGradient>
               </defs>
               <path d={gArea} fill="url(#gFill)" />
               <path d={gLine} fill="none" stroke="#ff5a1f" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-              <path d={hLine} fill="none" stroke="#575ecf" strokeWidth="1.5" strokeOpacity="0.8" vectorEffect="non-scaling-stroke" />
+              <path d={hLine} fill="none" stroke="#575ecf" strokeWidth="1.75" strokeOpacity="0.85" vectorEffect="non-scaling-stroke" />
             </svg>
           </div>
 
-          {/* lanes */}
-          <div className="relative mt-1">
-            {LANES.map((laneLabel, li) => (
-              <div key={laneLabel} className="relative h-11 border-t border-border/50 first:border-t-0">
-                <span className="pointer-events-none absolute left-1 top-1 z-0 text-[10px] uppercase tracking-wide text-faint/70">
-                  {laneLabel}
-                </span>
+          {/* lanes + pills */}
+          <div className="relative z-10">
+            {LANES.map((_, li) => (
+              <div key={li} className="relative" style={{ height: LANE_H }}>
                 {events
                   .filter((e) => cat(e.type).lane === li)
                   .map((e) => {
                     const c = cat(e.type);
-                    const left = (e.startMin / 1440) * 100;
-                    const width = (e.durMin / 1440) * 100;
                     const active = selected === e.id;
                     return (
                       <button
                         key={e.id}
                         onPointerDown={(ev) => dragPill(ev, e)}
-                        title={`${e.title} · drag to move`}
+                        title={`${e.title} · ${toHHMM(e.startMin)} — click to expand, drag to move`}
                         className={cn(
-                          "group absolute top-1.5 flex h-8 cursor-grab items-center gap-1 overflow-hidden rounded-lg border px-1.5 text-left text-[11px] active:cursor-grabbing",
-                          active ? "z-20" : "z-10",
+                          "group absolute flex items-center overflow-hidden rounded-lg border text-left transition-[transform,box-shadow] hover:-translate-y-px",
+                          active ? "z-20" : "z-10 cursor-grab active:cursor-grabbing",
                         )}
                         style={{
-                          left: `${left}%`,
-                          width: `${width}%`,
-                          minWidth: "1.9rem",
-                          background: hexA(c.color, active ? 0.2 : 0.12),
-                          borderColor: hexA(c.color, active ? 0.9 : 0.4),
-                          color: c.color,
+                          left: `${pct(e.startMin)}%`,
+                          width: `${pct(e.durMin)}%`,
+                          top: (LANE_H - PILL_H) / 2,
+                          height: PILL_H,
+                          minWidth: "1.85rem",
+                          background: hexA(c.color, 0.1),
+                          borderColor: hexA(c.color, active ? 0.95 : 0.35),
                           boxShadow: active ? `0 0 0 2px var(--surface), 0 0 0 4px ${c.color}` : undefined,
                         }}
                       >
-                        <c.Icon size={13} className="shrink-0" />
-                        <span className="truncate font-medium">{e.title}</span>
+                        <span
+                          className="grid h-full w-[26px] shrink-0 place-items-center"
+                          style={{ background: c.color, color: "#fff" }}
+                        >
+                          <c.Icon size={13} />
+                        </span>
+                        <span
+                          className="truncate px-1.5 text-[11px] font-medium"
+                          style={{ color: c.color }}
+                        >
+                          {e.title}
+                        </span>
                       </button>
                     );
                   })}
@@ -255,11 +308,11 @@ export function DayTimeline({ day }: { day: DayResponse }) {
           </div>
 
           {/* hour axis */}
-          <div className="relative mt-1 h-4">
+          <div className="relative" style={{ height: AXIS_H }}>
             {Array.from({ length: 9 }, (_, i) => i * 3).map((h) => (
               <span
                 key={h}
-                className="absolute -translate-x-1/2 text-[10px] tabular-nums text-faint"
+                className="absolute top-1 -translate-x-1/2 text-[10px] tabular-nums text-faint"
                 style={{ left: `${(h / 24) * 100}%` }}
               >
                 {String(h).padStart(2, "0")}:00
@@ -269,20 +322,26 @@ export function DayTimeline({ day }: { day: DayResponse }) {
 
           {/* scrubber */}
           <div
-            className="pointer-events-none absolute inset-y-0 z-30 w-px bg-fg/40"
-            style={{ left: `${scrubPct}%` }}
+            className="pointer-events-none absolute top-0 z-30 w-px bg-fg/40"
+            style={{ left: `${pct(scrub)}%`, height: CONTENT_H }}
           >
-            <div
+            <button
               onPointerDown={(e) => {
                 e.stopPropagation();
                 dragScrub(e);
               }}
-              className="pointer-events-auto absolute -left-2 -top-1 h-4 w-4 cursor-ew-resize rounded-full border-2 border-fg/60 bg-surface"
+              className="pointer-events-auto absolute -left-2 -top-1.5 h-4 w-4 cursor-ew-resize rounded-full border-2 border-fg/50 bg-surface shadow-card"
             />
-            <div className="pointer-events-none absolute -top-7 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-surface px-2 py-0.5 text-[10px] shadow-card">
-              <span className="font-mono">{toHHMM(scrub)}</span>
-              <span className="ml-1.5 font-mono text-vital-soft">{cur.glucose}</span>
-              <span className="ml-1 font-mono text-ai">{cur.hr}♥</span>
+            <div className="pointer-events-none absolute -top-9 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border bg-surface px-2.5 py-1 text-[10px] shadow-card">
+              <span className="font-mono font-medium">{toHHMM(scrub)}</span>
+              <span className="ml-2 font-mono" style={{ color: "#e2581a" }}>
+                {cur.glucose}
+                <span className="text-faint"> mg/dL</span>
+              </span>
+              <span className="ml-1.5 font-mono text-ai">
+                {cur.hr}
+                <span className="text-faint"> bpm</span>
+              </span>
             </div>
           </div>
         </div>
@@ -290,68 +349,109 @@ export function DayTimeline({ day }: { day: DayResponse }) {
 
       {/* detail panel */}
       <AnimatePresence mode="wait">
-        {sel && (
+        {sel ? (
           <motion.div
             key={sel.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22 }}
-            className="mt-5 rounded-xl border border-border bg-surface-2/40 p-4"
+            className="mt-5 grid gap-4 rounded-xl border border-border bg-surface-2/40 p-4 md:grid-cols-[1fr_220px]"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <span
-                  className="grid h-9 w-9 place-items-center rounded-lg"
-                  style={{ background: hexA(cat(sel.type).color, 0.15), color: cat(sel.type).color }}
-                >
-                  {(() => {
-                    const I = cat(sel.type).Icon;
-                    return <I size={18} />;
-                  })()}
-                </span>
-                <div>
-                  <h4 className="font-medium leading-tight">{sel.title}</h4>
-                  <div className="font-mono text-[11px] text-faint">
-                    {toHHMM(sel.startMin)}–{toHHMM(sel.startMin + sel.durMin)} · {cat(sel.type).label}
+            <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="grid h-9 w-9 place-items-center rounded-lg"
+                    style={{ background: hexA(cat(sel.type).color, 0.15), color: cat(sel.type).color }}
+                  >
+                    {(() => {
+                      const I = cat(sel.type).Icon;
+                      return <I size={18} />;
+                    })()}
+                  </span>
+                  <div>
+                    <h4 className="font-medium leading-tight">{sel.title}</h4>
+                    <div className="font-mono text-[11px] text-faint">
+                      {toHHMM(sel.startMin)}–{toHHMM(sel.startMin + sel.durMin)} · {cat(sel.type).label}
+                    </div>
                   </div>
                 </div>
+                <button onClick={() => setSelected(null)} className="text-faint hover:text-fg" aria-label="Close">
+                  <X size={16} />
+                </button>
               </div>
-              <button onClick={() => setSelected(null)} className="text-faint hover:text-fg">
-                <X size={16} />
-              </button>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-muted">{sel.detail}</p>
-            <div className="mt-3 rounded-lg border border-border bg-surface p-3">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-vital-soft">
+              <p className="mt-3 text-sm leading-relaxed text-muted">{sel.detail}</p>
+              <div className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-vital-soft">
                 <HeartPulse size={12} /> Your body&rsquo;s response
               </div>
               <p className="mt-1 text-sm leading-relaxed">{sel.response}</p>
-              <div className="mt-2 flex gap-4 text-xs text-muted">
-                <span className="font-mono">
-                  <span className="text-vital-soft">glucose</span> {sampleAt(sel.startMin).glucose} mg/dL
-                </span>
-                <span className="font-mono">
-                  <span className="text-ai">HR</span> {sampleAt(sel.startMin).hr} bpm
-                </span>
-              </div>
             </div>
+
+            {/* mini response sparkline */}
+            <ResponseSpark day={day} ev={sel} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="hint"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-5 rounded-xl border border-dashed border-border-strong bg-surface p-4 text-center text-sm text-muted"
+          >
+            Click any activity to expand its explanation and your body&rsquo;s response.
           </motion.div>
         )}
       </AnimatePresence>
 
       <p className="mt-3 text-[11px] text-faint">
-        Drag any activity to reschedule it · drag the scrubber or hit Replay to scan your day · click
-        an activity for its body response.
+        Drag an activity to reschedule it · drag the scrubber or hit Replay to scan your day · click
+        an activity to expand it.
       </p>
     </div>
   );
 }
 
-function Chip({ icon: Icon, label, color }: { icon: LucideIcon; label: string; color?: string }) {
+function ResponseSpark({ day, ev }: { day: DayResponse; ev: Ev }) {
+  const a = Math.max(0, ev.startMin - 45);
+  const b = Math.min(1440, ev.startMin + ev.durMin + 90);
+  const pts = day.signals.filter((s) => s.t >= a && s.t <= b);
+  if (pts.length < 2) return <div />;
+  const W = 220,
+    Hs = 92;
+  const xs = (t: number) => ((t - a) / (b - a)) * W;
+  const gMin = Math.min(...pts.map((p) => p.glucose)) - 4;
+  const gMax = Math.max(...pts.map((p) => p.glucose)) + 4;
+  const yy = (v: number) => Hs - 16 - ((v - gMin) / (gMax - gMin)) * (Hs - 28);
+  const line = pts.map((p, i) => `${i ? "L" : "M"} ${xs(p.t).toFixed(1)} ${yy(p.glucose).toFixed(1)}`).join(" ");
+  const c = cat(ev.type).color;
+  return (
+    <div className="rounded-lg border border-border bg-surface p-3">
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-faint">Glucose around it</div>
+      <svg viewBox={`0 0 ${W} ${Hs}`} width="100%" height={Hs} className="mt-1 block">
+        <rect
+          x={xs(ev.startMin)}
+          y={4}
+          width={Math.max(2, xs(ev.startMin + ev.durMin) - xs(ev.startMin))}
+          height={Hs - 8}
+          fill={hexA(c, 0.12)}
+          rx={3}
+        />
+        <path d={`${line} L ${W} ${Hs} L 0 ${Hs} Z`} fill={hexA("#ff5a1f", 0.1)} />
+        <path d={line} fill="none" stroke="#ff5a1f" strokeWidth="2" />
+      </svg>
+      <div className="flex justify-between font-mono text-[10px] text-faint">
+        <span>{toHHMM(a)}</span>
+        <span className="text-vital-soft">{day.signals[Math.round(ev.startMin / 10)]?.glucose} mg/dL</span>
+        <span>{toHHMM(b)}</span>
+      </div>
+    </div>
+  );
+}
+
+function Chip({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-2/50 px-2 py-1 text-muted">
-      <Icon size={12} style={color ? { color } : undefined} />
+      <Icon size={12} />
       {label}
     </span>
   );
