@@ -41,6 +41,7 @@ app.add_middleware(
 
 for r in (users, ingest, scoring, knowledge_base, agent, interventions, day, coach):
     app.include_router(r.router)
+app.include_router(coach.agents_router)
 
 
 @app.on_event("startup")

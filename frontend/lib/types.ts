@@ -127,9 +127,31 @@ export interface DayResponse {
   };
 }
 
+export interface AgentCard {
+  key: string;
+  name: string;
+  title: string;
+  role: string; // orchestrator | specialist | safety | synthesis
+  glyph: string;
+}
+
+export interface AgentNote {
+  key: string;
+  name: string;
+  title: string;
+  glyph: string;
+  text: string;
+  brief: string;
+  citations: string[];
+  suggestions: string[];
+}
+
 export interface CoachResponse {
   reply: string;
+  agents: AgentCard[];
+  notes: AgentNote[];
   citations: string[];
+  safety: { passed: boolean; note: string };
   suggestions: string[];
   checked: string[];
 }

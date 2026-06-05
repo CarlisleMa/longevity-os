@@ -1,4 +1,5 @@
 import type {
+  AgentCard,
   CoachResponse,
   CoachTurn,
   Dashboard,
@@ -56,6 +57,7 @@ export const api = {
   day: (userId: string) => get<DayResponse>(`/api/users/${userId}/day`),
   coach: (userId: string, message: string, history: CoachTurn[] = []) =>
     postJson<CoachResponse>(`/api/users/${userId}/coach`, { message, history }),
+  coachRoster: () => get<{ agents: AgentCard[] }>("/api/coach/agents"),
 };
 
 export const DEMO_USER = "demo_alex";
