@@ -70,6 +70,7 @@ export function DayTimeline({ day }: { day: DayResponse }) {
   const [playing, setPlaying] = useState(false);
   const plotRef = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
+  const lastPlayed = useRef<Ev | null>(null);
 
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
 
@@ -89,7 +90,13 @@ export function DayTimeline({ day }: { day: DayResponse }) {
 
   const sampleAt = (min: number) => day.signals[clamp(Math.round(min / 10), 0, day.signals.length - 1)];
   const cur = sampleAt(scrub);
-  const sel = events.find((e) => e.id === selected) ?? null;
+  // During replay the detail panel walks through the day with the playhead.
+  const playingEvent = playing
+    ? events.find((e) => scrub >= e.startMin && scrub < e.startMin + e.durMin)
+    : undefined;
+  if (playingEvent) lastPlayed.current = playingEvent;
+  const sel =
+    (playing ? playingEvent ?? lastPlayed.current : events.find((e) => e.id === selected)) ?? null;
   const sleeps = events.filter((e) => e.type === "sleep");
 
   // ── interaction ─────────────────────────────────────────────────
@@ -244,8 +251,11 @@ export function DayTimeline({ day }: { day: DayResponse }) {
             ))}
           </div>
 
-          {/* signal */}
-          <div className="day-wipe relative z-10" style={{ height: H }}>
+          {/* signal — reveals left→right with the playhead during Replay */}
+          <div
+            className={cn("relative z-10", !playing && "day-wipe")}
+            style={{ height: H, clipPath: playing ? `inset(0 ${100 - pct(scrub)}% 0 0)` : undefined }}
+          >
             <svg viewBox={`0 0 1440 ${H}`} preserveAspectRatio="none" width="100%" height={H} className="block">
               <defs>
                 <linearGradient id="gFill" x1="0" y1="0" x2="0" y2="1">
@@ -267,37 +277,37 @@ export function DayTimeline({ day }: { day: DayResponse }) {
                   .filter((e) => cat(e.type).lane === li)
                   .map((e) => {
                     const c = cat(e.type);
-                    const active = selected === e.id;
+                    const active = sel?.id === e.id;
+                    const future = playing && e.startMin > scrub;
                     return (
                       <button
                         key={e.id}
                         onPointerDown={(ev) => dragPill(ev, e)}
                         title={`${e.title} · ${toHHMM(e.startMin)} — click to expand, drag to move`}
                         className={cn(
-                          "group absolute flex items-center overflow-hidden rounded-lg border text-left transition-[transform,box-shadow] hover:-translate-y-px",
-                          active ? "z-20" : "z-10 cursor-grab active:cursor-grabbing",
+                          "group absolute flex items-center overflow-hidden rounded-lg border text-left transition-all",
+                          active ? "z-20" : "z-10 cursor-grab active:cursor-grabbing hover:-translate-y-px",
                         )}
                         style={{
                           left: `${pct(e.startMin)}%`,
                           width: `${pct(e.durMin)}%`,
                           top: (LANE_H - PILL_H) / 2,
                           height: PILL_H,
-                          minWidth: "1.85rem",
-                          background: hexA(c.color, 0.1),
-                          borderColor: hexA(c.color, active ? 0.95 : 0.35),
-                          boxShadow: active ? `0 0 0 2px var(--surface), 0 0 0 4px ${c.color}` : undefined,
+                          minWidth: "1.9rem",
+                          background: hexA(c.color, active ? 0.18 : 0.1),
+                          borderColor: hexA(c.color, active ? 0.85 : 0.4),
+                          opacity: future ? 0.3 : 1,
+                          boxShadow: active ? `0 0 0 2px var(--surface), 0 0 0 3px ${c.color}` : undefined,
                         }}
                       >
+                        <span className="h-full w-1 shrink-0" style={{ background: c.color }} />
                         <span
-                          className="grid h-full w-[26px] shrink-0 place-items-center"
-                          style={{ background: c.color, color: "#fff" }}
-                        >
-                          <c.Icon size={13} />
-                        </span>
-                        <span
-                          className="truncate px-1.5 text-[11px] font-medium"
+                          className="grid h-full w-[18px] shrink-0 place-items-center"
                           style={{ color: c.color }}
                         >
+                          <c.Icon size={12} />
+                        </span>
+                        <span className="truncate pr-1.5 text-[11px] font-medium text-fg/90">
                           {e.title}
                         </span>
                       </button>

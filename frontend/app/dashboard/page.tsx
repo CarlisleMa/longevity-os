@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api, DEMO_USER } from "@/lib/api";
 import type { Observation } from "@/lib/types";
 import { BiologicalAgeScorecard } from "@/components/biological-age-scorecard";
@@ -18,13 +18,14 @@ import { signed } from "@/lib/utils";
 import { ArrowRight, RefreshCw, Sparkles } from "lucide-react";
 
 export default function DashboardPage() {
-  const qc = useQueryClient();
   const dash = useQuery({ queryKey: ["dashboard"], queryFn: () => api.dashboard(DEMO_USER) });
   const interventions = useQuery({
     queryKey: ["interventions"],
     queryFn: () => api.interventions(DEMO_USER),
   });
 
+  const [accepted, setAccepted] = useState<Set<string>>(new Set());
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [freshObs, setFreshObs] = useState<Observation | null>(null);
   const [observing, setObserving] = useState(false);
 
@@ -34,13 +35,13 @@ export default function DashboardPage() {
   const d = dash.data;
   const observation = freshObs ?? d.latest_observation;
 
-  async function accept(id: string) {
-    await api.acceptIntervention(DEMO_USER, id);
-    qc.invalidateQueries({ queryKey: ["interventions"] });
+  function accept(id: string) {
+    setAccepted((s) => new Set(s).add(id));
+    api.acceptIntervention(DEMO_USER, id).catch(() => {});
   }
-  async function dismiss(id: string) {
-    await api.dismissIntervention(DEMO_USER, id);
-    qc.invalidateQueries({ queryKey: ["interventions"] });
+  function dismiss(id: string) {
+    setDismissed((s) => new Set(s).add(id));
+    api.dismissIntervention(DEMO_USER, id).catch(() => {});
   }
   async function regenerate() {
     setObserving(true);
@@ -154,11 +155,17 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {interventions.data?.map((iv) => (
-              <Reveal key={iv.id}>
-                <InterventionCard iv={iv} onAccept={accept} onDismiss={dismiss} />
-              </Reveal>
-            ))}
+            {interventions.data
+              ?.filter((iv) => !dismissed.has(iv.id))
+              .map((iv) => (
+                <Reveal key={iv.id}>
+                  <InterventionCard
+                    iv={accepted.has(iv.id) ? { ...iv, status: "accepted" } : iv}
+                    onAccept={accept}
+                    onDismiss={dismiss}
+                  />
+                </Reveal>
+              ))}
           </div>
         )}
       </section>
