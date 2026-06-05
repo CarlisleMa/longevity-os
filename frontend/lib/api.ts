@@ -61,3 +61,45 @@ export const api = {
 };
 
 export const DEMO_USER = "demo_alex";
+
+export type DebateEvent =
+  | { kind: "turn"; phase: string; agent: AgentCard }
+  | { kind: "token"; text: string }
+  | { kind: "end_turn"; citations: string[] }
+  | { kind: "done"; citations: string[]; safety: { passed: boolean; note: string }; reply: string };
+
+/** Stream a multi-agent team debate (SSE). Calls onEvent for each event. */
+export async function streamDebate(
+  userId: string,
+  message: string,
+  onEvent: (e: DebateEvent) => void,
+  signal?: AbortSignal,
+) {
+  const res = await fetch(`${BASE}/api/users/${userId}/coach/debate`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ message }),
+    signal,
+  });
+  if (!res.ok || !res.body) throw new Error(`${res.status}`);
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i: number;
+    while ((i = buf.indexOf("\n\n")) >= 0) {
+      const line = buf.slice(0, i).trim();
+      buf = buf.slice(i + 2);
+      if (line.startsWith("data:")) {
+        try {
+          onEvent(JSON.parse(line.slice(5).trim()));
+        } catch {
+          /* ignore keep-alives */
+        }
+      }
+    }
+  }
+}

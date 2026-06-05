@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api, DEMO_USER } from "@/lib/api";
+import { api, DEMO_USER, streamDebate } from "@/lib/api";
 import type { AgentCard, AgentNote, CoachTurn } from "@/lib/types";
 import { PageHeader } from "@/components/page-header";
 import { EvidenceChip } from "@/components/evidence-chip";
@@ -24,6 +24,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Sparkles,
+  Swords,
   Users,
   Utensils,
   type LucideIcon,
@@ -55,7 +56,136 @@ function AgentAvatar({ glyph, size = 28 }: { glyph: string; size?: number }) {
   );
 }
 
+const PHASE: Record<string, string> = {
+  frame: "convenes the team",
+  opening: "opening statement",
+  rebuttal: "rebuttal",
+  safety: "safety review",
+  verdict: "verdict",
+};
+
+function DebateView({
+  turns,
+  debating,
+  onStart,
+  suggestions,
+  live,
+}: {
+  turns: DebateTurn[];
+  debating: boolean;
+  onStart: (q: string) => void;
+  suggestions: string[];
+  live: boolean;
+}) {
+  const [q, setQ] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.scrollTo({ top: ref.current.scrollHeight, behavior: "smooth" });
+  }, [turns]);
+
+  return (
+    <div className="flex h-[62vh] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
+      <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Swords size={15} className="text-vital-soft" /> Team debate
+        </div>
+        <span
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]",
+            live ? "border-good/30 bg-good/10 text-good" : "border-border-strong bg-surface-2 text-muted",
+          )}
+          title={live ? "Each agent is a live Claude call" : "Grounded agents (set ANTHROPIC_API_KEY for live Claude)"}
+        >
+          <Sparkles size={11} /> {live ? "Live · Claude" : "Grounded"}
+        </span>
+      </div>
+
+      <div ref={ref} className="flex-1 space-y-4 overflow-y-auto p-5">
+        {turns.length === 0 && !debating && (
+          <div className="grid h-full place-items-center text-center text-sm text-muted">
+            Pose a question and watch the team debate it — opening statements, rebuttals, then a verdict.
+          </div>
+        )}
+        {turns.map((t, i) => {
+          const verdict = t.phase === "verdict";
+          const last = i === turns.length - 1;
+          return (
+            <div key={i} className="flex gap-2.5">
+              <AgentAvatar glyph={t.agent.glyph} size={28} />
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-center gap-1.5 text-[11px] text-faint">
+                  <span className="font-medium" style={{ color: gstyle(t.agent.glyph).color }}>
+                    {t.agent.name}
+                  </span>
+                  <span>· {PHASE[t.phase] ?? t.phase}</span>
+                </div>
+                <div
+                  className={cn(
+                    "rounded-2xl rounded-tl-sm border px-4 py-2.5 text-sm leading-relaxed",
+                    verdict ? "border-vital/30 bg-vital/5" : "border-border bg-surface-2/50",
+                    t.phase === "rebuttal" && "italic",
+                  )}
+                >
+                  {t.text}
+                  {last && debating && (
+                    <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-fg/50 align-middle" />
+                  )}
+                </div>
+                {t.citations && t.citations.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {t.citations.map((c) => (
+                      <EvidenceChip key={c} id={c} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="border-t border-border p-3">
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {suggestions.map((s) => (
+            <button
+              key={s}
+              onClick={() => onStart(s)}
+              disabled={debating}
+              className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted hover:text-fg disabled:opacity-50"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onStart(q);
+            setQ("");
+          }}
+          className="flex items-center gap-2"
+        >
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Pose a question to the team…  e.g. should I do cardio or lift tonight?"
+            className="flex-1 rounded-xl border border-border bg-surface-2/40 px-4 py-2.5 text-sm outline-none focus:border-vital/50"
+          />
+          <button
+            type="submit"
+            disabled={debating || !q.trim()}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-vital to-ai px-4 py-2.5 text-sm font-medium text-white transition-transform hover:-translate-y-px disabled:opacity-50"
+          >
+            <Swords size={15} /> {debating ? "Debating…" : "Debate"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 type Safety = { passed: boolean; note: string };
+type DebateTurn = { agent: AgentCard; phase: string; text: string; citations?: string[] };
 type Msg = {
   role: "user" | "assistant";
   text: string;
@@ -71,11 +201,15 @@ const START = ["What should I eat tonight?", "Best exercise for me?", "How's my 
 
 export default function CoachPage() {
   const roster = useQuery({ queryKey: ["coach-roster"], queryFn: () => api.coachRoster(), retry: false });
+  const meta = useQuery({ queryKey: ["meta"], queryFn: () => api.meta(), retry: false });
+  const live = !!meta.data?.run_modes?.agent_live;
   const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", text: GREETING }]);
+  const [debateTurns, setDebateTurns] = useState<DebateTurn[]>([]);
+  const [debating, setDebating] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>(START);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [mode, setMode] = useState<"chat" | "call">("chat");
+  const [mode, setMode] = useState<"chat" | "call" | "debate">("chat");
   const [teamOpen, setTeamOpen] = useState(true);
   const [openNotes, setOpenNotes] = useState<Set<number>>(new Set());
   const [speaking, setSpeaking] = useState(false);
@@ -143,6 +277,38 @@ export default function CoachPage() {
     recog.current?.stop?.();
   }
 
+  async function runDebate(q: string) {
+    const m = q.trim();
+    if (!m || debating) return;
+    setDebateTurns([]);
+    setDebating(true);
+    try {
+      await streamDebate(DEMO_USER, m, (e) => {
+        if (e.kind === "turn") {
+          setDebateTurns((t) => [...t, { agent: e.agent, phase: e.phase, text: "" }]);
+        } else if (e.kind === "token") {
+          setDebateTurns((t) => {
+            if (!t.length) return t;
+            const n = [...t];
+            n[n.length - 1] = { ...n[n.length - 1], text: n[n.length - 1].text + e.text };
+            return n;
+          });
+        } else if (e.kind === "end_turn") {
+          setDebateTurns((t) => {
+            if (!t.length) return t;
+            const n = [...t];
+            n[n.length - 1] = { ...n[n.length - 1], citations: e.citations };
+            return n;
+          });
+        }
+      });
+    } catch {
+      /* stream ended/aborted */
+    } finally {
+      setDebating(false);
+    }
+  }
+
   const status = listening ? "Listening…" : busy ? "Consulting the team…" : speaking ? "Speaking…" : "Tap the mic and ask";
 
   return (
@@ -158,6 +324,15 @@ export default function CoachPage() {
             className={cn("rounded-md px-3 py-1.5", mode === "chat" ? "bg-surface-2 font-medium" : "text-muted")}
           >
             Chat
+          </button>
+          <button
+            onClick={() => setMode("debate")}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5",
+              mode === "debate" ? "bg-surface-2 font-medium" : "text-muted",
+            )}
+          >
+            <Swords size={14} /> Debate
           </button>
           <button
             onClick={() => {
@@ -342,6 +517,14 @@ export default function CoachPage() {
             </form>
           </div>
         </div>
+      ) : mode === "debate" ? (
+        <DebateView
+          turns={debateTurns}
+          debating={debating}
+          onStart={runDebate}
+          suggestions={suggestions}
+          live={live}
+        />
       ) : (
         /* ── Voice call ── */
         <div className="flex min-h-[58vh] flex-col items-center justify-center gap-7 rounded-2xl border border-border bg-gradient-to-b from-surface to-ai/[0.04] p-8 text-center shadow-card">

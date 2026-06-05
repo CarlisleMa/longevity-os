@@ -11,7 +11,6 @@ scikit-learn>=1.4            # frozen aging-clock scoring (Ridge/ElasticNet)
 pyarrow>=15.0               # parquet feature tables
 python-dateutil>=2.9
 
-# Optional — only needed when wiring the live agentic layer.
-# The app runs in mock/representative mode without these.
-# anthropic>=0.39
-# claude-agent-sdk            # used by engine/agentic/agentic_discovery
+# Live multi-agent coach (set ANTHROPIC_API_KEY to enable; app runs grounded without it).
+anthropic>=0.40
+# Optional model override: COACH_MODEL (defaults to claude-opus-4-8).

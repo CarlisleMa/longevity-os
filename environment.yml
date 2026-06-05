@@ -16,4 +16,4 @@ dependencies:
       - "uvicorn[standard]>=0.29"
       - pydantic>=2.6
       - python-multipart>=0.0.9
-      # - anthropic>=0.39          # uncomment to enable the live agent layer
+      - anthropic>=0.40            # live multi-agent coach (set ANTHROPIC_API_KEY)
