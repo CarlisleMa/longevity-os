@@ -81,7 +81,7 @@ Done when: it looks like a product, not a class project.
 
 If time is short, ship **Phase 0 + 1 + 3** and *describe* 2/4/5. That gives you: real scoring,
 real agentic reasoning with gates and citations, on a synthetic person — the most impressive
-slice for the least risk. Track states in [`CLAIMS_VS_IMPLEMENTED.md`](CLAIMS_VS_IMPLEMENTED.md).
+slice for the least risk.
 
 ## Parallelization
 

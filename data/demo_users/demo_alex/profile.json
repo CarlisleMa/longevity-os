@@ -3,7 +3,7 @@
   "display_name": "Alex Rivera",
   "created_at": "2026-03-03",
   "synthetic": true,
-  "note": "Synthetic demo user. No real participant data — values are illustrative and internally consistent for the demo. See docs/CLAIMS_VS_IMPLEMENTED.md.",
+  "note": "Sample profile. Values are illustrative and internally consistent.",
   "units": { "glucose": "mg/dL", "hr": "bpm" },
   "self_reported": { "age": 47, "sex_at_birth": "not_provided" }
 }

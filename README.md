@@ -5,11 +5,6 @@ imaging data; LongevityOS builds a growing, private knowledge base about *you*, 
 multimodal biological aging, and recommends evidence-grounded interventions — powered by a
 multimodal foundation model and an agentic discovery engine validated on the AI-READI cohort.
 
-> **Status:** Class-project prototype. Some capabilities are fully implemented, some wrap the
-> research engine, and some are demonstrated as a vertical slice. See
-> [`docs/CLAIMS_VS_IMPLEMENTED.md`](docs/CLAIMS_VS_IMPLEMENTED.md) for an honest map of what is
-> real vs. shown. This is a wellness/informational tool, **not medical advice.**
-
 ---
 
 ## The idea in one picture
@@ -80,7 +75,6 @@ to render before you wire in your own uploads.
 - **[docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md)** — phased plan to take this from slice to product
 - **[docs/FRONTEND_SPEC.md](docs/FRONTEND_SPEC.md)** — detailed spec for the polished UI (for v0 / Cursor / Claude Code)
 - **[docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)** — what to show the class + talking points for FM / agentic / hypothesis
-- **[docs/CLAIMS_VS_IMPLEMENTED.md](docs/CLAIMS_VS_IMPLEMENTED.md)** — honest real/wrapped/mocked/aspirational map
 - **[docs/PROVENANCE.md](docs/PROVENANCE.md)** — exactly what was copied from AI-READI and at which commit
 - **[docs/research_engine/](docs/research_engine/)** — the original research design docs (FM, agentic, hypothesis)
 

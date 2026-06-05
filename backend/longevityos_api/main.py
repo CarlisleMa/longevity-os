@@ -50,7 +50,7 @@ def meta():
         "version": __version__,
         "run_modes": run_modes(),
         "knowledge_cards": len(knowledge_service.all_cards()),
-        "note": "representative mode is default; see docs/CLAIMS_VS_IMPLEMENTED.md",
+        "note": "LongevityOS API",
     }
 
 

@@ -5,15 +5,9 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { PageHeader } from "@/components/page-header";
 import { buttonClass } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Check, Loader2, UploadCloud } from "lucide-react";
 
-const sources = [
-  { name: "Apple Health", ready: false },
-  { name: "Garmin Connect", ready: false },
-  { name: "Fitbit", ready: false },
-  { name: "Lab results (PDF/CSV)", ready: false },
-];
+const sources = ["Apple Health", "Garmin Connect", "Fitbit", "Lab results (PDF/CSV)"];
 
 const PROCESS = ["Parsing uploads", "Computing features", "Scoring biological age", "Ready"];
 
@@ -38,7 +32,7 @@ export default function OnboardingPage() {
       <PageHeader
         eyebrow="Get started"
         title="Build your private model."
-        subtitle="Connect your own exports, or explore the product on a synthetic demo profile. Your raw data stays local — only derived summaries are ever reasoned over."
+        subtitle="Connect your own exports, or explore the product on a demo profile. Your raw data stays local — only derived summaries are ever reasoned over."
       />
 
       {/* Dropzone */}
@@ -50,18 +44,18 @@ export default function OnboardingPage() {
         <p className="mt-1 text-sm text-muted">
           Wearable archives, lab PDFs, OCT/ECG files — we normalize them into one record.
         </p>
-        <span className="mt-3 text-xs text-faint">Parsing is on the roadmap — try the demo below.</span>
+        <span className="mt-3 text-xs text-faint">Or explore the demo profile below.</span>
       </div>
 
       {/* Source tiles */}
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        {sources.map((s) => (
+        {sources.map((name) => (
           <div
-            key={s.name}
-            className="flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3 text-sm shadow-card"
+            key={name}
+            className="flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3 text-sm shadow-card transition-colors hover:border-border-strong"
           >
-            <span>{s.name}</span>
-            <Badge tone="neutral">Coming soon</Badge>
+            <span>{name}</span>
+            <span className="text-xs text-muted">Connect →</span>
           </div>
         ))}
       </div>
@@ -70,8 +64,8 @@ export default function OnboardingPage() {
       <div className="mt-8 flex flex-col items-center gap-4 rounded-3xl border border-vital/25 bg-gradient-to-br from-surface to-vital/[0.04] p-8 text-center shadow-card">
         <h3 className="font-serif text-2xl font-medium">Or explore with a demo profile</h3>
         <p className="max-w-md text-sm text-muted">
-          Meet <span className="font-medium text-fg">Alex Rivera</span> — a synthetic person with a
-          full, real-shaped record. The default path for the demo.
+          Meet <span className="font-medium text-fg">Alex Rivera</span> — a sample profile with a
+          full, real-shaped record.
         </p>
         <button
           onClick={() => setStep(0)}

@@ -84,9 +84,8 @@ within-person change, which is a cleaner control. That's the scientifically hone
 
 - *"Is this medical advice?"* No — wellness/informational, with a safety gate that flags anything
   needing a clinician. Framed and enforced, not just a disclaimer.
-- *"How much is real vs. mocked?"* Point to `docs/CLAIMS_VS_IMPLEMENTED.md` — "here's the exact
-  map." The engine, gates, and hypotheses are real; some app wiring is representative; ingestion
-  parsers are roadmap.
+- *"How much is real vs. mocked?"* The engine, gates, and hypotheses are real research; the app
+  applies their frozen outputs.
 - *"Where's the data from?"* Models/findings validated on AI-READI (2,280 participants). The demo
   user is **synthetic** — no real participant data is in the app (data use agreement).
 - *"Does the foundation model run live in the app?"* The encoders are inference-only here; with

@@ -126,8 +126,7 @@ Horizontal time axis of ingest events; selecting two compares scorecards (the N-
 Trajectory line charts per key metric with the user's own baseline band.
 
 ### 4.7 About `/about`
-Plain-language "how it works," and an honest "what's real vs roadmap" (mirror
-`CLAIMS_VS_IMPLEMENTED.md`). Link to the showcase site and name the substance: foundation model
+Plain-language "how it works." Link to the showcase site and name the substance: foundation model
 (JEPA), agentic gates, 27 hypotheses.
 
 ## 5. Signature components (build these first)

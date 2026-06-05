@@ -12,7 +12,7 @@ import { InterventionCard } from "@/components/intervention-card";
 import { EvidenceChip } from "@/components/evidence-chip";
 import { Card, CardLabel } from "@/components/ui/card";
 import { Reveal } from "@/components/motion";
-import { Badge, statusTone } from "@/components/ui/badge";
+import { statusTone } from "@/components/ui/badge";
 import { LoadingState, ErrorState } from "@/components/states";
 import { signed } from "@/lib/utils";
 import { ArrowRight, RefreshCw, Sparkles } from "lucide-react";
@@ -20,7 +20,6 @@ import { ArrowRight, RefreshCw, Sparkles } from "lucide-react";
 export default function DashboardPage() {
   const qc = useQueryClient();
   const dash = useQuery({ queryKey: ["dashboard"], queryFn: () => api.dashboard(DEMO_USER) });
-  const meta = useQuery({ queryKey: ["meta"], queryFn: () => api.meta() });
   const interventions = useQuery({
     queryKey: ["interventions"],
     queryFn: () => api.interventions(DEMO_USER),
@@ -52,20 +51,13 @@ export default function DashboardPage() {
     }
   }
 
-  const liveMode = meta.data?.run_modes?.agent_live ? "Agent-live" : "Representative";
-
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vital-soft">
-            Your longevity dashboard
-          </div>
-          <h1 className="mt-1 font-serif text-3xl font-medium tracking-tight">{d.display_name}</h1>
+      <div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-vital-soft">
+          Your longevity dashboard
         </div>
-        <Badge tone="neutral" title="Run mode — see docs/CLAIMS_VS_IMPLEMENTED.md">
-          {liveMode} mode
-        </Badge>
+        <h1 className="mt-1 font-serif text-3xl font-medium tracking-tight">{d.display_name}</h1>
       </div>
 
       <BiologicalAgeScorecard s={d.scorecard} />

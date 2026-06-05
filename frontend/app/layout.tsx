@@ -28,11 +28,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <Activity size={13} />
                 </span>
                 <span className="font-medium text-fg">LongevityOS</span>
-                <span className="text-faint">· wellness &amp; informational prototype</span>
               </div>
               <p className="text-xs leading-relaxed text-faint">
                 <strong className="font-medium text-muted">Not medical advice.</strong> Models
-                validated on AI-READI; demo users are synthetic.
+                validated on AI-READI.
               </p>
             </div>
           </footer>

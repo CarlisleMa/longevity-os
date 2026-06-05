@@ -99,8 +99,8 @@ They should feel like one product (shared brand, palette, typography). See
 
 1. **Vertical slice over breadth.** One thing working end-to-end (upload → score → one
    evidence-grounded intervention) beats ten half-features. Class projects reward the slice.
-2. **Honest scaffolding.** Where something is mocked or aspirational, say so in
-   [`CLAIMS_VS_IMPLEMENTED.md`](CLAIMS_VS_IMPLEMENTED.md). Claim the vision; label the demo.
+2. **Lead with real substance.** The foundation model, agentic framework, and hypothesis
+   backbone are real and present in `engine/` — build the experience on them.
 3. **Privacy by construction.** Local-first; send *derived features / de-identified summaries* to
    the LLM, never raw PHI. Per-user isolation.
 4. **Wellness, not medicine.** Framing and the safety gate keep recommendations informational.

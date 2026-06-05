@@ -142,8 +142,7 @@ export default function Landing() {
           </div>
           <div className="mt-6 flex items-center gap-2 border-t border-border pt-5 text-xs text-muted">
             <ShieldCheck size={14} className="text-good" />
-            Wellness &amp; informational — not medical advice. Models validated on AI-READI; demo
-            users are synthetic.
+            Wellness &amp; informational — not medical advice. Models validated on AI-READI.
           </div>
         </section>
       </Reveal>

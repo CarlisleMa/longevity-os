@@ -110,12 +110,6 @@ export default function InterventionsPage() {
         </div>
       )}
 
-      {tab === "tracking" && (
-        <p className="mt-6 text-xs text-faint">
-          Outcome logging (did the intervention work?) is on the roadmap — adherence and re-measure
-          come next.
-        </p>
-      )}
     </div>
   );
 }

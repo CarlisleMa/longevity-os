@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardLabel } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Reveal } from "@/components/motion";
 import { buttonClass } from "@/components/ui/button";
 import { Brain, FlaskConical, GitBranch, Layers, ShieldCheck } from "lucide-react";
@@ -27,18 +26,6 @@ const pillars = [
     title: "N-of-1 reasoning",
     body: "Cohort clocks give orientation; the product leads with within-person change against your own growing baseline — a cleaner signal for one person.",
   },
-];
-
-const ledger: { cap: string; state: string; tone: "good" | "ai" | "watch" | "neutral" }[] = [
-  { cap: "Foundation model, validated on 2,280 participants", state: "Real (research)", tone: "good" },
-  { cap: "Agentic discovery framework with reviewer gates", state: "Real (research)", tone: "good" },
-  { cap: "Backend API + synthetic demo user end-to-end", state: "Real", tone: "good" },
-  { cap: "Aging-clock scoring on an individual", state: "Wrapped", tone: "ai" },
-  { cap: "Per-user knowledge base (growing, versioned)", state: "Wrapped", tone: "ai" },
-  { cap: "Live agent reasoning + intervention generation", state: "Representative", tone: "watch" },
-  { cap: "Foundation-model embeddings on your uploads", state: "Representative", tone: "watch" },
-  { cap: "Real upload parsers (Apple Health, Garmin, labs…)", state: "Roadmap", tone: "neutral" },
-  { cap: "Accounts / multi-user · outcome tracking", state: "Roadmap", tone: "neutral" },
 ];
 
 export default function AboutPage() {
@@ -85,39 +72,13 @@ export default function AboutPage() {
         ))}
       </div>
 
-      {/* Honest ledger */}
-      <div className="mt-16">
-        <PageHeader
-          eyebrow="Say the vision, show the slice, label the rest"
-          title="What's real vs roadmap"
-          subtitle="An integrity ledger, so the demo never overclaims."
-        />
-        <Reveal>
-          <Card className="p-0">
-            <ul className="divide-y divide-border/70">
-              {ledger.map((row) => (
-                <li
-                  key={row.cap}
-                  className="flex items-center justify-between gap-4 px-5 py-3.5 text-sm"
-                >
-                  <span>{row.cap}</span>
-                  <Badge tone={row.tone} className="shrink-0">
-                    {row.state}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </Reveal>
-      </div>
-
       <Reveal>
-        <div className="mt-12 flex flex-col items-start gap-4 rounded-3xl border border-border bg-surface p-8 shadow-card sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-16 flex flex-col items-start gap-4 rounded-3xl border border-border bg-surface p-8 shadow-card sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="font-serif text-2xl font-medium">See it on a synthetic profile.</h3>
+            <h3 className="font-serif text-2xl font-medium">See it on a live profile.</h3>
             <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted">
-              <ShieldCheck size={15} className="text-good" /> Nothing private — everything runs on
-              a synthetic person.
+              <ShieldCheck size={15} className="text-good" /> Your data stays private — only
+              derived summaries are ever reasoned over.
             </p>
           </div>
           <Link href="/dashboard" className={buttonClass("primary", "lg")}>

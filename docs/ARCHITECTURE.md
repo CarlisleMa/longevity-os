@@ -112,4 +112,3 @@ gates become evidence/personalization/safety checks (see [BRAINSTORM.md](BRAINST
 | **Agent-live** | `ANTHROPIC_API_KEY` | Real agent reasoning + intervention generation through the gates. |
 
 This staging lets the demo run anywhere, then light up real capability as you wire each piece.
-See [CLAIMS_VS_IMPLEMENTED.md](CLAIMS_VS_IMPLEMENTED.md).
