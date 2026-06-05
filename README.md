@@ -6,20 +6,28 @@ multimodal biological aging, and recommends evidence-grounded interventions — 
 multimodal foundation model and an agentic discovery engine validated on the AI-READI cohort.
 
 <p align="center">
-  <a href="https://longevity-os-sable.vercel.app/"><b>&#9654;&nbsp; Try the live demo</b></a>
-  &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://drive.google.com/file/d/14LRMQ9f3TXppVOi34LEg033tmwcUvXGD/view?usp=sharing"><b>&#127916;&nbsp; Watch the demo video</b></a>
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="https://longevity-os-sable.vercel.app/"><b>&#9654;&nbsp; Try the live demo</b></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://longevity-os.xyz/"><b>&#127760;&nbsp; Website</b></a>
 </p>
 
 ---
 
-## &#9654;&nbsp; Live demo — try it now
+## 🎬 Demo video
+
+<a href="https://drive.google.com/file/d/14LRMQ9f3TXppVOi34LEg033tmwcUvXGD/view?usp=sharing">
+  <img src="docs/media/video-poster.png" alt="Watch the LongevityOS demo video" width="100%"/>
+</a>
+
+▶ **[Watch the walkthrough on Google Drive →](https://drive.google.com/file/d/14LRMQ9f3TXppVOi34LEg033tmwcUvXGD/view?usp=sharing)**
+
+## ▶ Live demo
 
 ### 👉 **[longevity-os-sable.vercel.app](https://longevity-os-sable.vercel.app/)**
 
-The full interactive app, running live on a synthetic user. Click the screenshot to open it.
+The full interactive app, running live on a synthetic user — click to open it.
 
 <a href="https://longevity-os-sable.vercel.app/">
   <img src="docs/media/demo-dashboard.png" alt="LongevityOS live interactive demo — dashboard" width="100%"/>
@@ -29,25 +37,7 @@ Walk a real person's data end-to-end: the **biological-age scorecard**, the **sy
 grounded **knowledge cards**, and **gated interventions** from a multi-agent care team.
 *Wellness & informational — not medical advice; all demo data is synthetic.*
 
-## 🎬 Demo video — 5:46, narrated
-
-A code-defined ([Remotion](https://www.remotion.dev/)) walkthrough: the problem → the **AI-READI**
-dataset → the **JEPA foundation model** I trained (under submission to *Nature Aging*) → the
-**agentic discovery system** → the app → evaluation, integrity & disclosure.
-
-<a href="https://drive.google.com/file/d/14LRMQ9f3TXppVOi34LEg033tmwcUvXGD/view?usp=sharing">
-  <img src="docs/media/video-poster.png" alt="Watch the LongevityOS demo video (5:46)" width="100%"/>
-</a>
-
-▶ **[Watch on Google Drive →](https://drive.google.com/file/d/14LRMQ9f3TXppVOi34LEg033tmwcUvXGD/view?usp=sharing)**
-
-### The landing page
-
-<a href="https://longevity-os-sable.vercel.app/">
-  <img src="docs/media/demo-home.png" alt="LongevityOS demo — landing page" width="100%"/>
-</a>
-
-A companion **research-engine explainer** site also lives at **[longevity-os.xyz](https://longevity-os.xyz/)**.
+🌐 **Companion research-engine site:** **[longevity-os.xyz](https://longevity-os.xyz/)**
 
 ---
 
