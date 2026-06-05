@@ -45,7 +45,6 @@ LongevityOS/
     agentic/              Agentic discovery framework (agentic_discovery + agents)
     hypothesis/           Hypothesis-driven backbone + 27 stored hypotheses
     science/              Loaders, feature formulas, coupling, aging-clock scoring
-    neuro/                Eye–brain–metabolism (MoCA) mapping direction
     knowledge_cards/      Validated findings distilled as evidence priors the agent cites
   backend/                FastAPI app: users, ingest, knowledge base, scoring, agent, interventions
   frontend/               Next.js + Tailwind + shadcn/ui interactive app (build locally)

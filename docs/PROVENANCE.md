@@ -20,7 +20,6 @@ boundary between "research engine" and "new product" stays clear.
 | `engine/agentic/agents/` | `agents/` | Modality + reasoning agents, orchestrator, critic, memory, task pipelines. |
 | `engine/hypothesis/` | `hypothesis_driven/` | Proposer/critic/executor/verifier + **27 stored hypotheses** (`hypotheses/*.json`) + `results/critic_verdicts.json`. |
 | `engine/science/` | `scripts/` | Loaders, feature formulas, coupling, aging-clock scoring, utils, reporting. |
-| `engine/neuro/` | `neuro_moca_mapping/` | Eye–brain–metabolism (MoCA) mapping direction (was uncommitted in AI-READI). |
 | `docs/research_engine/` | `docs/**/*.md` | Design docs, JEPA summaries, current status, references. **Markdown only** (images/decks/pptx excluded). |
 
 ## What was deliberately NOT copied

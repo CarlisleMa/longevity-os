@@ -108,18 +108,6 @@
     "caveats": "Motivates the product's emphasis on dynamics over static clocks."
   },
   {
-    "id": "KC-RETINA-COGNITION",
-    "title": "Retina and physiology carry modest cognitive-function signal",
-    "finding": "In a first-pass MoCA mapping, retinal embeddings and continuous physiology showed weak-to-modest signal for cognitive function; combined they added ΔR² ≈ +0.036 over a clinical/metabolic baseline (not yet improving low-MoCA screening).",
-    "interpretation": "Non-invasive eye + physiology data contains measurable cognitive signal — promising, not yet decisive.",
-    "individual_application": "Offer an exploratory 'eye–brain–metabolism' view, clearly labeled as early-stage, motivating longitudinal tracking rather than a claim.",
-    "evidence_strength": "exploratory",
-    "source": { "system": "neuro", "ref": "neuro_moca_mapping/FIRST_PASS_RESULTS" },
-    "modalities": ["retinal", "wearable", "glucose", "clinical"],
-    "metrics": ["moca_total_pred"],
-    "caveats": "First pass; does NOT yet support robust individual cognitive screening. Present as research direction only."
-  },
-  {
     "id": "KC-COUPLING-NOT-STRUCTURE",
     "title": "Coupling does NOT predict retinal/cardiac structural damage (refuted)",
     "finding": "The hypothesis that coupling features predict retinal/cardiac structural damage was refuted in the cohort.",

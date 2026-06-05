@@ -66,7 +66,7 @@
     { "modality": "wearable", "label": "Sleep efficiency", "value": "88%", "trend": "down", "as_of": "2026-06-01", "evidence_card": "KC-SLEEPWAKE-REORG" },
     { "modality": "wearable", "label": "Sleep–wake coupling reorganization", "value": "slow", "trend": "down", "as_of": "2026-06-01", "evidence_card": "KC-SLEEPWAKE-REORG" },
     { "modality": "cardiac", "label": "Cardiac age gap", "value": "−3.1 yrs", "trend": "flat", "as_of": "2026-05-20", "evidence_card": "KC-STATIC-DOMINANCE" },
-    { "modality": "retinal", "label": "Retinal age gap", "value": "−1.2 yrs", "trend": "flat", "as_of": "2026-05-20", "evidence_card": "KC-RETINA-COGNITION" },
+    { "modality": "retinal", "label": "Retinal age gap", "value": "−1.2 yrs", "trend": "flat", "as_of": "2026-05-20", "evidence_card": "KC-STATIC-DOMINANCE" },
     { "modality": "clinical", "label": "HbA1c", "value": "5.6%", "trend": "up", "as_of": "2026-05-10", "evidence_card": null },
     { "modality": "environment", "label": "Avg evening light exposure", "value": "elevated", "trend": "up", "as_of": "2026-06-01", "evidence_card": "KC-CIRCADIAN-COUPLING" }
   ],

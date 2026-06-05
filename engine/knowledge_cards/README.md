@@ -6,8 +6,8 @@ frontend `EvidenceChip` links to and what keeps every recommendation grounded in
 rather than a vibe.
 
 - Source of truth: `knowledge_cards.json` (array of cards).
-- Each card traces to a real artifact in `engine/hypothesis/hypotheses/*.json`, the JEPA summary
-  in `docs/research_engine/reports/`, or the neuro/MoCA first pass in `engine/neuro/`.
+- Each card traces to a real artifact in `engine/hypothesis/hypotheses/*.json` or the JEPA summary
+  in `docs/research_engine/reports/`.
 - `evidence_strength` is honest: `supported` / `completed` / `exploratory` / `refuted`. The
   refuted card is included on purpose — the system records negative evidence too.
 
