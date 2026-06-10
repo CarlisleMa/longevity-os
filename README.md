@@ -5,6 +5,40 @@ imaging data; LongevityOS builds a growing, private knowledge base about *you*, 
 multimodal biological aging, and recommends evidence-grounded interventions — powered by a
 multimodal foundation model and an agentic discovery engine validated on the AI-READI cohort.
 
+<p align="center">
+  <a href="https://drive.google.com/file/d/14LRMQ9f3TXppVOi34LEg033tmwcUvXGD/view?usp=sharing"><b>&#127916;&nbsp; Watch the demo video</b></a>
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="https://longevity-os-sable.vercel.app/"><b>&#9654;&nbsp; Try the live demo</b></a>
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="https://longevity-os.xyz/"><b>&#127760;&nbsp; Website</b></a>
+</p>
+
+---
+
+## 🎬 Demo video
+
+<a href="https://drive.google.com/file/d/14LRMQ9f3TXppVOi34LEg033tmwcUvXGD/view?usp=sharing">
+  <img src="docs/media/video-poster.png" alt="Watch the LongevityOS demo video" width="100%"/>
+</a>
+
+▶ **[Watch the walkthrough on Google Drive →](https://drive.google.com/file/d/14LRMQ9f3TXppVOi34LEg033tmwcUvXGD/view?usp=sharing)**
+
+## ▶ Live demo
+
+### 👉 **[longevity-os-sable.vercel.app](https://longevity-os-sable.vercel.app/)**
+
+The full interactive app, running live on a synthetic user — click to open it.
+
+<a href="https://longevity-os-sable.vercel.app/">
+  <img src="docs/media/demo-dashboard.png" alt="LongevityOS live interactive demo — dashboard" width="100%"/>
+</a>
+
+Walk a real person's data end-to-end: the **biological-age scorecard**, the **system-aging radar**,
+grounded **knowledge cards**, and **gated interventions** from a multi-agent care team.
+*Wellness & informational — not medical advice; all demo data is synthetic.*
+
+🌐 **Companion research-engine site:** **[longevity-os.xyz](https://longevity-os.xyz/)**
+
 ---
 
 ## The idea in one picture
@@ -78,6 +112,70 @@ to render before you wire in your own uploads.
 - **[docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)** — what to show the class + talking points for FM / agentic / hypothesis
 - **[docs/PROVENANCE.md](docs/PROVENANCE.md)** — exactly what was copied from AI-READI and at which commit
 - **[docs/research_engine/](docs/research_engine/)** — the original research design docs (FM, agentic, hypothesis)
+
+## What it is, and why (the bet)
+
+Population longevity research produces aging clocks and coupling findings, but a *person* can't act
+on a paper. LongevityOS runs that engine **in reverse**: it takes models validated on a population
+and turns them onto one individual's own data. And because a cohort clock on a single person has
+wide error bars, it leads with the honest signal — **within-person change against your own
+baseline** (a clean N-of-1 control) — rather than a shaky cohort percentile.
+
+## What I built (and the research underneath)
+
+- **A multimodal JEPA foundation model I trained** on AI-READI's synchronized 10-day physiology
+  (glucose, heart rate, activity, environment) + frozen retinal/cardiac encoders. It's
+  **control-validated** (real, time-aligned windows beat wrong-day and wrong-person controls across
+  **36 GPU runs × 4 horizons × 3 seeds**) and is **currently under submission to *Nature Aging***.
+  → `docs/research_engine/reports/JEPA_SYSTEMATIC_SUMMARY_20260428.md`
+- **An agentic discovery system** built on the **Claude Agent SDK** — specialist agents that
+  hypothesize, run, and verify, with **guarded tools (no raw shell)** and **three reviewer gates**.
+  It produced **27 hypotheses** and a coupling atlas (glucose–HR coupling alone separates
+  insulin-dependent from healthy at **AUROC 0.80**). → `engine/agentic/`, `engine/hypothesis/`
+- **The interactive app** — Next.js + Tailwind frontend over a FastAPI backend: upload → growing
+  knowledge base → biological-age scorecard, system radar, grounded knowledge cards, and gated
+  interventions. → `frontend/`, `backend/`
+- **A code-defined demo video** (Remotion, narrated) — project on the `claude/tender-goldberg-cDzjU`
+  branch under `video/`.
+
+## Evidence & evaluation
+
+- **Control-validated foundation model.** Aligned < wrong-day < wrong-person, repeated across random,
+  event, horizon, and event-type suites; the aligned advantage decays with horizon — physiologically
+  plausible, not a static shortcut.
+- **Honest hypothesis ledger.** 27 hypotheses through propose → critique → verify, with supported,
+  refuted, and open verdicts all retained (`engine/hypothesis/results/`).
+- **Baselines & citations.** Aging-clock benchmarks (best multimodal-static MAE 5.20 yr, R² 0.65);
+  coupling-only AUROC 0.80 for insulin-dependent vs healthy.
+- **Stated limitations.** ~2,280 participants is small for from-scratch temporal encoders; static
+  phenotype shortcuts coarse age/severity; results show *predictability*, not causal mechanism.
+  Wellness-scoped — **not medical advice**; demo data is synthetic.
+
+## AI usage & disclosure
+
+Per the course AI policy, here is exactly how and where AI tools were used:
+
+- **Claude Code (Anthropic)** scaffolded and built the **interactive app** (Next.js frontend +
+  FastAPI backend), the polished UI, and the **demo video** (the Remotion project), and assisted in
+  drafting the docs/README (author-reviewed).
+- The **Claude Agent SDK** powers the **agentic discovery system** in the research engine.
+- The **Anthropic API** powers the app's **multi-agent care team**.
+- **Not AI-generated:** the **JEPA foundation model**, the AI-READI analyses, and the scientific
+  findings are my own research work — AI tools assisted with implementation and refactoring, not the
+  science.
+
+## Credits, sources & repo
+
+- **AI-READI dataset** v3.0.0 — DOI [10.60775/fairhub.3](https://doi.org/10.60775/fairhub.3) (NIH
+  Bridge2AI; PI Aaron Lee, MD). Used under its data-use agreement; **no participant data is
+  redistributed**.
+- **RETFound** (retinal) and **ECGFounder** (cardiac) foundation models — used as frozen encoders.
+- `engine/` is curated from my own AI-READI research workspace at commit `1530e4c` — see
+  [docs/PROVENANCE.md](docs/PROVENANCE.md) for exactly what was copied.
+- Built with [Remotion](https://www.remotion.dev/), Next.js, Tailwind, and FastAPI.
+- **Repo & process:** private repo with **access granted to course staff**; full **commit history**
+  and development artifacts (research reports in `docs/research_engine/`, the hypothesis ledger,
+  design docs) are included as evidence of work over time.
 
 ## Provenance & data ethics
 
