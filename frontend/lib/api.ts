@@ -13,6 +13,16 @@ import type {
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
+// The demo user's data is static (a fixed synthetic record), so we bundle it as
+// JSON into the frontend and serve it from Vercel's CDN. This makes every page
+// load instantly and removes the dependency on the (sleepy, free-tier) backend
+// for reads — the backend is only needed for the live AI Coach and write actions.
+async function getStatic<T>(file: string): Promise<T> {
+  const res = await fetch(`/demo/${file}`, { cache: "force-cache" });
+  if (!res.ok) throw new Error(`${res.status} /demo/${file}`);
+  return res.json() as Promise<T>;
+}
+
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { cache: "no-store" });
   if (!res.ok) throw new Error(`${res.status} ${path}`);
@@ -36,28 +46,40 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 }
 
 export const api = {
+  // Reads — served instantly from the bundled static demo data (Vercel CDN).
   meta: () =>
-    get<{ version: string; run_modes: Record<string, boolean>; knowledge_cards: number }>(
-      "/api/meta",
+    getStatic<{ version: string; run_modes: Record<string, boolean>; knowledge_cards: number }>(
+      "meta.json",
     ),
-  dashboard: (userId: string) => get<Dashboard>(`/api/users/${userId}/dashboard`),
-  timeline: (userId: string) => get<TimelineEvent[]>(`/api/users/${userId}/timeline`),
-  knowledgeBase: (userId: string) =>
-    get<KnowledgeBaseResponse>(`/api/users/${userId}/knowledge-base`),
-  knowledgeCards: () => get<KnowledgeCard[]>("/api/knowledge-cards"),
-  knowledgeCard: (id: string) => get<KnowledgeCard>(`/api/knowledge-cards/${id}`),
-  observe: (userId: string) => post<Observation>(`/api/users/${userId}/agent/observe`),
-  observations: (userId: string) =>
-    get<Observation[]>(`/api/users/${userId}/agent/observations`),
-  interventions: (userId: string) => get<Intervention[]>(`/api/users/${userId}/interventions`),
+  dashboard: (_userId: string) => getStatic<Dashboard>("dashboard.json"),
+  timeline: (_userId: string) => getStatic<TimelineEvent[]>("timeline.json"),
+  knowledgeBase: (_userId: string) => getStatic<KnowledgeBaseResponse>("knowledge-base.json"),
+  knowledgeCards: () => getStatic<KnowledgeCard[]>("knowledge-cards.json"),
+  knowledgeCard: async (id: string) => {
+    const cards = await getStatic<KnowledgeCard[]>("knowledge-cards.json");
+    const card = cards.find((c) => c.id === id);
+    if (!card) throw new Error(`404 knowledge-card ${id}`);
+    return card;
+  },
+  observations: (_userId: string) => getStatic<Observation[]>("observations.json"),
+  interventions: (_userId: string) => getStatic<Intervention[]>("interventions.json"),
+  day: (_userId: string) => getStatic<DayResponse>("day.json"),
+  coachRoster: () => getStatic<{ agents: AgentCard[] }>("coach-agents.json"),
+
+  // "Re-observe" — pick a fresh insight from the bundled set (no backend needed).
+  observe: async (_userId: string) => {
+    const obs = await getStatic<Observation[]>("observations.json");
+    if (!obs.length) throw new Error("no observations");
+    return obs[Math.floor(Math.random() * obs.length)];
+  },
+
+  // Writes & live AI — these still go to the backend (BASE).
   acceptIntervention: (userId: string, id: string) =>
     post<Intervention>(`/api/users/${userId}/interventions/${id}/accept`),
   dismissIntervention: (userId: string, id: string) =>
     post<Intervention>(`/api/users/${userId}/interventions/${id}/dismiss`),
-  day: (userId: string) => get<DayResponse>(`/api/users/${userId}/day`),
   coach: (userId: string, message: string, history: CoachTurn[] = []) =>
     postJson<CoachResponse>(`/api/users/${userId}/coach`, { message, history }),
-  coachRoster: () => get<{ agents: AgentCard[] }>("/api/coach/agents"),
 };
 
 export const DEMO_USER = "demo_alex";
